@@ -1,18 +1,19 @@
 import numpy as n
-import pylab as p
 
+"""
+Basic library for processing MCRaT simulation data.
+Written by Tyler Parsotan and D. Lazzati @ OregonState
 
-## Library for the MC code for radiation transport in GRB jet simulations.
-##
-## Written by D. Lazzati @ OregonState
-## V. 0.1, July 7, 2015 single Compton working
-## V. 0.2, July 8, 2015	added Lorentz boost
-## V  0.3, Aug 24, 2015. Added electron simulator for high-T scattering
+This includes some legacy code that is kept to allow compatibility with older versions of MCRaT. At some point these may
+be deleted from the scripts as MCRaT approaches a well developed stage.
+"""
 
 def single_electron(T, P_ph):
-	#	This routine simulates one electron from a thermal distribution at a
-	#	temperature T. The electron has the correct angular distribution for a
-	#	photon traveling with direction P_ph
+	"""
+	This routine simulates one electron from a thermal distribution at a
+	temperature T. The electron has the correct angular distribution for a
+	photon traveling with direction P_ph
+	"""
 	from scipy import special
 	me = 9.1093897e-28
 	c_light = 2.99792458e10
@@ -70,6 +71,14 @@ def single_electron(T, P_ph):
 
 
 def lorentzBoostVectorized(boost, P_ph):
+	"""
+	Function to quickly lorentz boost a set of photon 4 momenta, and ensures that the 0 norm condition is met.
+	:param boost: The velocity vector of the frame that the photon will be boosted into. The shape of the array
+	              should be (3,N), where N is the number of photons that will be lorentz boosted
+	:param P_ph: The photon's 4 momentum that will be boosted into the desired frame of reference. The shape of the array
+	              should be (4,N)
+	:return: returns (4,N) array of the boosted photon's 4 momenta
+	"""
 
 	indexes=n.where((boost**2).sum(axis=0)>0)[0]
 	zero_beta_idx=n.where((boost**2).sum(axis=0)==0)[0]
@@ -98,26 +107,22 @@ def lorentzBoostVectorized(boost, P_ph):
 
 	#perform dot product for each photon
 	result=n.einsum('ijk,jk->ik', Lambda1, P_ph[:,indexes])
-	#print(result.shape, indexes.shape, n.where((boost**2).sum(axis=0)<=0)[0], boost[:,n.where((boost**2).sum(axis=0)<=0)[0]], n.sqrt((boost[:,n.where((boost**2).sum(axis=0)<=0)[0]]**2).sum(axis=0)))
 	if (zero_beta_idx.size>0):
 		result=n.insert(result, zero_beta_idx, P_ph[:,zero_beta_idx], axis=1)
-		#print(result.shape)
-	
+
 	result=zero_norm(result)
 	return result
 
 def Lorentz_Boost(boost, P_ph):
-	#	This routine performs a Lorentz boost of a 4-momentum. The boost is
-	#	specified with its 3-vel
-	#
-	# Fist let's define some constants:
-	# me=9.1093897e-28
-	# c=2.99792458e10
+	"""
+	This routine performs a Lorentz boost of a 4-momentum. The boost is specified with a 3-vel.
+	:param boost: The velocity vector of the frame that the photon will be boosted into.
+	:param P_ph: The photon 4 momentum that will be boosted into the desired frame of reference.
+	:return:  the boosted photon 4 mometum
+	"""
 
-	#
 	# First, performs Lorentz boost so that the electron is at rest.
 	if (boost ** 2).sum() > 0:
-		#print('In if statement of Lorentz Boost')
 		beta = n.sqrt((boost ** 2).sum())
 		gamma = 1. / n.sqrt(1. - beta ** 2)
 		Lambda1 = n.empty([4, 4])
@@ -140,44 +145,32 @@ def Lorentz_Boost(boost, P_ph):
 		Lambda1[3, 2] = Lambda1[2, 3]
 
 		P_ph_prime = n.dot(Lambda1, P_ph)
-		#print(Lambda1, beta, gamma)
-		#check for zero norm
-		#P_ph_prime = zero_norm(P_ph_prime)
+
 		return P_ph_prime
 	else:
-		#print('In else statement of Lorentz Boost')
-		#check for zero norm
-		#P_ph = zero_norm(P_ph)
+
 		return P_ph
 
 def zero_norm(P):
-	#test zero norm condition of 4 momenta, if its violated correct the 4 momenta assuming that the energy is correct
-	#print(P.shape)
+	"""
+	Takes a photon 4 momentum and checks if it satisfies the 0 norm condition of photons. If not, it corrects the 4
+	mometum by assuming that the energy is correct.
+	:param P: photon 4 monetum
+	:return: returns the correct 0 normed photon 4 momentum
+	"""
 
 	if P.ndim >1:
 		not_norm=n.where(P[0,:]**2 != n.linalg.norm(P[1:,:], axis=0)**2)[0]
-		#print(not_norm)
-		#print('before',not_norm)
 		P[1:,not_norm]=(P[1:,not_norm]/n.linalg.norm(P[1:,not_norm], axis=0))*P[0,not_norm]
-		#print(not_norm)
-		#if (P[0,:]**2 != n.linalg.norm(P[1:,:])**2):
-			#correct the 4 momentum
-	#P[1:,not_norm]=(P[1:,not_norm]/n.linalg.norm(P[1:,not_norm]))*P[0,not_norm]
 	else:
-		#print('Normalizing factor', n.linalg.norm(P[1:]))
 		if (P[0]**2 != n.linalg.norm(P[1:])**2):
 			#correct the 4 momentum
 			P[1:]=(P[1:]/n.linalg.norm(P[1:]))*P[0]
 
-	#print(n.where(P[0,:]**2 != n.linalg.norm(P[1:,:], axis=0)**2))
-	#print(P[0,:]**2,n.linalg.norm(P[1:,:], axis=0)**2)
-	#print('new',P[:,0])
-	#stop()
 	return P
 
 
 def single_cs(P_el, P_ph, x_tilde, y_tilde):
-	import test_stokes_lorentz_boost as tslb
 
 	#	This routine performs a Compton scattering between a photon and a
 	#	moving electron. Takes the 4-momenta as inputs
@@ -324,58 +317,6 @@ def single_cs(P_el, P_ph, x_tilde, y_tilde):
 
 	return P_el_seventh, P_ph_seventh
 
-
-# def eventfile(r_observer,theta_deg,dtheta_deg,path):
-# 	import mypy as d
-# 	theta=theta_deg*n.pi/180 # angle between photon velocity and line of sight
-# 	dtheta=dtheta_deg*n.pi/180 # acceptance
-# 	parms=d.readcol(path+'mc.par',1,['d'])
-# 	lastfile=int(parms[2])
-# 	foutn='events.dat'
-# 	fout=open(path+foutn,'w')
-
-# 	weight=n.loadtxt(path+'mcdata_PW.dat')
-# 	weight=n.reshape(weight,weight.size)
-# 	jfound=n.zeros(weight.size)
-
-
-# 	for i in xrange(firstfile,lastfile+1):
-# 		if i/100==i/100.: print 'I have done ',i-firstfile,' out of ',lastfile-firstfile+1
-# 		P0=n.loadtxt(path+'mcdata_'+str(i)+'_P0.dat')
-# 		P1=n.loadtxt(path+'mcdata_'+str(i)+'_P1.dat')
-# 		P2=n.loadtxt(path+'mcdata_'+str(i)+'_P2.dat')
-# 		P3=n.loadtxt(path+'mcdata_'+str(i)+'_P3.dat')
-# 		R1=n.loadtxt(path+'mcdata_'+str(i)+'_R1.dat')
-# 		R2=n.loadtxt(path+'mcdata_'+str(i)+'_R2.dat')
-# 		R3=n.loadtxt(path+'mcdata_'+str(i)+'_R3.dat')
-# 		P0=n.reshape(P0,P0.size)
-# 		P1=n.reshape(P1,P0.size)
-# 		P2=n.reshape(P2,P0.size)
-# 		P3=n.reshape(P3,P0.size)
-# 		R1=n.reshape(R1,P0.size)
-# 		R2=n.reshape(R2,P0.size)
-# 		R3=n.reshape(R3,P0.size)
-# 		RR=n.sqrt(R1**2+R2**2+R3**2)  # radius of propagation
-# 		theta_pos=n.arctan2(n.sqrt(R1**2+R2**2),R3) # angle between position vector and polar axis
-# 		theta_rel=theta-theta_pos  # angle between position vector and line of sight
-# 		RR_prop=RR*n.cos(theta_rel)
-# 		theta_ph=n.arctan2(n.sqrt(P1**2+P2**2),P3)  # angle between velocity vector and polar axis
-# 		theta_ph_rel=theta-theta_ph # angle between velocity vector and line of sight
-# 		jj=n.where((RR_prop>=r_observer)&(jfound==0)&(n.abs(theta_ph_rel)<dtheta))
-# 		if jj[0].size>0:
-# 			print jj[0]
-# 			time=float(i)/5-r_observer/3e10
-# 			hnukeV=P0[jj]*3e10/1.6e-9
-# 			jfound[jj]=1
-# 			wewe=weight[jj]
-# 			for j in range(jj[0].size):
-# 				stri=str(time)+'\t'+str(hnukeV[j])+'\t'+str(wewe[j])+'\n'
-# 				fout.write(stri)
-
-# 	fout.close()
-
-# 	kk=n.where(jfound==1)
-# 	print 'Numero eventi validi: ',kk[0].size
 
 def event3D(r_obs, theta_deg, phi_deg, dtheta_deg, path, lastfile, sim_type, riken_switch=False):
 	theta = theta_deg * n.pi / 180  # angle between jet axis and line of sight
