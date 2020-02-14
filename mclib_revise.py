@@ -170,7 +170,14 @@ def zero_norm(P):
 	return P
 
 
-def single_cs(P_el, P_ph, x_tilde, y_tilde):
+def single_cs(P_el, P_ph):
+	"""
+	This function conducts a single compton scatter in the electron rest frame. The photon has to be in the comoving
+	frame first. Legacy code from Python version of MCRaT.
+	:param P_el: electron 4 momentum
+	:param P_ph: photon comoving 4 momentum
+	:return: returns post-scattered photon 4 momentum in the comoving frame
+	"""
 
 	#	This routine performs a Compton scattering between a photon and a
 	#	moving electron. Takes the 4-momenta as inputs
@@ -187,14 +194,6 @@ def single_cs(P_el, P_ph, x_tilde, y_tilde):
 	#test norm of photon
 	P_ph_prime=zero_norm(P_ph_prime)
 	###################################################################################################################
-
-	#t=n.arccos(P_ph[3]/ n.linalg.norm(P_ph[1:]))
-	#p=n.arctan2(P_ph[2],P_ph[1])
-	#y_tilde=-1*n.array([n.cos(t)*n.cos(p),n.cos(t)*n.sin(p), -n.sin(t)]) #this is for the lab case
-	#x_tilde=n.array([-n.sin(p),n.cos(p), 0])
-	#x_tilde_1, y_tilde_1=tslb.test_stokes(P_ph, P_el[1:] / P_el[0], x_tilde, y_tilde, P_ph_prime)
-
-	#print(n.arccos(n.dot(P_ph_prime[1:], y_tilde_1)/n.sqrt(n.dot(P_ph_prime[1:],P_ph_prime[1:])))*180/n.pi, n.arccos(n.dot(P_ph_prime[1:], x_tilde_1)/n.sqrt(n.dot(P_ph_prime[1:],P_ph_prime[1:])))*180/n.pi)
 
 	#
 	# Second, we rotate the axes so that the photon incomes along the x-axis
@@ -319,6 +318,18 @@ def single_cs(P_el, P_ph, x_tilde, y_tilde):
 
 
 def event3D(r_obs, theta_deg, phi_deg, dtheta_deg, path, lastfile, sim_type, riken_switch=False):
+	"""
+	Place holder function to conduct a synthetic observation of MCRaT simulated outflow using a 3D hydro simulation.
+	:param r_obs:
+	:param theta_deg:
+	:param phi_deg:
+	:param dtheta_deg:
+	:param path:
+	:param lastfile:
+	:param sim_type:
+	:param riken_switch:
+	:return:
+	"""
 	theta = theta_deg * n.pi / 180  # angle between jet axis and line of sight
 	dtheta = dtheta_deg * n.pi / 180  # acceptance
 	phi=phi_deg* np.pi / 180
@@ -397,6 +408,22 @@ def event3D(r_obs, theta_deg, phi_deg, dtheta_deg, path, lastfile, sim_type, rik
 	n.savetxt('EVENT_FILES/'+fout,outarr)
 
 def event4(r_obs, theta_deg, dtheta_deg, path, lastfile, sim_type, withintheta_deg=False,riken_switch=False, save_event=True):
+	"""
+	Function to collect MCRaT photons in space that will be observed. legacy code from when MCRaT produced text files
+	as its output.
+
+	:param r_obs: radius of where the detector will be placed, should be at a radius such that all the photons have
+	       propagated past the detector by the end of the MCRaT simulation
+	:param theta_deg: observer viewing angle in degrees
+	:param dtheta_deg: delta theta of the observer viewieng angle for accepting photons, also in degrees
+	:param path: path to the directory that holds ll the output MCRaT files, should be a string
+	:param lastfile: the number of the last MCRaT output file, this should be an int
+	:param sim_type: A string that will be the name of the output file of this function
+	:param withintheta_deg: this is a depreciated key
+	:param riken_switch: this is a depreciated key
+	:param save_event: switch to create the event file that will be read in by other functions
+	:return: returns photon's that would be observed and thier energy, detector crossing time, and their weight
+	"""
 	theta = theta_deg * n.pi / 180  # angle between jet axis and line of sight
 	dtheta = dtheta_deg * n.pi / 180  # acceptance
 	foutn='events.dat'
@@ -435,10 +462,6 @@ def event4(r_obs, theta_deg, dtheta_deg, path, lastfile, sim_type, withintheta_d
 	#comment out when using mc.par file for weight
 	weight=n.reshape(weight[:sizze[0]],P0.size)
 
-	#read photon weight from mc.par file
-	#weight=n.ones(P0.size)*(n.genfromtxt(path+'mc.par')[-3])
-	#weight = n.reshape(weight, P0.size)
-
 
 	theta_pho = n.arctan2(n.sqrt(P1 ** 2 + P2 ** 2), P3)  # angle between velocity vector and polar axis
 
@@ -473,6 +496,24 @@ def event4(r_obs, theta_deg, dtheta_deg, path, lastfile, sim_type, withintheta_d
 	return  crossing_time, hnukeV, weight[jj], jj[0]
 
 def event_h5(r_obs, theta_deg, dtheta_deg, path, lastfile, sim_type, fps=5, read_comv=False, read_stokes=False, append=False):
+	"""
+	Function to collect MCRaT photons in space that will be observed. Saves event files in EVENT_FILES/ directory that
+	must be created before calling this function.
+	:param r_obs: radius of where the detector will be placed, should be at a radius such that all the photons have
+	       propagated past the detector by the end of the MCRaT simulation
+	:param theta_deg: observer viewing angle in degrees
+	:param dtheta_deg: delta theta of the observer viewieng angle for accepting photons, also in degrees
+	:param path: path to the directory that holds ll the output MCRaT files, should be a string
+	:param lastfile: the number of the last MCRaT output file, this should be an int
+	:param sim_type: A string that will be the name of the output file of this function
+	:param fps: an int that represents the number fo frames per second in the hydro simulation used
+	:param read_comv: switch to denote of the MCRaT files contain the comoving photon 4 momenta
+	:param read_stokes: switch to denote if the MCRaT output files have the stokes parameters
+	:param append: switch to denote if the function should append the extracted data to a pre-existing event file
+	:return: returns (N,8) array where N is the number of photons 'detected'. The array contains:
+	          the crossing time of the photon, the lab energy in keV, the weight, the index in the list of photons,
+	          the stokes parameters and the comoving energy in keV
+	"""
 	from read_process_files import read_mcrat_h5
 	import h5py as h5
 	
@@ -516,10 +557,7 @@ def event_h5(r_obs, theta_deg, dtheta_deg, path, lastfile, sim_type, fps=5, read
 	jj = n.where((theta_pho >= theta - dtheta / 2.) & (theta_pho < theta + dtheta / 2.) & (RR_prop >= r_obs) ) #& (S1 != 0) &  (S2 != 0) added last two to properly calc polarization in test cases
 	print ('accepted photons ', jj[0].size)
 	nnn = jj[0].size
-	#if not riken_switch:
-	#	fps=5.0
-	#else:
-	#	fps=10.0
+
 
 
 	tnow = lastfile / fps
@@ -548,7 +586,24 @@ def event_h5(r_obs, theta_deg, dtheta_deg, path, lastfile, sim_type, fps=5, read
 			n.savetxt(f, outarr)
 
 
-def lcur(simid, t, units='erg/s', theta=1., dtheta=1., phi=0, dphi=1, sim_dims=2, iso_lumi=False, h5=False):
+def lcur(simid, t, units='erg/s', theta=1., dtheta=1., phi=0, dphi=1, sim_dims=2, h5=True):
+	"""
+	reads in the event file and bins photons in uniform time bins to create light curves
+	:param simid: a string of the event file base name of the event file created in event_h5 (everything but the .evt)
+	:param t: an array of time bin edges
+	:param units: string specifying units, can be erg/s or cts/s
+	:param theta: observer viewing angle in degrees
+	:param dtheta: the size of the observer viewing angle bin in degrees (same as is specified in event_h5 function)
+	:param phi: azimuthal angle for mock observer in degrees (only for 3D simulations, not fully supported)
+	:param dphi: the size of the observer azimuthal viewing angle bin in degrees (only for 3D simulations, not fully
+	            supported)
+	:param sim_dims: The number of dimensions of the hydro simulation used
+	:param h5: specify if the format of the MCRaT output files is hdf5 files or not (denotes if using an old format or
+	           a newer format of saving files)
+	:return: returns the time binned quantities of luminosity, luminosity error, number of photons in each bin, the
+			 average eenrgy of photons in each bin, polarization, the stokes parameters, polarization error and
+			 polarization angle
+	"""
 	if (units != 'cts/s') & (units != 'erg/s'):
 		print( 'Wrong units')
 		print( 'The only allowed units are: erg/s and cts/s')
@@ -564,13 +619,6 @@ def lcur(simid, t, units='erg/s', theta=1., dtheta=1., phi=0, dphi=1, sim_dims=2
 				time,hnu,weight, indexes=n.loadtxt('EVENT_FILES/'+simid+'.evt',unpack=True)
 			except ValueError:
 				time,hnu,weight=n.loadtxt('EVENT_FILES/'+simid+'.evt',unpack=True)
-			
-		#if 'sp' in simid:
-		#	lc_factor=1 #divide by 2 is for variabel simulations where I was injecting 2x as many photons as needed in a given slab
-			#iso_lumi=True
-		#	print("Dividing lc by factor of 2!!!!!")
-		#else:
-		lc_factor=1 #0.5 dont need this anymore since we have corrected the weights in the MCRaT code
 
 		p=n.zeros(t.size)
 		p_angle = n.zeros(t.size)
@@ -606,39 +654,47 @@ def lcur(simid, t, units='erg/s', theta=1., dtheta=1., phi=0, dphi=1, sim_dims=2
 					I=n.average(s0[jj],weights=weight[jj])
 					#print(u[i])
 					p[i]=n.sqrt(q[i]**2+u[i]**2)#/I
-					p_angle[i]=(0.5*n.arctan2(u[i],q[i])*180/n.pi)#%360 #convert to degrees, between 0 and 360
-					#if p_angle[i]>180:
-					#	p_angle[i]=p_angle[i]-180 #since there is 180 degree symmetry, convert angles to be within 0 and pi
-					#if p_angle[i] < 0:
-					#	p_angle[i] = p_angle[i] + 180
-
-					#or try doing from -90 to 90
-					#if p_angle[i]>90:
-					#	p_angle[i]=p_angle[i]-180 #since there is 180 degree symmetry, convert angles to be within 0 and pi
-					#if p_angle[i] < -90:
-					#	p_angle[i] = p_angle[i] + 180
-					#with all this commented out, the angle just goes from -90 to 90
+					p_angle[i]=(0.5*n.arctan2(u[i],q[i])*180/n.pi)#gives angle between +90 degrees and -90 degrees
 
 					#from Kislat eqn 36 and 37
 					mu=1
 					perr[i,:]= n.sqrt(2.0-p[i]**2*mu**2) / n.sqrt((jj[0].size-1)*mu**2), (180/n.pi)*1/(mu*p[i]*n.sqrt(2*(jj[0].size-1)))
 
+		#calulate d \Omega
 		if sim_dims==2:
 			factor = 2 * n.pi * (n.cos((theta - dtheta / 2.) * n.pi / 180) - n.cos((theta + dtheta / 2.) * n.pi / 180))
 		elif sim_dims==3:
 			factor = (dphi* n.pi / 180) * (n.cos((theta - dtheta / 2.) * n.pi / 180) - n.cos((theta + dtheta / 2.) * n.pi / 180))
 
-		if iso_lumi:
-			factor2 = 4*n.pi
-		else:
-			factor2 = 1
 
-		lc = factor2 * lc / dt / factor
-		lce = factor2 * lce / dt / factor
+		lc =  lc / dt / factor
+		lce =  lce / dt / factor
 		return lc, lce, ph_num, ph_avg_energy, p, l, q, u, v, perr, p_angle
 
 
-def lcur_var_t(simid, time_start, time_end, dt, dt_min, liso_c = 1e50, units='erg/s', theta=1., dtheta=1., phi=0, dphi=1, sim_dims=2, iso_lumi=False, h5=False):
+def lcur_var_t(simid, time_start, time_end, dt, dt_min, liso_c = 1e50, units='erg/s', theta=1., dtheta=1., phi=0, dphi=1, sim_dims=2, h5=True):
+	"""
+	Produces time binned quantities for non-uniform time bins. The time bins must be larger than some critical
+	luminosity and some minimum dt that the user specifies.
+	:param simid: a string of the event file base name of the event file created in event_h5 (everything but the .evt)
+	:param time_start: starting time of the light curve
+	:param time_end: end time of the light curve binning
+	:param dt: initial dt of the time bins
+	:param dt_min: the minimum acceptable dt for the light curve
+	:param liso_c: the mimimum isotropic luminosity for a given time bin (in the same units specified by units)
+	:param units: a string of the units of the light curve that will be produced (erg/s or cts/s)
+	:param theta: the observer viewing angle in degrees
+	:param dtheta: the size of the observer viewing angle bin in degrees (same as is specified in event_h5 function)
+	:param phi: azimuthal angle for mock observer in degrees (only for 3D simulations, not fully supported)
+	:param dphi: the size of the observer azimuthal viewing angle bin in degrees (only for 3D simulations, not fully
+	            supported)
+	:param sim_dims: The number of dimensions of the hydro simulation used
+	:param h5: specify if the format of the MCRaT output files is hdf5 files or not (denotes if using an old format or
+	           a newer format of saving files)
+	:return: returns the time binned quantities of luminosity, luminosity error, number of photons in each bin, the
+			 average eenrgy of photons in each bin, polarization, the stokes parameters, polarization error and
+			 polarization angle
+	"""
 
 	if (units != 'cts/s') & (units != 'erg/s'):
 		print('Wrong units')
@@ -671,7 +727,7 @@ def lcur_var_t(simid, time_start, time_end, dt, dt_min, liso_c = 1e50, units='er
 			print(i)
 			if j == 0:
 				if (i + 1 < test_t.size):
-					val = lcur(simid, n.array([test_t[i], test_t[i + 1]]), h5=True)[0][0]
+					val = lcur(simid, n.array([test_t[i], test_t[i + 1]]), units=units, h5=True)[0][0]
 					print(val)
 					if (n.round(test_t[i + 1] - test_t[i], decimals=2) >= dt_min) & (val > liso_c):
 						print(test_t[i + 1], test_t[i], test_t[i + 1] - test_t[i])
@@ -687,7 +743,7 @@ def lcur_var_t(simid, time_start, time_end, dt, dt_min, liso_c = 1e50, units='er
 			else:
 				if (i + 1 < test_t.size):
 					print('In else')
-					val = lcur(simid, n.array([test_t[j], test_t[i + 1]]), h5=True)[0][0]
+					val = lcur(simid, n.array([test_t[j], test_t[i + 1]]), units=units, h5=True)[0][0]
 					print(val)
 					if (n.round(test_t[i + 1] - test_t[i], decimals=2) >= dt_min) & (val > liso_c):
 						print(test_t[i + 1], test_t[j], test_t[i + 1] - test_t[j])
@@ -721,9 +777,7 @@ def lcur_var_t(simid, time_start, time_end, dt, dt_min, liso_c = 1e50, units='er
 		lce = n.empty(t.size)*n.nan
 		ph_num = n.empty(t.size)*n.nan
 		ph_avg_energy = n.empty(t.size)*n.nan
-		#dt = t[1] - t[0]
-		#tmin = t  # - dt / 2.
-		#tmax = t + dt  # / 2.
+
 		for i in range(t.size-1):
 			# print(tmin[i], tmax[i])
 			jj = n.where((time >= t[i]) & (time < t[i+1]) & (~n.isnan(s0)))
@@ -744,20 +798,7 @@ def lcur_var_t(simid, time_start, time_end, dt, dt_min, liso_c = 1e50, units='er
 					I = n.average(s0[jj], weights=weight[jj])
 					p[i] = n.sqrt(q[i] ** 2 + u[i] ** 2) / I
 					p_angle[i] = (
-								0.5 * n.arctan2(u[i], q[i]) * 180 / n.pi)#%360 #convert to degrees, between 0 and 360
-					print('Before',0.5 * n.arctan2(u[i], q[i]) * 180 / n.pi, p_angle[i])
-					#if p_angle[i]>180:
-					#	p_angle[i]=p_angle[i]-180 #since there is 180 degree symmetry, convert angles to be within 0 and pi
-					#if p_angle[i] < 0:
-					#	p_angle[i] = p_angle[i] + 180
-
-					#or try doing from -90 to 90
-					#if p_angle[i]>90:
-					#	p_angle[i]=p_angle[i]-180 #since there is 180 degree symmetry, convert angles to be within 0 and pi
-					#if p_angle[i] < -90:
-					#	p_angle[i] = p_angle[i] - 180
-
-					print('After', p_angle[i])
+								0.5 * n.arctan2(u[i], q[i]) * 180 / n.pi)
 
 
 					perr[i,:] = n.sqrt(2.0) / n.sqrt(jj[0].size), (180/n.pi)*n.sqrt(2.0) / n.sqrt(jj[0].size) /(2*p[i])
@@ -768,17 +809,25 @@ def lcur_var_t(simid, time_start, time_end, dt, dt_min, liso_c = 1e50, units='er
 			factor = (dphi * n.pi / 180) * (
 						n.cos((theta - dtheta / 2.) * n.pi / 180) - n.cos((theta + dtheta / 2.) * n.pi / 180))
 
-		#if iso_lumi:
-		#	factor2 = 4 * n.pi
-		#else:
-		#	factor2 = 1
 
 		lc =  lc  / factor
 		lce =  lce  / factor
 		return lc, lce, ph_num, ph_avg_energy, p, l, q, u, v, perr, p_angle, t
 
 
-def spex(simid,numin,numax,tmin,tmax,units='erg/s', h5=False):
+def spex(simid,numin,numax,tmin,tmax,units='erg/s', h5=True):
+	"""
+	Produces spectra of phtons detected within any time interval
+	:param simid: a string of the event file base name of the event file created in event_h5 (everything but the .evt)
+	:param numin: array of energy values of the left most cutoff of the energy bins in the spectrum in keV
+	:param numax: array of energy values of the right most cutoff of the energy bins in the spectrum in keV
+	:param tmin: minimum of time bin that we are interested in collecting photons in to analyze
+	:param tmax: max of time bin that we are interested in collecting photons in to analyze
+	:param units: a string of the units of the spectrum that will be produced (erg/s or cts/s)
+	:param h5: pecify if the format of the MCRaT output files is hdf5 files or not (denotes if using an old format or
+	           a newer format of saving files)
+	:return: returns the spectrum with the specified units, for the photons in each energy bin
+	"""
 	if (units!='cts/s')&(units!='erg/s'):
 		print( 'Wrong units')
 		print( 'The only allowed units are: erg/s and cts/s')
@@ -805,260 +854,19 @@ def spex(simid,numin,numax,tmin,tmax,units='erg/s', h5=False):
 					sp[i]=(1.6e-9)*n.sum(weight[jj]*hnu[jj])/dnu[i]
 				else:
 					sp[i]=n.sum(weight[jj])/dnu[i]
-				spe[i]=sp[i]/n.sqrt(jj[0].size)#/dnu[i]
+				spe[i]=sp[i]/n.sqrt(jj[0].size)
 				if jj[0].size>10: 
 					goodones[i]=jj[0].size
-				#print(jj, jj[0].size, weight[jj])
+					
 	return sp,spe,goodones
 
-
-######################
-
-def readcol(filen, ncol, fmt):
-	# this routine converts tabs into spaces
-	def tabspace(st):
-		while '\t' in st:
-			jj = st.find('\t')
-			if jj == 0:
-				st = ' ' + st[1:]
-			elif jj == len(st) - 1:
-				st = st[0:len(st) - 1] + ' '
-			else:
-				stt = st[0:jj] + ' ' + st[jj + 1:]
-				st = stt
-		return st
-
-	# this is a routine that eliminates the blanks at the
-	# beginning of a string
-	def blanks(stringa):
-		jj = 0
-		while jj == 0:
-			jj = stringa.find(' ')
-			if jj == 0: stringa = stringa[1:]
-		return stringa
-
-	# this checks if a string can be converted into a number
-	def chk_n(stringa):
-		strin = stringa
-		nn = len(strin)
-		pos = 0
-		yae = 0
-		yad = 0
-		yap = 0
-		for i in range(0, nn):
-			check = 1
-			aa = strin[0]
-			if aa == '0': check = check * 2
-			if aa == '1': check = check * 2
-			if aa == '2': check = check * 2
-			if aa == '3': check = check * 2
-			if aa == '4': check = check * 2
-			if aa == '5': check = check * 2
-			if aa == '6': check = check * 2
-			if aa == '7': check = check * 2
-			if aa == '8': check = check * 2
-			if aa == '9': check = check * 2
-			if n.logical_and(n.logical_and(aa == 'e', yae == 0), n.logical_and(pos != 0, pos != nn - 1)):
-				check = check * 2
-				yae = 1
-			if n.logical_and(n.logical_and(aa == 'E', yae == 0), n.logical_and(pos != 0, pos != nn - 1)):
-				check = check * 2
-				yae = 1
-			if n.logical_and(n.logical_and(aa == 'd', yad == 0), n.logical_and(pos != 0, pos != nn - 1)):
-				check = check * 2
-				yad = 1
-			if n.logical_and(n.logical_and(aa == 'D', yad == 0), n.logical_and(pos != 0, pos != nn - 1)):
-				check = check * 2
-				yad = 1
-			if aa == '+': check = check * 2
-			if aa == '-': check = check * 2
-			if n.logical_and(aa == '.', yap == 0):
-				check = check * 2
-				yap = 1
-
-			pos = pos + 1
-			if check > 1: sucheck = 1
-			if check == 1:
-				sucheck = 0
-				break
-			strin = strin[1:]
-		return sucheck
-
-	import os
-	import numpy as n
-
-	ff = file(filen)
-	nlines = 0
-	for i in ff: nlines += 1
-	ff.close()
-
-	output = n.zeros([ncol, nlines], dtype='|S200')
-
-	ff = open(filen, 'r')
-	skipped = 0
-	retained = 0
-	igo = 0
-	for i in range(0, nlines):
-		raw = ff.readline()
-		raw = tabspace(raw)
-		goods = n.zeros(ncol)
-		outp = [' ']
-		for j in range(0, ncol):
-			raw = blanks(raw)
-			jj = raw.find(' ')
-			#			print jj,'+',raw,'+'
-			#			if n.logical_and(jj==-1,j!=ncol-1): break
-			datum = raw[0:jj]
-			raw = raw[jj + 1:]
-			#			print 'datum= ',datum,len(datum)
-			if len(datum) == 0: break
-			if n.logical_and(fmt[j] == 'd', chk_n(datum) == 1): goods[j] = 1
-			if fmt[j] == 'a': goods[j] = 1
-			outp = outp + [datum]
-		if goods.sum() == ncol:
-			outp = outp[1:]
-			for jj in range(0, ncol): output[jj, igo] = outp[jj]
-			igo += 1
-			retained += 1
-		else:
-			skipped += 1
-	output = output[:, 0:igo]
-	print( retained, 'valid line(s) read')
-	print( skipped, ' line(s) skipped: not conform to format')
-
-	if ncol == 1:
-		if fmt[0] == 'd': x0 = n.array(output[0, :], dtype='float64')
-		if fmt[0] == 'a': x0 = n.array(output[0, :], dtype='|S200')
-		return x0
-	if ncol == 2:
-		if fmt[0] == 'd': x0 = n.array(output[0, :], dtype='float64')
-		if fmt[0] == 'a': x0 = n.array(output[0, :], dtype='|S200')
-		if fmt[1] == 'd': x1 = n.array(output[1, :], dtype='float64')
-		if fmt[1] == 'a': x1 = n.array(output[1, :], dtype='|S200')
-		return x0, x1
-	if ncol == 3:
-		if fmt[0] == 'd': x0 = n.array(output[0, :], dtype='float64')
-		if fmt[0] == 'a': x0 = n.array(output[0, :], dtype='|S200')
-		if fmt[1] == 'd': x1 = n.array(output[1, :], dtype='float64')
-		if fmt[1] == 'a': x1 = n.array(output[1, :], dtype='|S200')
-		if fmt[2] == 'd': x2 = n.array(output[2, :], dtype='float64')
-		if fmt[2] == 'a': x2 = n.array(output[2, :], dtype='|S200')
-		return x0, x1, x2
-	if ncol == 4:
-		if fmt[0] == 'd': x0 = n.array(output[0, :], dtype='float64')
-		if fmt[0] == 'a': x0 = n.array(output[0, :], dtype='|S200')
-		if fmt[1] == 'd': x1 = n.array(output[1, :], dtype='float64')
-		if fmt[1] == 'a': x1 = n.array(output[1, :], dtype='|S200')
-		if fmt[2] == 'd': x2 = n.array(output[2, :], dtype='float64')
-		if fmt[2] == 'a': x2 = n.array(output[2, :], dtype='|S200')
-		if fmt[3] == 'd': x3 = n.array(output[3, :], dtype='float64')
-		if fmt[3] == 'a': x3 = n.array(output[3, :], dtype='|S200')
-		return x0, x1, x2, x3
-	if ncol == 5:
-		if fmt[0] == 'd': x0 = n.array(output[0, :], dtype='float64')
-		if fmt[0] == 'a': x0 = n.array(output[0, :], dtype='|S200')
-		if fmt[1] == 'd': x1 = n.array(output[1, :], dtype='float64')
-		if fmt[1] == 'a': x1 = n.array(output[1, :], dtype='|S200')
-		if fmt[2] == 'd': x2 = n.array(output[2, :], dtype='float64')
-		if fmt[2] == 'a': x2 = n.array(output[2, :], dtype='|S200')
-		if fmt[3] == 'd': x3 = n.array(output[3, :], dtype='float64')
-		if fmt[3] == 'a': x3 = n.array(output[3, :], dtype='|S200')
-		if fmt[4] == 'd': x4 = n.array(output[4, :], dtype='float64')
-		if fmt[4] == 'a': x4 = n.array(output[4, :], dtype='|S200')
-		return x0, x1, x2, x3, x4
-	if ncol == 6:
-		if fmt[0] == 'd': x0 = n.array(output[0, :], dtype='float64')
-		if fmt[0] == 'a': x0 = n.array(output[0, :], dtype='|S200')
-		if fmt[1] == 'd': x1 = n.array(output[1, :], dtype='float64')
-		if fmt[1] == 'a': x1 = n.array(output[1, :], dtype='|S200')
-		if fmt[2] == 'd': x2 = n.array(output[2, :], dtype='float64')
-		if fmt[2] == 'a': x2 = n.array(output[2, :], dtype='|S200')
-		if fmt[3] == 'd': x3 = n.array(output[3, :], dtype='float64')
-		if fmt[3] == 'a': x3 = n.array(output[3, :], dtype='|S200')
-		if fmt[4] == 'd': x4 = n.array(output[4, :], dtype='float64')
-		if fmt[4] == 'a': x4 = n.array(output[4, :], dtype='|S200')
-		if fmt[5] == 'd': x5 = n.array(output[5, :], dtype='float64')
-		if fmt[5] == 'a': x5 = n.array(output[5, :], dtype='|S200')
-		return x0, x1, x2, x3, x4, x5
-	if ncol == 7:
-		if fmt[0] == 'd': x0 = n.array(output[0, :], dtype='float64')
-		if fmt[0] == 'a': x0 = n.array(output[0, :], dtype='|S200')
-		if fmt[1] == 'd': x1 = n.array(output[1, :], dtype='float64')
-		if fmt[1] == 'a': x1 = n.array(output[1, :], dtype='|S200')
-		if fmt[2] == 'd': x2 = n.array(output[2, :], dtype='float64')
-		if fmt[2] == 'a': x2 = n.array(output[2, :], dtype='|S200')
-		if fmt[3] == 'd': x3 = n.array(output[3, :], dtype='float64')
-		if fmt[3] == 'a': x3 = n.array(output[3, :], dtype='|S200')
-		if fmt[4] == 'd': x4 = n.array(output[4, :], dtype='float64')
-		if fmt[4] == 'a': x4 = n.array(output[4, :], dtype='|S200')
-		if fmt[5] == 'd': x5 = n.array(output[5, :], dtype='float64')
-		if fmt[5] == 'a': x5 = n.array(output[5, :], dtype='|S200')
-		if fmt[6] == 'd': x6 = n.array(output[6, :], dtype='float64')
-		if fmt[6] == 'a': x6 = n.array(output[6, :], dtype='|S200')
-		return x0, x1, x2, x3, x4, x5, x6
-	if ncol == 8:
-		if fmt[0] == 'd': x0 = n.array(output[0, :], dtype='float64')
-		if fmt[0] == 'a': x0 = n.array(output[0, :], dtype='|S200')
-		if fmt[1] == 'd': x1 = n.array(output[1, :], dtype='float64')
-		if fmt[1] == 'a': x1 = n.array(output[1, :], dtype='|S200')
-		if fmt[2] == 'd': x2 = n.array(output[2, :], dtype='float64')
-		if fmt[2] == 'a': x2 = n.array(output[2, :], dtype='|S200')
-		if fmt[3] == 'd': x3 = n.array(output[3, :], dtype='float64')
-		if fmt[3] == 'a': x3 = n.array(output[3, :], dtype='|S200')
-		if fmt[4] == 'd': x4 = n.array(output[4, :], dtype='float64')
-		if fmt[4] == 'a': x4 = n.array(output[4, :], dtype='|S200')
-		if fmt[5] == 'd': x5 = n.array(output[5, :], dtype='float64')
-		if fmt[5] == 'a': x5 = n.array(output[5, :], dtype='|S200')
-		if fmt[6] == 'd': x6 = n.array(output[6, :], dtype='float64')
-		if fmt[6] == 'a': x6 = n.array(output[6, :], dtype='|S200')
-		if fmt[7] == 'd': x7 = n.array(output[7, :], dtype='float64')
-		if fmt[7] == 'a': x7 = n.array(output[7, :], dtype='|S200')
-		return x0, x1, x2, x3, x4, x5, x6, x7
-	if ncol == 9:
-		if fmt[0] == 'd': x0 = n.array(output[0, :], dtype='float64')
-		if fmt[0] == 'a': x0 = n.array(output[0, :], dtype='|S200')
-		if fmt[1] == 'd': x1 = n.array(output[1, :], dtype='float64')
-		if fmt[1] == 'a': x1 = n.array(output[1, :], dtype='|S200')
-		if fmt[2] == 'd': x2 = n.array(output[2, :], dtype='float64')
-		if fmt[2] == 'a': x2 = n.array(output[2, :], dtype='|S200')
-		if fmt[3] == 'd': x3 = n.array(output[3, :], dtype='float64')
-		if fmt[3] == 'a': x3 = n.array(output[3, :], dtype='|S200')
-		if fmt[4] == 'd': x4 = n.array(output[4, :], dtype='float64')
-		if fmt[4] == 'a': x4 = n.array(output[4, :], dtype='|S200')
-		if fmt[5] == 'd': x5 = n.array(output[5, :], dtype='float64')
-		if fmt[5] == 'a': x5 = n.array(output[5, :], dtype='|S200')
-		if fmt[6] == 'd': x6 = n.array(output[6, :], dtype='float64')
-		if fmt[6] == 'a': x6 = n.array(output[6, :], dtype='|S200')
-		if fmt[7] == 'd': x7 = n.array(output[7, :], dtype='float64')
-		if fmt[7] == 'a': x7 = n.array(output[7, :], dtype='|S200')
-		if fmt[8] == 'd': x8 = n.array(output[8, :], dtype='float64')
-		if fmt[8] == 'a': x8 = n.array(output[8, :], dtype='|S200')
-		return x0, x1, x2, x3, x4, x5, x6, x7, x8
-	if ncol == 10:
-		if fmt[0] == 'd': x0 = n.array(output[0, :], dtype='float64')
-		if fmt[0] == 'a': x0 = n.array(output[0, :], dtype='|S200')
-		if fmt[1] == 'd': x1 = n.array(output[1, :], dtype='float64')
-		if fmt[1] == 'a': x1 = n.array(output[1, :], dtype='|S200')
-		if fmt[2] == 'd': x2 = n.array(output[2, :], dtype='float64')
-		if fmt[2] == 'a': x2 = n.array(output[2, :], dtype='|S200')
-		if fmt[3] == 'd': x3 = n.array(output[3, :], dtype='float64')
-		if fmt[3] == 'a': x3 = n.array(output[3, :], dtype='|S200')
-		if fmt[4] == 'd': x4 = n.array(output[4, :], dtype='float64')
-		if fmt[4] == 'a': x4 = n.array(output[4, :], dtype='|S200')
-		if fmt[5] == 'd': x5 = n.array(output[5, :], dtype='float64')
-		if fmt[5] == 'a': x5 = n.array(output[5, :], dtype='|S200')
-		if fmt[6] == 'd': x6 = n.array(output[6, :], dtype='float64')
-		if fmt[6] == 'a': x6 = n.array(output[6, :], dtype='|S200')
-		if fmt[7] == 'd': x7 = n.array(output[7, :], dtype='float64')
-		if fmt[7] == 'a': x7 = n.array(output[7, :], dtype='|S200')
-		if fmt[8] == 'd': x8 = n.array(output[8, :], dtype='float64')
-		if fmt[8] == 'a': x8 = n.array(output[8, :], dtype='|S200')
-		if fmt[9] == 'd': x9 = n.array(output[9, :], dtype='float64')
-		if fmt[9] == 'a': x9 = n.array(output[9, :], dtype='|S200')
-		return x0, x1, x2, x3, x4, x5, x6, x7, x8, x9
-
-
 def readanddecimate(fnam, inj_radius):
+	"""
+	Legacy code from the python version of MCRaT to read and process FLASH files
+	:param fnam: string of directory and file name of the FLASH file that will be loaded and processed
+	:param inj_radius: The radius that photons are injected in cm
+	:return: returns FLASH values of various quantities at cells
+	"""
 	import tables as t
 	file = t.open_file(fnam)
 	print( '>> mc.py: Reading positional, density, pressure, and velocity information...')
@@ -1144,43 +952,3 @@ def readanddecimate(fnam, inj_radius):
 	szy=szy[jj]
 
 	return xx, yy, vx, vy, gg, dd, dd_lab, rr, tt, pp, szx, szy
-
-
-def spexbin(freq, weight, jmin, minbin):
-	jsort = n.argsort(freq)
-	ffreq = freq[jsort]
-	wweight = weight[jsort]
-	numin = n.zeros(freq.size / jmin + 10)
-	spex = n.zeros(freq.size / jmin + 10)
-	counts = n.zeros(freq.size / jmin + 10)
-	numph = 0
-	j = 0
-	while numph < freq.size:
-		j += 1
-		print( 'j,jmin,ff.size', j, jmin, ffreq.size)
-		numin[j] = 10 ** ((n.log10(ffreq[jmin]) + n.log10(ffreq[jmin + 1])) / 2.)
-		print( numin[j])
-		print( 'ffreq', ffreq[jmin])
-		if n.log10(numin[j] / numin[j - 1]) < minbin:
-			numin[j] = 10 ** (n.log10(numin[j - 1]) + minbin)
-			print( 'numin entrato', numin[j])
-		kk = n.where((ffreq >= numin[j - 1]) & (ffreq < numin[j]))
-		counts[j - 1] = kk[0].size
-		spex[j - 1] = n.sum(ffreq[kk] * weight[kk])
-		print( 'kk,numi,numi', kk[0], numin[j - 1], numin[j])
-		ffreq = ffreq[kk[0].size:]
-		weight = weight[kk[0].size:]
-		if ffreq.size < jmin:
-			counts[j - 1] = counts[j - 1] + ffreq.size
-			numin[j] = 2 * ffreq.max()
-			spex[j - 1] = spex[j - 1] + n.sum(ffreq * weight)
-			break
-
-	numino = numin[:j]
-	numax = numin[1:j + 1]
-	spex = spex[:j]
-	counts = counts[:j]
-	dnu = numax - numino
-	spex = spex / dnu
-	spexe = spex / n.sqrt(counts)
-	return numino, numax, spex, spexe, counts
