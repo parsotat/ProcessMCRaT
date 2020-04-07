@@ -1,0 +1,5 @@
+_*/
+*.rst
+*.bat
+conf.py
+Makefile

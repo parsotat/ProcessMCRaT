@@ -73,6 +73,7 @@ def single_electron(T, P_ph):
 def lorentzBoostVectorized(boost, P_ph):
 	"""
 	Function to quickly lorentz boost a set of photon 4 momenta, and ensures that the 0 norm condition is met.
+
 	:param boost: The velocity vector of the frame that the photon will be boosted into. The shape of the array
 	              should be (3,N), where N is the number of photons that will be lorentz boosted
 	:param P_ph: The photon's 4 momentum that will be boosted into the desired frame of reference. The shape of the array
@@ -116,6 +117,7 @@ def lorentzBoostVectorized(boost, P_ph):
 def Lorentz_Boost(boost, P_ph):
 	"""
 	This routine performs a Lorentz boost of a 4-momentum. The boost is specified with a 3-vel.
+
 	:param boost: The velocity vector of the frame that the photon will be boosted into.
 	:param P_ph: The photon 4 momentum that will be boosted into the desired frame of reference.
 	:return:  the boosted photon 4 mometum
@@ -155,6 +157,7 @@ def zero_norm(P):
 	"""
 	Takes a photon 4 momentum and checks if it satisfies the 0 norm condition of photons. If not, it corrects the 4
 	mometum by assuming that the energy is correct.
+
 	:param P: photon 4 monetum
 	:return: returns the correct 0 normed photon 4 momentum
 	"""
@@ -174,6 +177,7 @@ def single_cs(P_el, P_ph):
 	"""
 	This function conducts a single compton scatter in the electron rest frame. The photon has to be in the comoving
 	frame first. Legacy code from Python version of MCRaT.
+
 	:param P_el: electron 4 momentum
 	:param P_ph: photon comoving 4 momentum
 	:return: returns post-scattered photon 4 momentum in the comoving frame
@@ -320,6 +324,7 @@ def single_cs(P_el, P_ph):
 def event3D(r_obs, theta_deg, phi_deg, dtheta_deg, path, lastfile, sim_type, riken_switch=False):
 	"""
 	Place holder function to conduct a synthetic observation of MCRaT simulated outflow using a 3D hydro simulation.
+
 	:param r_obs:
 	:param theta_deg:
 	:param phi_deg:
@@ -499,10 +504,11 @@ def event_h5(r_obs, theta_deg, dtheta_deg, path, lastfile, sim_type, fps=5, read
 	"""
 	Function to collect MCRaT photons in space that will be observed. Saves event files in EVENT_FILES/ directory that
 	must be created before calling this function.
+
 	:param r_obs: radius of where the detector will be placed, should be at a radius such that all the photons have
 	       propagated past the detector by the end of the MCRaT simulation
 	:param theta_deg: observer viewing angle in degrees
-	:param dtheta_deg: delta theta of the observer viewieng angle for accepting photons, also in degrees
+	:param dtheta_deg: delta theta of the observer viewing angle for accepting photons, also in degrees
 	:param path: path to the directory that holds ll the output MCRaT files, should be a string
 	:param lastfile: the number of the last MCRaT output file, this should be an int
 	:param sim_type: A string that will be the name of the output file of this function
@@ -589,6 +595,7 @@ def event_h5(r_obs, theta_deg, dtheta_deg, path, lastfile, sim_type, fps=5, read
 def lcur(simid, t, units='erg/s', theta=1., dtheta=1., phi=0, dphi=1, sim_dims=2, h5=True):
 	"""
 	reads in the event file and bins photons in uniform time bins to create light curves
+
 	:param simid: a string of the event file base name of the event file created in event_h5 (everything but the .evt)
 	:param t: an array of time bin edges
 	:param units: string specifying units, can be erg/s or cts/s
@@ -610,7 +617,7 @@ def lcur(simid, t, units='erg/s', theta=1., dtheta=1., phi=0, dphi=1, sim_dims=2
 	else:
 		if h5:
 			try:
-				time,hnu,weight, indexes, s0, s1, s2, s3=n.loadtxt('EVENT_FILES/'+simid+'.evt',unpack=True)
+				time,hnu,weight, indexes, s0, s1, s2, s3, comv_hnu=n.loadtxt('EVENT_FILES/'+simid+'.evt',unpack=True)
 			except ValueError:
 				time,hnu,weight, s0, s1, s2, s3=n.loadtxt('EVENT_FILES/'+simid+'.evt',unpack=True)
 			
@@ -676,6 +683,7 @@ def lcur_var_t(simid, time_start, time_end, dt, dt_min, liso_c = 1e50, units='er
 	"""
 	Produces time binned quantities for non-uniform time bins. The time bins must be larger than some critical
 	luminosity and some minimum dt that the user specifies.
+
 	:param simid: a string of the event file base name of the event file created in event_h5 (everything but the .evt)
 	:param time_start: starting time of the light curve
 	:param time_end: end time of the light curve binning
@@ -818,6 +826,7 @@ def lcur_var_t(simid, time_start, time_end, dt, dt_min, liso_c = 1e50, units='er
 def spex(simid,numin,numax,tmin,tmax,units='erg/s', h5=True):
 	"""
 	Produces spectra of phtons detected within any time interval
+
 	:param simid: a string of the event file base name of the event file created in event_h5 (everything but the .evt)
 	:param numin: array of energy values of the left most cutoff of the energy bins in the spectrum in keV
 	:param numax: array of energy values of the right most cutoff of the energy bins in the spectrum in keV
@@ -857,12 +866,13 @@ def spex(simid,numin,numax,tmin,tmax,units='erg/s', h5=True):
 				spe[i]=sp[i]/n.sqrt(jj[0].size)
 				if jj[0].size>10: 
 					goodones[i]=jj[0].size
-					
+
 	return sp,spe,goodones
 
 def readanddecimate(fnam, inj_radius):
 	"""
 	Legacy code from the python version of MCRaT to read and process FLASH files
+
 	:param fnam: string of directory and file name of the FLASH file that will be loaded and processed
 	:param inj_radius: The radius that photons are injected in cm
 	:return: returns FLASH values of various quantities at cells
