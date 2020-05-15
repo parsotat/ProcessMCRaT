@@ -809,7 +809,10 @@ def lcur_var_t(simid, time_start, time_end, dt, dt_min, liso_c = 1e50, units='er
 								0.5 * n.arctan2(u[i], q[i]) * 180 / n.pi)
 
 
-					perr[i,:] = n.sqrt(2.0) / n.sqrt(jj[0].size), (180/n.pi)*n.sqrt(2.0) / n.sqrt(jj[0].size) /(2*p[i])
+					#from Kislat eqn 36 and 37
+                    mu=1
+                    perr[i,:]= n.sqrt(2.0-p[i]**2*mu**2) / n.sqrt((jj[0].size-1)*mu**2), (180/n.pi)*1/(mu*p[i]*n.sqrt(2*(jj[0].size-1)))
+
 
 		if sim_dims == 2:
 			factor = 2 * n.pi * (n.cos((theta - dtheta / 2.) * n.pi / 180) - n.cos((theta + dtheta / 2.) * n.pi / 180))
