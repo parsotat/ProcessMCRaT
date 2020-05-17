@@ -527,23 +527,22 @@ def event_h5(r_obs, theta_deg, dtheta_deg, path, lastfile, sim_type, fps=5, read
 	
 	data=read_mcrat_h5(path+"mcdata_"+n.str_(lastfile), read_comv=read_comv, read_stokes=read_stokes)
 	if read_comv and read_stokes:
-		NS, P0, P1, P2, P3, R1, R2, R3, S0, S1, S2, S3, COMV_P0, COMV_P1, COMV_P2, COMV_P3=data
+		PW, NS, P0, P1, P2, P3, R1, R2, R3, S0, S1, S2, S3, COMV_P0, COMV_P1, COMV_P2, COMV_P3=data
 	elif read_comv and not read_stokes:
-		NS, P0, P1, P2, P3, R1, R2, R3, COMV_P0, COMV_P1, COMV_P2, COMV_P3=data
+		PW, NS, P0, P1, P2, P3, R1, R2, R3, COMV_P0, COMV_P1, COMV_P2, COMV_P3=data
 		S0, S1, S2, S3 = n.zeros((4, n.size(P0))) * n.nan
 	elif not read_comv and read_stokes:
-		NS, P0, P1, P2, P3, R1, R2, R3, S0, S1, S2, S3=data
+		PW, NS, P0, P1, P2, P3, R1, R2, R3, S0, S1, S2, S3=data
 		COMV_P0, COMV_P1, COMV_P2, COMV_P3 = n.zeros((4, n.size(P0))) * n.nan
 	else:
-		NS, P0, P1, P2, P3, R1, R2, R3=data
+		PW, NS, P0, P1, P2, P3, R1, R2, R3=data
 		S0, S1, S2, S3, COMV_P0, COMV_P1, COMV_P2, COMV_P3 = n.zeros((8, n.size(P0))) * n.nan
 
 
 
 	print('Total Number of Photons: ', n.size(P0), P0)
 
-	with h5.File(path + "mcdata_PW.h5", 'r') as f:
-		weight = f['Weight'].value
+	weight = PW
 		
 	theta = theta_deg * n.pi / 180  # angle between jet axis and line of sight
 	dtheta = dtheta_deg * n.pi / 180  # acceptance

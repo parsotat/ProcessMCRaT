@@ -46,6 +46,7 @@ def read_mcrat_h5(file_name, read_comv=False, read_stokes=True):
     """
     import h5py as h5
     with h5.File(file_name+'.h5', 'r') as f:
+        pw = f['PW'].value
         ns=f['NS'].value
         p0=f['P0'].value
         p1=f['P1'].value
@@ -66,13 +67,13 @@ def read_mcrat_h5(file_name, read_comv=False, read_stokes=True):
             comv_p3 = f['COMV_P3'].value
 
     if read_comv and read_stokes:
-        return ns, p0, p1, p2, p3, r0, r1, r2, s0, s1, s2, s3, comv_p0, comv_p1, comv_p2, comv_p3
+        return pw, ns, p0, p1, p2, p3, r0, r1, r2, s0, s1, s2, s3, comv_p0, comv_p1, comv_p2, comv_p3
     elif read_comv and not read_stokes:
-        return ns, p0, p1, p2, p3, r0, r1, r2, comv_p0, comv_p1, comv_p2, comv_p3
+        return pw, ns, p0, p1, p2, p3, r0, r1, r2, comv_p0, comv_p1, comv_p2, comv_p3
     elif not read_comv and read_stokes:
-        return ns, p0, p1, p2, p3, r0, r1, r2, s0, s1, s2, s3
+        return pw, ns, p0, p1, p2, p3, r0, r1, r2, s0, s1, s2, s3
     else:
-        return ns, p0, p1, p2, p3, r0, r1, r2
+        return pw, ns, p0, p1, p2, p3, r0, r1, r2
 
 
 def read_flash(fnam):
