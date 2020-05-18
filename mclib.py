@@ -834,7 +834,7 @@ def spex(simid,numin,numax,tmin,tmax,units='erg/s', h5=True):
 	:param numax: array of energy values of the right most cutoff of the energy bins in the spectrum in keV
 	:param tmin: minimum of time bin that we are interested in collecting photons in to analyze
 	:param tmax: max of time bin that we are interested in collecting photons in to analyze
-	:param units: a string of the units of the spectrum that will be produced (erg/s or cts/s)
+	:param units: a string of the units of the spectrum that will be produced (erg/s or cts/s), each unit is then divided by the width of the enrgy bin in keV
 	:param h5: pecify if the format of the MCRaT output files is hdf5 files or not (denotes if using an old format or
 	           a newer format of saving files)
 	:return: returns the spectrum with the specified units, for the photons in each energy bin
