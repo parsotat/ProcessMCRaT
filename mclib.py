@@ -640,6 +640,7 @@ def lcur(simid, t, units='erg/s', theta=1., dtheta=1., phi=0, dphi=1, sim_dims=2
 		dt = t[1] - t[0]
 		tmin = t #- dt / 2.
 		tmax = t + dt #/ 2.
+        weight_std=np.zeros(t.size)
 		for i in range(t.size):
 			#print(tmin[i], tmax[i])
 			jj = n.where((time >= tmin[i]) & (time < tmax[i]) & (~n.isnan(s0)))
@@ -651,6 +652,8 @@ def lcur(simid, t, units='erg/s', theta=1., dtheta=1., phi=0, dphi=1, sim_dims=2
 				lce[i] = lc[i] / n.sqrt(jj[0].size)
 				ph_num[i]=jj[0].size
 				ph_avg_energy[i]=n.average(hnu[jj] * 1.6e-9, weights=weight[jj]) #in ergs
+                weight_std[i]=(np.sqrt(np.mean(weight[jj] ** 2) / np.mean(weight[jj]) ** 2))
+
 				if h5:
 					#p[i]=n.average(n.sqrt(n.sum(s1[jj])**2+n.sum(s2[jj])**2)/n.sum(s0[jj]), weights=weight[jj])
 					l[i]=n.average(s0[jj], weights=weight[jj])
@@ -664,7 +667,7 @@ def lcur(simid, t, units='erg/s', theta=1., dtheta=1., phi=0, dphi=1, sim_dims=2
 
 					#from Kislat eqn 36 and 37
 					mu=1
-					perr[i,:]= n.sqrt(2.0-p[i]**2*mu**2) / n.sqrt((jj[0].size-1)*mu**2), (180/n.pi)*1/(mu*p[i]*n.sqrt(2*(jj[0].size-1)))
+					perr[i,:]= weight_std[i]*n.sqrt(2.0-p[i]**2*mu**2) / n.sqrt((jj[0].size-1)*mu**2), weight_std[i]*(180/n.pi)*1/(mu*p[i]*n.sqrt(2*(jj[0].size-1)))
 
 		#calulate d \Omega
 		if sim_dims==2:
@@ -784,6 +787,7 @@ def lcur_var_t(simid, time_start, time_end, dt, dt_min, liso_c = 1e50, units='er
 		lce = n.empty(t.size)*n.nan
 		ph_num = n.empty(t.size)*n.nan
 		ph_avg_energy = n.empty(t.size)*n.nan
+        weight_std=np.zeros(t.size)
 
 		for i in range(t.size-1):
 			# print(tmin[i], tmax[i])
@@ -796,6 +800,7 @@ def lcur_var_t(simid, time_start, time_end, dt, dt_min, liso_c = 1e50, units='er
 				lce[i] = lc[i] / n.sqrt(jj[0].size)
 				ph_num[i] = jj[0].size
 				ph_avg_energy[i] = n.average(hnu[jj] * 1.6e-9, weights=weight[jj])  # in ergs
+                weight_std[i]=(np.sqrt(np.mean(weight[jj] ** 2) / np.mean(weight[jj]) ** 2))
 				if h5:
 					# p[i]=n.average(n.sqrt(n.sum(s1[jj])**2+n.sum(s2[jj])**2)/n.sum(s0[jj]), weights=weight[jj])
 					l[i] = n.average(s0[jj], weights=weight[jj])
@@ -810,7 +815,7 @@ def lcur_var_t(simid, time_start, time_end, dt, dt_min, liso_c = 1e50, units='er
 
 					#from Kislat eqn 36 and 37
                     mu=1
-                    perr[i,:]= n.sqrt(2.0-p[i]**2*mu**2) / n.sqrt((jj[0].size-1)*mu**2), (180/n.pi)*1/(mu*p[i]*n.sqrt(2*(jj[0].size-1)))
+                    perr[i,:]= weight_std[i]*n.sqrt(2.0-p[i]**2*mu**2) / n.sqrt((jj[0].size-1)*mu**2), weight_std[i]*(180/n.pi)*1/(mu*p[i]*n.sqrt(2*(jj[0].size-1)))
 
 
 		if sim_dims == 2:
