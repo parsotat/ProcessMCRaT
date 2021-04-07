@@ -2237,7 +2237,7 @@ def get_yonetoku_rel(simid_array, t_start, t_end, dt=1, h5=False, save_plot=Fals
 
     simid_array=np.array(simid_array)
     #file_data=np.genfromtxt('yoketoku_relation.dat')
-    file_data=np.genfromtxt('GRB_list.dat',dtype='S',usecols=(8,10), delimiter='\t')
+    file_data=np.genfromtxt('Data_files/GRB_list.dat',dtype='S',usecols=(8,10), delimiter='\t')
 
     E_p=np.zeros(file_data.shape[0])
     L_iso=np.zeros(file_data.shape[0])
@@ -2464,7 +2464,7 @@ def get_FERMI_best_data():
     :return: returns arrays of the Band or COMP function fitted GRB spectral parameters
     """
 
-    data=np.genfromtxt('FERMI_BEST_GRB.dat', dtype='U', usecols=(4,7,9,11 ))
+    data=np.genfromtxt('Data_files/FERMI_BEST_GRB.dat', dtype='U', usecols=(4,7,9,11 ))
 
     #only want BAND and COMP ones
     Band_Comp_data=data[np.logical_or(data[:,0]=='BAND', data[:,0]=='COMP') ,:]
@@ -2503,7 +2503,7 @@ def get_amati_rel(simid_array, time_start, time_end, save_plot=False, h5=False):
     symbols=np.array(['*', 'D', '^', 'P', '8', 's', '|', 'o', '4', 'X', 'd', 'h',  '1', 'p','+'])
 
 
-    file_data=np.genfromtxt('GRB_list.dat',dtype='S',usecols=(8,9), delimiter='\t')
+    file_data=np.genfromtxt('Data_files/GRB_list.dat',dtype='S',usecols=(8,9), delimiter='\t')
     E_p=np.zeros(file_data.shape[0])
     E_iso=np.zeros(file_data.shape[0])
 
@@ -3129,11 +3129,11 @@ def get_lundman_pol_data(p=4, thetaj=0.01):
     #p parameter says which p result to get, p=4 or p=2
     if p==4:
         if thetaj==0.01:
-            all_data=np.genfromtxt('Dataset_lundman_1.csv', delimiter=',', usecols=(0,1,3,4))
+            all_data=np.genfromtxt('Data_files/Dataset_lundman_1.csv', delimiter=',', usecols=(0,1,3,4))
         if thetaj==0.1:
-            all_data=np.genfromtxt('lundman_p_4_thetaj_0.1.csv', delimiter=',', usecols=(0,1,3,4))
+            all_data=np.genfromtxt('Data_files/lundman_p_4_thetaj_0.1.csv', delimiter=',', usecols=(0,1,3,4))
     elif p==2:
-        all_data=np.genfromtxt('Dataset_lundman_2.csv', delimiter=',', usecols=(0,1,3,4))
+        all_data=np.genfromtxt('Data_files/Dataset_lundman_2.csv', delimiter=',', usecols=(0,1,3,4))
 
     return all_data
 
