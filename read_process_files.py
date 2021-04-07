@@ -32,16 +32,18 @@ def read_mcrat(file_name):
 
     return ns, p0, p1, p2, p3, r1, r2, r3
 
-def read_mcrat_h5(file_name, read_comv=False, read_stokes=True):
+def read_mcrat_h5(file_name, read_comv=False, read_stokes=False, read_type=False):
     """
     Reads in MCRaT data for current version of MCRaT that outputs data in hdf5 files. Also has support for various
     MCRaT switches that can be turned on by the user.
 
     :param file_name: the file name of the MCRaT data file including the directory that it is located
     :param read_comv: switch that lets the function know if it should expect/ return comoving 4 momenta data, set to true
-                    if this swith is set to ON in mcrat_input.h
+                    if this switch is set to ON in mcrat_input.h
     :param read_stokes: switch that lets the function know if it should expect/ return stokes parameters, set to true
-                    if this swith is set to ON in mcrat_input.h
+                    if this switch is set to ON in mcrat_input.h
+    :param read_type: switch that lets the function know if it should expect/ return photon type, set to true
+                    if this switch is set to ON in mcrat_input.h
     :return: returns the data read in from the MCRaT data frame
     """
     import h5py as h5
@@ -65,23 +67,40 @@ def read_mcrat_h5(file_name, read_comv=False, read_stokes=True):
             comv_p1 = f['COMV_P1'].value
             comv_p2 = f['COMV_P2'].value
             comv_p3 = f['COMV_P3'].value
+        if read_type:
+            pt = f['PT'].value
+            pt=np.array([i for i in bytes(pt).decode()])
 
     if read_comv and read_stokes:
-        return pw, ns, p0, p1, p2, p3, r0, r1, r2, s0, s1, s2, s3, comv_p0, comv_p1, comv_p2, comv_p3
+        if read_type:
+            return pw, ns, p0, p1, p2, p3, r0, r1, r2, s0, s1, s2, s3, comv_p0, comv_p1, comv_p2, comv_p3, pt
+        else:
+            return pw, ns, p0, p1, p2, p3, r0, r1, r2, s0, s1, s2, s3, comv_p0, comv_p1, comv_p2, comv_p3
     elif read_comv and not read_stokes:
-        return pw, ns, p0, p1, p2, p3, r0, r1, r2, comv_p0, comv_p1, comv_p2, comv_p3
+        if read_type:
+            return pw, ns, p0, p1, p2, p3, r0, r1, r2, comv_p0, comv_p1, comv_p2, comv_p3, pt
+        else:
+            return pw, ns, p0, p1, p2, p3, r0, r1, r2, comv_p0, comv_p1, comv_p2, comv_p3
     elif not read_comv and read_stokes:
-        return pw, ns, p0, p1, p2, p3, r0, r1, r2, s0, s1, s2, s3
+        if read_type:
+            return pw, ns, p0, p1, p2, p3, r0, r1, r2, s0, s1, s2, s3, pt
+        else:
+            return pw, ns, p0, p1, p2, p3, r0, r1, r2, s0, s1, s2, s3
     else:
-        return pw, ns, p0, p1, p2, p3, r0, r1, r2
+        if read_type:
+            return pw, ns, p0, p1, p2, p3, r0, r1, r2, pt
+        else:
+            return pw, ns, p0, p1, p2, p3, r0, r1, r2
 
 
-def read_flash(fnam):
+def read_flash(fnam, length_scale=1e9, make1D=True):
     """
     Legacy code that was used to read in FLASH data frames in the old python version of the code, still is used in some
     functions comparing MCRaT information to fluid quantities
 
     :param fnam: the file name fo the FLASH file, including directory it is located in
+    :param make1D: switch to set the output to be either 1D, if set to True (the default), or keep the returned
+                    information as 2D arrays
     :return: returns all of the FLASH file information (x, y, dx, dy, vx, vy, gamma, density, lab density, radius,
             theta, pressure) at each hydro node
     """
@@ -131,31 +150,86 @@ def read_flash(fnam):
     nty = nty.read()
     file.close()
     jj = np.where(nty == 1)
-    xx = np.array(xx[jj, 0, :, :]) * 1e9
+    xx = np.array(xx[jj, 0, :, :]) * length_scale
     #  yy=np.array(yy[jj,0,:,:]+1) this takes care of the fact that lngths scales with 1e9
-    yy = np.array(yy[jj, 0, :, :]) * 1e9
-    szxx = np.array(szxx[jj, 0, :, :]) * 1e9
-    szyy = np.array(szyy[jj, 0, :, :]) * 1e9
+    yy = np.array(yy[jj, 0, :, :]) * length_scale
+    szxx = np.array(szxx[jj, 0, :, :]) * length_scale
+    szyy = np.array(szyy[jj, 0, :, :]) * length_scale
     vx = np.array(vx[jj, 0, :, :])
     vy = np.array(vy[jj, 0, :, :])
     dens = np.array(dens[jj, 0, :, :])
     pres = np.array(pres[jj, 0, :, :])
 
-    #print( '>> read_flash: Reshaping arrays...')
-    xx = np.reshape(xx, xx.size)
-    vx = np.reshape(vx, xx.size)
-    yy = np.reshape(yy, yy.size)
-    szxx = np.reshape(szxx, xx.size)
-    szyy = np.reshape(szyy, yy.size)
-    vy = np.reshape(vy, yy.size)
-    gg = 1. / np.sqrt(1. - (vx ** 2 + vy ** 2))
-    dd = np.reshape(dens, dens.size)
-    dd_lab = dd * gg
-    rr = np.sqrt(xx ** 2 + yy ** 2)
-    tt = np.arctan2(xx, yy)
-    pp = np.reshape(pres, pres.size)
+    if make1D:
+        xx = np.reshape(xx, xx.size)
+        vx = np.reshape(vx, xx.size)
+        yy = np.reshape(yy, yy.size)
+        szxx = np.reshape(szxx, xx.size)
+        szyy = np.reshape(szyy, yy.size)
+        vy = np.reshape(vy, yy.size)
+        gg = 1. / np.sqrt(1. - (vx ** 2 + vy ** 2))
+        dd = np.reshape(dens, dens.size)
+        dd_lab = dd * gg
+        rr = np.sqrt(xx ** 2 + yy ** 2)
+        tt = np.arctan2(xx, yy)
+        pp = np.reshape(pres, pres.size)
+    else:
+        dd=dens
+        pp=pres
+        gg = 1. / np.sqrt(1. - (vx ** 2 + vy ** 2))
+        dd_lab = dd * gg
+        rr = np.sqrt(xx ** 2 + yy ** 2)
+        tt = np.arctan2(xx, yy)
+
 
     return xx, yy, szxx, szyy, vx, vy, gg, dd, dd_lab, rr, tt, pp
+
+def calc_kislat_error(s0,s1,s2,s3,weights,mu=1):
+    #calc the q and u normalized by I
+    I=np.sum(weights) #np.mean(weights) #np.sum(weights)
+    i=np.average(s0, weights=weights)
+    q=np.average(s1, weights=weights)
+    u=np.average(s2, weights=weights)
+    v = np.average(s3, weights=weights)
+    p=np.sqrt(q**2+u**2)
+    chi = (0.5 * np.arctan2(u, q) * 180 / np.pi)
+    W_2=np.sum(weights**2) #np.mean(weights**2) #np.sum(weights**2)
+
+    mu_factor=2/mu
+    var_factor=W_2/I**2
+
+    #convert q and u to reconstructed values that kislat uses
+    Q_r=mu_factor*q
+    U_r=mu_factor*u
+    p_r=mu_factor*p
+
+    #calculate the standard deviation in Q_R and U_r and covariance
+    sigma_Q_r=np.sqrt(var_factor*(mu_factor/mu-Q_r**2))
+    sigma_U_r=np.sqrt(var_factor*(mu_factor/mu-U_r**2))
+    if (np.isnan(sigma_Q_r)):
+        #in case there is some error with the argument of sqrt being negative (happens rarely and am not sure why)
+        sigma_Q_r = np.sqrt(var_factor * np.abs(mu_factor / mu - Q_r ** 2))
+    if (np.isnan(sigma_U_r)):
+        sigma_U_r = np.sqrt(var_factor * np.abs(mu_factor / mu - U_r ** 2))
+
+    cov= -var_factor*Q_r*U_r
+    #print('var factor', var_factor, 'W_2', W_2, 'I', I,  'mean value of W_2', np.mean(weights**2), 'mean value of I', np.mean(weights), 'leads to', np.mean(weights**2)/np.mean(weights)**2)
+    #print(Q_r, U_r, sigma_U_r, sigma_Q_r, cov)
+    #calculate the partial derivatives
+    partial_pr_Qr=Q_r/p_r
+    partial_pr_Ur=U_r/p_r
+    partial_phir_Qr=-0.5*u/p**2/mu_factor #dq/dQ_r=2/mu, and do (d phi/dq)*(dq/dQ_r)
+    partial_phir_Ur=-0.5*q/p**2/mu_factor
+
+    #calculate the error in pr and chi
+    sigma_pr=np.sqrt( (partial_pr_Qr*sigma_Q_r)**2 + (partial_pr_Ur*sigma_U_r)**2 + 2*partial_pr_Qr*partial_pr_Ur*cov )
+    sigma_chi=np.sqrt( (partial_phir_Qr*sigma_Q_r)**2 + (partial_phir_Ur*sigma_U_r)**2 + 2*partial_phir_Qr*partial_phir_Ur*cov )
+    if (np.isnan(sigma_pr)):
+        sigma_pr = np.sqrt(np.abs((partial_pr_Qr * sigma_Q_r) ** 2 + (
+                    partial_pr_Ur * sigma_U_r) ** 2 + 2 * partial_pr_Qr * partial_pr_Ur * cov))
+
+    return i, q, u, v, p, chi, sigma_pr/mu_factor, (180/np.pi)*sigma_chi
+
 
 def get_times_angles(v, t, min_angle, max_angle, change_in_angle,angle_range, r , angle):
 
@@ -518,7 +592,7 @@ def Goodman(max_spex, max_energy):
 
     return [nux_shift, spy_shift]
 
-def cfit(event_file,time_start, time_end, dnulog=0.1, hdf5=False, plotting=False, save_plot=False, save_spex=None, append=False):
+def cfit(event_file,time_start, time_end, dnulog=0.1, hdf5=True, plotting=False, save_plot=False, save_spex=None, append=False, photon_type=None, calc_pol=False, calc_synch=False):
     """
     Function that fits either the COMP function of the Band function to time integrated or time resolved spectra from
     MCRaT and also acquires the 1 sigma error in the fitted values. The best fit spectra, accounting for the extra
@@ -534,11 +608,13 @@ def cfit(event_file,time_start, time_end, dnulog=0.1, hdf5=False, plotting=False
     :param save_plot: switch to let the function know if it should save the plots
     :param save_spex: string to let the function save the tabulated spectrum to a file given by this string
     :param append: switch to let the function know if it should append data to the file given by save_spex
+    :param photon_type: can be set to 's', 'i', or left as None in order to select thermal synchrotron photons, injected photons, or all the photons in the simulation for analysis
+    :param calc_pol: switch to determine of polarization as a function of energy should be calculated and plotted
     :return: returns the best fitted parameters to the function, a (3,2) array that has each parameters' (alpha, beta
             and break energy) upper and lower 1 sigma errors, and a character denoting the function that provided the best fit ('c' for
             COMP or 'b' for Band)
     """
-    from mclib_revise import spex as sp
+    from mclib import spex as sp
     import scipy.stats as ss
     import os.path
 
@@ -547,15 +623,40 @@ def cfit(event_file,time_start, time_end, dnulog=0.1, hdf5=False, plotting=False
     numax=numin*10**dnulog
     nucen=np.sqrt(numax*numin)
 
-    spex,spee,grade=sp(event_file,numin,numax,time_start,time_end, units='cts/s', h5=hdf5)
+    spex,spee,grade, i, q, u, v, p, p_angle, perr, ns=sp(event_file,numin,numax,time_start,time_end, units='cts/s', h5=hdf5, photon_type=photon_type, calc_pol=calc_pol)
+
+    if calc_synch:
+        type='s'
+        if '16TI' in event_file:
+            type='o'
+        s_spex, s_spee, s_grade, s_i, s_q, s_u, s_v, s_p, s_p_angle, s_perr, s_ns = sp(event_file, numin, numax,
+                                                                                       time_start, time_end,
+                                                                                       units='cts/s', h5=hdf5,
+                                                                                       photon_type=type,
+                                                                                       calc_pol=calc_pol)
+        s_kk = np.where(s_grade > 0)
+        s_spex = s_spex[s_kk]  # /1e50
+        s_spexe = s_spee[s_kk]  # /1e50
+        s_pol = s_p[s_kk]
+        s_p_angle = s_p_angle[s_kk]
+        s_perr = s_perr[s_kk[0], :]
+        s_numin = numin[s_kk]
+        s_numax = numax[s_kk]
+        s_nucen = nucen[s_kk]
+        s_data_pts = s_spex.size
 
     kk=np.where(grade>0)
     spex=spex[kk]#/1e50
     spexe=spee[kk]#/1e50
+    pol=p[kk]
+    p_angle=p_angle[kk]
+    perr=perr[kk[0],:]
     numin=numin[kk]
     numax=numax[kk]
     nucen=nucen[kk]
     data_pts=spex.size
+
+
 
     #print(grade[kk].mean(),grade[kk].max(), grade[kk].min(), nucen, spex, grade[kk] )
 
@@ -579,13 +680,42 @@ def cfit(event_file,time_start, time_end, dnulog=0.1, hdf5=False, plotting=False
     #spex=Band(nucen,1,-3,100,d)   # delete this and next line to fit real data ###
     #spexe=spex/10.
     if plotting:
-        plt.close(1)
-        plt.figure(1)
-        plt.loglog(nucen,spex,'r.')
-        plt.errorbar(nucen,spex,yerr=spexe,color='r',marker='o',ls='None')
+        #plt.close(1)
+        if not calc_pol:
+            f, axarr = plt.subplots(1)
+            axarr_spex=axarr
+        else:
+            f, axarr = plt.subplots(2, sharex=True)
+            axarr_spex = axarr[0]
+            axarr_pol = axarr[1]
+        axarr_spex.loglog(nucen,spex,'r.')
+        axarr_spex.errorbar(nucen,spex,yerr=spexe,color='r',marker='o',ls='None')
+        if calc_synch:
+            axarr_spex.errorbar(s_nucen, s_spex, yerr=s_spexe, color='b',marker='o',ls='None')
+        if calc_pol:
+            axarr_pol.semilogx(nucen, pol*100, 'k.')
+            axarr_pol.errorbar(nucen, pol*100, yerr=perr[:,0]*100, color='k', marker='o',ls='None')
+            ax_pol_angle = axarr_pol.twinx()
+            ax_pol_angle.errorbar(nucen, p_angle, yerr=perr[:,1], color='darkmagenta', marker='.', ls='None')
+            ax_pol_angle.plot(np.arange(nucen.min(), nucen.max()), np.zeros(np.size(np.arange(nucen.min(), nucen.max()))),
+                  ls='--', color='darkmagenta', alpha=0.5)
 
+            ax_pol_angle.set_ylabel(r'$\chi$ ($^\circ$)', color='darkmagenta')
+            ax_pol_angle.set_ylim([-90, 90])
+            ax_pol_angle.set_yticks([-90, -45, 0, 45, 90])
 
-    best,matrice=curve_fit(Band,nucen,spex,sigma=spexe,p0=[.3,-5,100,d])#spexe*10
+    nucen_all = nucen.copy()
+    spex_all = spex.copy()
+    spexe_all = spexe.copy()
+
+    # restrict to 8 keV and on
+    fermi_gbm_e_min=8
+    idx = np.where(nucen > fermi_gbm_e_min)
+    spex = spex[idx]
+    nucen = nucen[idx]
+    spexe = spexe[idx]
+
+    best,matrice=curve_fit(Band,nucen,spex,sigma=spexe,p0=[.3,-5,100,d], maxfev =5000)#spexe*10
     print(best,matrice)
     zachimin=((Band(nucen,best[0],best[1],best[2],best[3])-spex)**2/spexe**2).sum()
 
@@ -597,20 +727,20 @@ def cfit(event_file,time_start, time_end, dnulog=0.1, hdf5=False, plotting=False
         best_comp,matrice=curve_fit(comp,nucen,spex,sigma=spexe,p0=p0_init, bounds=([-np.inf, 0, 0],[np.inf,np.inf,np.inf]))
 
     zachimin_comp=((comp(nucen,best_comp[0],best_comp[1],best_comp[2])-spex)**2/spexe**2).sum()
-    print('Chis:', zachimin, zachimin_comp, 'Number of points: ', data_pts)
-    print('Band: ', best, 'Comp: ', best_comp)
+    #print('Chis:', zachimin, zachimin_comp, 'Number of points: ', data_pts)
+    #print('Band: ', best, 'Comp: ', best_comp)
 
     if plotting:
-        plt.plot(nucen,Band(nucen,best[0],best[1],best[2],best[3]),'g', label='Band')
-        plt.plot(nucen, comp(nucen,best_comp[0],best_comp[1],best_comp[2]), 'r', label='Comp')
-        plt.legend(loc='best')
-        plt.show()
+        axarr_spex.plot(nucen,Band(nucen,best[0],best[1],best[2],best[3]),'g', label='Band')
+        axarr_spex.plot(nucen, comp(nucen,best_comp[0],best_comp[1],best_comp[2]), 'r', label='Comp')
+        axarr_spex.legend(loc='best')
+        #plt.show()
 
     #if the two chi squares are equal have to choose the simpler model aka comp otherwise do F test
     if (zachimin==zachimin_comp):
         #use comp
         model_use='c'
-        print('Equal chi squared Values: Using Comp Model')
+        #print('Equal chi squared Values: Using Comp Model')
     else:
         #do F test
         dof_c=data_pts-2-1
@@ -624,10 +754,10 @@ def cfit(event_file,time_start, time_end, dnulog=0.1, hdf5=False, plotting=False
         print(p,F)
         if (p < alpha):
             model_use='b'
-            print('Using The band function')
+            #print('Using The band function')
         else:
             model_use='c'
-            print('Using the Comp function')
+            #print('Using the Comp function')
 
 
     if model_use=='b' :
@@ -679,29 +809,116 @@ def cfit(event_file,time_start, time_end, dnulog=0.1, hdf5=False, plotting=False
 
 
     if plotting:
-        plt.figure()
+        if not calc_pol:
+            f, axarr = plt.subplots(1, sharex=True)
+            axarr_spex=axarr
+        else:
+            f, axarr = plt.subplots(2, sharex=True)
+            #f.subplots_adjust(right=0.75) #went with new_ax.spines
+            axarr_spex = axarr[0]
+            axarr_pol = axarr[1]
         plt.rcParams.update({'font.size':14})
-        plt.loglog(nucen,spex,'r.')
-        plt.errorbar(nucen,spex,yerr=spexe,color='r',marker='o',ls='None')
+
+        axarr_spex.loglog(nucen_all,spex_all,'b.')
+        axarr_spex.errorbar(nucen_all,spex_all,yerr=spexe_all,color='b',marker='o',ls='None', markersize=10, label='Total Spectrum')
+        if calc_synch:
+            axarr_spex.errorbar(s_nucen, s_spex, yerr=s_spexe, color='r',marker='P',ls='None', markersize=8, label='CS Spectrum')#, mfc='w'
+            max_spex=s_spex[s_nucen<1].max()
+            max_E=s_nucen[s_nucen<1][s_spex[s_nucen<1].argmax()]
+            x=np.linspace(max_E, nucen_all[spex_all.argmax()], 100)
+            axarr_spex.plot(x, x**-1*max_spex/x[0]**-1, 'k-.', zorder=3)
+            axarr_spex.annotate(r'$\propto E^{-1}$', (x[-1], x[-1]**-1*max_spex/x[0]**-1 ), textcoords='offset points', xytext=(-10, -15))
+        if calc_pol:
+            axarr_pol.semilogx(nucen_all, pol*100, 'k.')
+            axarr_pol.errorbar(nucen_all, pol*100, yerr=perr[:,0]*100, color='k', marker='o',ls='None')
+            axarr_pol.set_ylabel(r'$\Pi (\%)$', fontsize=14)
+            axarr_pol.set_xlabel(r'E' + ' (keV)', fontsize=14)
+            if (axarr_pol.get_ylim()[1] > 100):
+                axarr_pol.set_ylim([0, 100])
+                axarr_pol.set_yticks([ 0, 25, 50, 75, 100])
+            if (axarr_pol.get_ylim()[0] < 0):
+                axarr_pol.set_ylim([0, axarr_pol.get_ylim()[1]])
+
+
+
+            ax_pol_angle = axarr_pol.twinx()
+            ax_pol_angle.errorbar(nucen_all, p_angle, yerr=perr[:,1], color='darkmagenta', marker='o', ls='None')
+            ax_pol_angle.plot(np.arange(nucen_all.min(), nucen_all.max()), np.zeros(np.size(np.arange(nucen_all.min(), nucen_all.max()))),
+                  ls='--', color='darkmagenta', alpha=0.5)
+
+            ax_pol_angle.set_ylabel(r'$\chi$ ($^\circ$)', color='darkmagenta', fontsize=14)
+            ax_pol_angle.set_ylim([-90, 90])
+            ax_pol_angle.set_yticks([-90, -45, 0, 45, 90])
+
+            def make_patch_spines_invisible(ax):
+                ax.set_frame_on(True)
+                ax.patch.set_visible(False)
+                for sp in ax.spines.values():
+                    sp.set_visible(False)
+
+
+            #axvspan for energy limits of different instruments
+
+            #new_ax = axarr_pol.twinx()
+            #new_ax.spines["right"].set_position(("axes", 1.2))
+            #make_patch_spines_invisible(new_ax)
+            #new_ax.spines["right"].set_visible(True)
+
+            #modify this to show either number of scatterings or number of photons
+            new_ax = axarr_spex.twinx()
+            #new_ax.plot(nucen_all, grade[kk], 'g.')
+            #new_ax.set_ylabel('Number of MC Photons', color='g', fontsize=14)
+            new_ax.plot(nucen_all, ns[kk], 'g.')
+            new_ax.set_ylabel('Avg number of scatterings', color='g', fontsize=14)
+            new_ax.set_yscale('log')
+
+
 
         if model_use=='b':
-            plt.plot(nucen,Band(nucen,best[0],best[1],best[2],best[3]), color='k', label=r'$\alpha$'+'='+np.str(best[0]).split('.')[0] + '.'+ np.str(best[0]).split('.')[1][0]+
-                '\n'+r'$\beta$'+'='+np.str(best[1]).split('.')[0] + '.'+ np.str(best[1]).split('.')[1][0]+'\n'+r'E$_{\mathrm{o}}$'+'=' +
-                    np.str(best[2]).split('.')[0] + '.'+ np.str(best[2]).split('.')[1][0] +' keV', ls='solid')
+            band_in_energy_range=Band(nucen, best[0], best[1], best[2], best[3])
+            axarr_spex.plot(nucen,band_in_energy_range, color='k', label='Fitted Band', ls='solid', lw=3, zorder=3)
+            full_band = Band(nucen_all, best[0], best[1], best[2], best[3]) # this is for the extrapolated portion below energy range keV, also normalize it so its continuous with other plotted band function >energy range
+            full_band = full_band*band_in_energy_range[-1]/full_band[-1]
+            axarr_spex.plot(nucen_all[nucen_all<=fermi_gbm_e_min],full_band[nucen_all<=fermi_gbm_e_min],'k--', lw=3, label='Extrapolated Band', zorder=3)
 
-            plt.text(nucen[spex.argmax()], 5*spex.min(),r'$\alpha$'+'='+np.str(best[0]).split('.')[0] + '.'+ np.str(best[0]).split('.')[1][0]+
+            axarr_spex.annotate(r'$\alpha$'+'='+np.str(best[0]).split('.')[0] + '.'+ np.str(best[0]).split('.')[1][0]+
                 '\n'+r'$\beta$'+'='+np.str(best[1]).split('.')[0] + '.'+ np.str(best[1]).split('.')[1][0]+'\n'+r'E$_{\mathrm{o}}$'+'=' +
-                    np.str(best[2]).split('.')[0] + '.'+ np.str(best[2]).split('.')[1][0] +' keV', fontsize=14)
+                    np.str(best[2]).split('.')[0] + '.'+ np.str(best[2]).split('.')[1][0] +' keV', xy=(0, 0), xycoords='axes fraction', fontsize=18, xytext=(10, 10),
+                      textcoords='offset points', ha='left', va='bottom')
 
         if model_use=='c':
-            plt.plot(nucen, comp(nucen,best_comp[0],best_comp[1],best_comp[2]), color='k',label='Comp')
-            plt.text(nucen[spex.argmax()], spex.min(), r'$\alpha$'+'='+np.str(best[0]).split('.')[0] + '.'+ np.str(best[0]).split('.')[1][0]+
-                '\n'+r'E$_{\mathrm{o}}$'+'=' +np.str(best[2]).split('.')[0] + '.'+ np.str(best[2]).split('.')[1][0]+' keV', fontsize=14)
-        plt.ylabel('N('+r'$h\nu$'+') (photons/s/keV)')
-        plt.xlabel(r'$h\nu$'+' (keV)')
+            axarr_spex.plot(nucen, comp(nucen,best_comp[0],best_comp[1],best_comp[2]), color='k',label='Fitted COMP',ls='solid', lw=3, zorder=3)
+            full_comp = comp(nucen_all, best_comp[0], best_comp[1], best_comp[2])  # this is for the extrapolated portion below 1 keV
+            axarr_spex.plot(nucen_all[nucen_all <= fermi_gbm_e_min], full_comp[nucen_all <= fermi_gbm_e_min], 'k--', lw=3,
+                            label='Extrapolated COMP', zorder=3)
+
+            axarr_spex.annotate(r'$\alpha$'+'='+np.str(best[0]).split('.')[0] + '.'+ np.str(best[0]).split('.')[1][0]+
+                '\n'+r'E$_{\mathrm{o}}$'+'=' +np.str(best[2]).split('.')[0] + '.'+ np.str(best[2]).split('.')[1][0]+' keV', xy=(0, 0), xycoords='axes fraction', fontsize=18, xytext=(10, 10),
+                      textcoords='offset points', ha='left', va='bottom')
+        axarr_spex.set_ylabel('N('+r'E'+') (photons/s/keV)', fontsize=14)
+        if not calc_pol:
+            axarr_spex.set_xlabel(r'E'+' (keV)', fontsize=14)
+            axarr_spex.axvspan(8, 40e3, ymin=0, ymax=1, alpha=0.5, facecolor='g')
+            energy_range = [1.5e-3, 7.7e-3]
+            axarr_spex.axvspan(energy_range[0], energy_range[1], ymin=0, ymax=1, alpha=0.5, facecolor='r')
+            #f.legend(loc='upper center', fontsize=12, ncol=2, bbox_to_anchor=(0.5, 1.05))
+            #axarr_spex.annotate('(b) 40sp_down\n'+'\t'+r'$\theta_\mathrm{v}=%s^\circ$'%(event_file.split('_')[-1]), xy=(1, 1), xycoords='axes fraction', fontsize=14, xytext=(-120, -30),textcoords='offset points')
+            axarr_spex.annotate('(c) 16TI\n'+'     '+r'$\theta_\mathrm{v}=%s^\circ$'%(event_file.split('_')[-1]), xy=(1, 1), xycoords='axes fraction', fontsize=14, xytext=(-90, -30),textcoords='offset points')
+
+
+        axarr_spex.tick_params(labelsize=14)
+        if calc_pol:
+            axarr_pol.tick_params(labelsize=14)
 
         if save_plot:
-            plt.savefig('EVENT_FILE_ANALYSIS_PLOTS/'+event_file[:10]+'_'+event_file[-1]+'_t_s_'+np.str(time_start).replace('.','_')+'_t_e_'+np.str(time_end).replace('.','_')+'_paper.pdf')
+            ang_str = event_file.split('_')[-1]
+            base_name=event_file.split(ang_str)[0]
+            if not calc_pol:
+                savefilename='EVENT_FILE_ANALYSIS_PLOTS/'+event_file.replace('.', '_')+'_t_s_'+np.str(time_start).replace('.','_')+'_t_e_'+np.str(time_end).replace('.','_')+'.pdf'
+            else:
+                savefilename='EVENT_FILE_ANALYSIS_PLOTS/' + event_file.replace('.', '_') + '_t_s_' + np.str(
+                    time_start).replace('.', '_') + '_t_e_' + np.str(time_end).replace('.', '_') + '_w_pol_w_scatt.pdf'
+            f.savefig(savefilename, bbox_inches='tight')
         plt.show()
 
     return best, np.array([a_err,b_err,c_err]), model_use
@@ -985,7 +1202,7 @@ def band_hist_data(pickle_file, event_files, time_start, time_end, dt, plotting=
     #pickle file for later plotting
 
     import pickle
-    time=np.arange(time_start[0],time_end[0]+dt,dt)
+    time=np.arange(time_start.min(),time_end.max()+dt.min(),dt.min())#get the most number of time bins that have to be accounted for
     alphas=np.zeros([event_files.size, time.size])
     betas=np.zeros_like(alphas)
     e_0s=np.zeros_like(alphas)
@@ -998,8 +1215,12 @@ def band_hist_data(pickle_file, event_files, time_start, time_end, dt, plotting=
 
     j=0
     for i in event_files:
-        lcur, lcur_e, alphas[j,:time.size], betas[j,:time.size], e_0s[j,:time.size], err, t, model[j,:time.size], P, I, Q, U, V, Perr, P_angle, num_ph=\
-            lcur_param(i, time_start[j], time_end[j], dt, plotting=plotting, save_plot=save_plot, choose_best=choose_best)
+        lcur, lcur_e, a, b, e, err, time, m, P, I, Q, U, V, Perr, P_angle, num_ph, num_scatt=\
+            lcur_param_var_t(i, time_start[j], time_end[j], dt[j], plotting=plotting, save_plot=save_plot, choose_best=choose_best)
+        alphas[j, :time.size]=a
+        betas[j, :time.size]=b
+        e_0s[j, :time.size]=e
+        model[j, :time.size]=m
         #alphas[j,:time.size][lcur<1e50]=np.nan
         #e_0s[j,:time.size][lcur<1e50]=np.nan
         #betas[j,:time.size][lcur<1e50]=np.nan
@@ -1043,8 +1264,8 @@ def band_hist_plot(pickle_file, plotting=True, save_plot=False, scale=1):
 
     model=model.astype('U')
 
-    theta_1=mlines.Line2D([],[],color='darkmagenta', ls='dashed', lw=1, label=r'$\theta_v= 1^ \circ$')
-    theta_2=mlines.Line2D([],[],color='darkmagenta', ls='solid', lw=1, label=r'$\theta_v= 2^ \circ$')
+    theta_1=mlines.Line2D([],[],color='darkmagenta', ls='dashed', lw=3, label=r'16TI')
+    theta_2=mlines.Line2D([],[],color='darkmagenta', ls='solid', lw=3, label=r'40sp_down')
     theta_3=mlines.Line2D([],[],color='darkmagenta', ls='dotted', lw=1, label=r'$\theta_v= 3^ \circ$')
 
     #alphas_bin_size=0.5
@@ -1053,6 +1274,7 @@ def band_hist_plot(pickle_file, plotting=True, save_plot=False, scale=1):
 
     #make the peak energies match the FERMI Brightest Burst paper
     energies=(e_0s*(2+alphas))
+    energies=energies[energies>0]
 
     all_alphas=alphas[np.logical_and(~np.isnan(alphas),~np.isinf(alphas)) ]
     all_betas=betas[np.logical_and(~np.isnan(betas),~np.isinf(betas)) ]
@@ -1061,7 +1283,7 @@ def band_hist_plot(pickle_file, plotting=True, save_plot=False, scale=1):
 
     fig_all_a=plt.figure()
     a_ax=fig_all_a.add_subplot(111)
-    num,bin, stuff=plt.hist(all_alphas, bins=np.arange(np.floor(all_alphas.min()), np.ceil(all_alphas.max()+0.1), 0.1), color='r', alpha=.75, edgecolor='None', zorder=10)#
+    num,bin, stuff=plt.hist(all_alphas, bins=np.arange(np.floor(all_alphas.min()), np.ceil(all_alphas.max()+0.1), 0.1), color='r', alpha=.75, edgecolor='None', zorder=5)#
     #plt.hist(d[:,0], bins=np.arange(np.floor(d[:,0].min()), np.ceil(d[:,0].max()+0.1), 0.1), color="#3F5D7D",alpha=0.2)
     hist_all,bin_edges_all=np.histogram(d[:,0], bins=np.arange(np.floor(d[:,0].min()), np.ceil(d[:,0].max()+0.1), 0.1))
     bin_centers=(bin_edges_all[:-1] +bin_edges_all[1:])/2.0
@@ -1098,11 +1320,20 @@ def band_hist_plot(pickle_file, plotting=True, save_plot=False, scale=1):
 
 
     """
+    alpha_16ti=alphas[:15,:][np.logical_and(~np.isnan(alphas[:15,:]),~np.isinf(alphas[:15,:])) ]
+    alpha_40sp_down=alphas[15:,:][np.logical_and(~np.isnan(alphas[15:,:]),~np.isinf(alphas[15:,:])) ]
+
+    a_ax.hist(alpha_16ti, bins=np.arange(np.floor(all_alphas.min()), np.ceil(all_alphas.max() + 0.1), 0.1),
+             histtype='step', color='darkmagenta', linestyle='dashed', lw=3, zorder=6)
+
+    a_ax.hist(alpha_40sp_down, bins=np.arange(np.floor(all_alphas.min()), np.ceil(all_alphas.max() + 0.1), 0.1),
+             histtype='step', color='darkmagenta', linestyle='solid', lw=3, zorder=6)
+
     #plt.ylim([0,(hist_all.max()/scale)+45]) #+45 for 35OB otherwise +10
     plt.ylabel('N('+r'$\alpha$'+')')
     plt.xlabel(r'$\alpha$')
     plt.xlim([-2,6])
-    #plt.legend(loc='upper left', handles=[theta_1, theta_2, theta_3],fontsize='12')
+    plt.legend(loc='upper right', handles=[theta_1, theta_2],fontsize='12')
     """
     #plot alphas divided by comp vs Band fit spectra
     inset_axis=inset_axes(a_ax, width="40%",height=1.5, loc=1)
@@ -1141,7 +1372,7 @@ def band_hist_plot(pickle_file, plotting=True, save_plot=False, scale=1):
     fig_all_b=plt.figure()
     b_ax=fig_all_b.add_subplot(111)
     n, b, stuff=plt.hist(all_betas, bins=np.arange(np.floor(all_betas.min()), np.ceil(all_betas.max()+0.1), 0.1), color='b', alpha=.75, edgecolor='None', zorder=1)#
-    num, bin, stuff=plt.hist(d[~np.isnan(d[:,1]),1], bins=np.arange(np.floor(d[~np.isnan(d[:,1]),1].min()), np.ceil(d[~np.isnan(d[:,1]),1].max()+0.1), 0.1), color='darkorange',alpha=1, zorder=10, linestyle='solid', lw=4) #"#3F5D7D"
+    num, bin, stuff=plt.hist(d[~np.isnan(d[:,1]),1], bins=np.arange(np.floor(d[~np.isnan(d[:,1]),1].min()), np.ceil(d[~np.isnan(d[:,1]),1].max()+0.1), 0.1), color='darkorange',alpha=1, zorder=5, linestyle='solid', lw=4) #"#3F5D7D"
 
     """
     if sim:
@@ -1171,17 +1402,27 @@ def band_hist_plot(pickle_file, plotting=True, save_plot=False, scale=1):
             plt.hist(flat_arr[np.where(np.logical_and(~np.isnan(flat_arr),~np.isinf(flat_arr)))], bins=np.arange(np.floor(all_betas.min()), np.ceil(all_betas.max()+0.1), 0.1), histtype='step', color='darkmagenta', linestyle=line, lw=j)
 
     """
+    beta_16ti=betas[:15,:][np.logical_and(~np.isnan(betas[:15,:]),~np.isinf(betas[:15,:])) ]
+    beta_40sp_down=betas[15:,:][np.logical_and(~np.isnan(betas[15:,:]),~np.isinf(betas[15:,:])) ]
+
+    b_ax.hist(beta_16ti, bins=np.arange(np.floor(all_betas.min()), np.ceil(all_betas.max()+0.1), 0.1),
+             histtype='step', color='darkmagenta', linestyle='dashed', lw=3, zorder=6)
+
+    b_ax.hist(beta_40sp_down, bins=np.arange(np.floor(all_betas.min()), np.ceil(all_betas.max()+0.1), 0.1),
+             histtype='step', color='darkmagenta', linestyle='solid', lw=3, zorder=6)
+
     #plt.legend(loc='best', handles=[theta_1, theta_2, theta_3],fontsize='12')
     plt.ylabel('N('+r'$\beta$'+')')
     plt.xlabel(r'$\beta$')
     print(num.max())
     plt.ylim([0,n.max()+1])
+    plt.xlim([-6, -1])
 
     fig_all_e=plt.figure()
     e_ax=fig_all_e.add_subplot(111)
     bin_e=10**(np.arange(np.log10(np.floor(all_energies.min())), np.log10(np.ceil(d[:,2].max()+10)), 0.1)) #(np.arange((np.floor(all_energies.min())), (np.ceil(d[:,2].max()+10)), 10))
 
-    num,bin, stuff=plt.hist(all_energies, bins=bin_e, color='g', alpha=0.75, edgecolor='None', zorder=10)#
+    num,bin, stuff=plt.hist(all_energies, bins=bin_e, color='g', alpha=0.75, edgecolor='None', zorder=5)#
     #plt.hist(d[:,2], bins=np.arange((np.floor(all_energies.min())), (np.ceil(d[:,2].max()+50)), 50 ), color="#3F5D7D",alpha=0.2)
     hist_all,bin_edges_all=np.histogram(d[:,2], bins=bin_e)
     bin_centers=(bin_edges_all[:-1] +bin_edges_all[1:])/2.0
@@ -1215,11 +1456,20 @@ def band_hist_plot(pickle_file, plotting=True, save_plot=False, scale=1):
             plt.hist(flat_arr[np.where(np.logical_and(~np.isnan(flat_arr),~np.isinf(flat_arr)))], bins=bin_e, histtype='step', color='darkmagenta', linestyle=line, lw=j)
 
     """
+    energies=(e_0s*(2+alphas))
+    energies_16ti=energies[:15,:][np.logical_and(~np.isnan(energies[:15,:]),~np.isinf(energies[:15,:])) ]
+    energies_40sp_down=energies[15:,:][np.logical_and(~np.isnan(energies[15:,:]),~np.isinf(energies[15:,:])) ]
+    energies_16ti=energies_16ti[energies_16ti>0]
+    energies_40sp_down=energies_40sp_down[energies_40sp_down>0]
+
+    plt.hist(energies_16ti, bins=bin_e, histtype='step', color='darkmagenta', linestyle='dashed', lw=3, zorder=6)
+    plt.hist(energies_40sp_down, bins=bin_e, histtype='step', color='darkmagenta', linestyle='solid', lw=3, zorder=6)
+
     plt.ylabel('N('+r'E$_{\mathrm{pk}}$'+')')
     plt.xlabel(r'E$_{\mathrm{pk}}$ (keV)')
     #plt.ylim([0,num.max()+172])
     plt.gca().set_xscale("log")
-    #plt.legend(loc='best', handles=[theta_1, theta_2, theta_3],fontsize='12')
+    #plt.legend(loc='best', handles=[theta_1, theta_2],fontsize='12')
 
     """
     inset_axis=inset_axes(e_ax, width="50%",height=2.0, loc=1)
@@ -1263,7 +1513,7 @@ def band_hist_plot(pickle_file, plotting=True, save_plot=False, scale=1):
     return all_alphas, all_betas, all_energies, d
 
 
-def lcur_param(event_file,time_start,time_end, dt=1, phi_angle=0, delta_theta=1, unit='erg/s', plotting=True, save_plot=False, choose_best=False, lc_only=False, pol_only=False, dim=2, hdf5=True, save_spex=None ):
+def lcur_param(event_file,time_start,time_end, dt=1, phi_angle=0, delta_theta=1, unit='erg/s', plotting=True, save_plot=False, choose_best=False, lc_only=False, pol_only=False, dim=2, hdf5=True, save_spex=None, photon_type=None, energy_range=None ):
     """
     This function takes the MCRaT 'detected' photons from the event file and time bins them to produce light curves. The
     photons in a given time bin are then fitted with either the COMP or Band functions.
@@ -1289,13 +1539,16 @@ def lcur_param(event_file,time_start,time_end, dt=1, phi_angle=0, delta_theta=1,
     :param hdf5: Switch to specify if the MCRaT output files were HDF5 format or not, default is True. Should be set to
             False when an old version of MCRaT was used which outputtted the data in text files
     :param save_spex: Switch that allows the time resolved spectra to be saved to a text file
+    :param photon_type: can be set to 's', 'i', or left as None in order to select thermal synchrotron photons, injected photons, or all the photons in the simulation for analysis
+    :param energy_range: has units of keV, can be left as None to choose photons of all energy ranges for analysis or it can be set to an array with [min energy, max energy] e.g. [1, 10] for 1 to 10 keV (limits inclusive)
+
     :return: returns arrays of the various time resolved parameters and their errors. The order of the variables
             returned are: light curve, light curve error, alpha,beta,break energy, errors in the spectral parameters
             (a (times.size,3,2) array where times is the start of the light curve time bins), start times of the time bins, the best fit model in each time bin,
             polarization, stokes I, stokes Q, stokes U, stokes V, polarization and polarization angle errors (a ((times.size,2)) array), polarization angle,
             number of photons in each time bin
     """
-    from mclib_revise import lcur
+    from mclib import lcur
     plt.ion()
     if save_spex:
         append=True
@@ -1307,7 +1560,7 @@ def lcur_param(event_file,time_start,time_end, dt=1, phi_angle=0, delta_theta=1,
     times=np.arange(time_start,time_end+dt,dt)
 
 
-    lc,lcur_e, num_ph, avg_e_ph, P, I, Q, U, V, Perr, P_angle=lcur(event_file,times,units=unit, theta=angle, dtheta=delta_theta, sim_dims=dim, h5=hdf5)
+    lc,lcur_e, num_ph, avg_e_ph, P, I, Q, U, V, Perr, P_angle, num_scatt, times=lcur(event_file,times,units=unit, theta=angle, dtheta=delta_theta, sim_dims=dim, h5=hdf5, photon_type=photon_type, energy_range=energy_range)
 
 
     #initalize matrices to hold best fit values, loop goes to one less value to encompass range from time_end-1 to time_end
@@ -1326,10 +1579,10 @@ def lcur_param(event_file,time_start,time_end, dt=1, phi_angle=0, delta_theta=1,
 
     #get curve fit of spectrum for each time period
     count=0
-    for i in times:
+    for i in times[:-1]:
         print(i,i+dt)
         try:
-            fit, error, model=cfit(event_file,i,i+dt, hdf5=hdf5, save_spex=save_spex, append=append)
+            fit, error, model=cfit(event_file,i,i+dt, hdf5=hdf5, save_spex=save_spex, append=append, photon_type=photon_type)
             fit=np.array(fit)
             error=np.array(error)
             if choose_best:
@@ -1378,11 +1631,11 @@ def lcur_param(event_file,time_start,time_end, dt=1, phi_angle=0, delta_theta=1,
         count+=1
 
     if plotting:
-        lcur_param_plot(event_file,lc, lcur_e, alpha,beta,e_o,err,np.arange(time_start,time_end+dt,dt), model_use, P, I, Q, U, V, Perr, P_angle, dt=dt, plotting=save_plot, lc_only=lc_only, pol_only=pol_only, h5=hdf5)
+        lcur_param_plot(event_file,lc, lcur_e, alpha,beta,e_o,err,np.arange(time_start,time_end+dt,dt), model_use, P, I, Q, U, V, Perr, P_angle, num_scatt, dt=dt, plotting=save_plot, lc_only=lc_only, pol_only=pol_only, h5=hdf5)
 
-    return lc, lcur_e, alpha,beta,e_o,err, np.arange(time_start,time_end+dt,dt), model_use, P, I, Q, U, V, Perr, P_angle, num_ph
+    return lc, lcur_e, alpha,beta,e_o,err, np.arange(time_start,time_end+dt,dt), model_use, P, I, Q, U, V, Perr, P_angle, num_ph, num_scatt
 
-def lcur_param_var_t(event_file,time, dt=0.2, dt_min=0.2, phi_angle=0, delta_theta=1, liso_c=1e50, unit='erg/s', plotting=True, save_plot=False, choose_best=False, lc_only=False, pol_only=False, dim=2,riken_switch=False, hdf5=True, save_spex=None ):
+def lcur_param_var_t(event_file,time_start, time_end, dt=0.2, dt_min=0.2, phi_angle=0, delta_theta=1, liso_c=None, unit='erg/s', plotting=True, save_plot=False, choose_best=False, lc_only=False, pol_only=False, dim=2,riken_switch=False, hdf5=True, save_spex=None,  photon_type=None, energy_range=None, use_Lcrit=False, plot3=False ):
     """
     This function takes the MCRaT 'detected' photons from the event file and time bins them to produce light curves with
     variable time bins. The photons in a given time bin are then fitted with either the COMP or Band functions.
@@ -1393,8 +1646,7 @@ def lcur_param_var_t(event_file,time, dt=0.2, dt_min=0.2, phi_angle=0, delta_the
 
     :param event_file: the base name of the event file that holds all of the info about the mock observed photons
             from MCRaT
-    :param time_start: the start time to begin binning the photons
-    :param time_end: the end time to stop binning the photons
+    :param time: a python list or numpy array with the start time and the end time in chronological order e.g. time=[0, 35]
     :param dt: the light curve time bin width
     :param phi_angle: unused parameter, meant for future 3D development
     :param delta_theta: delta theta of the observer viewing angle for accepting photons, in degrees. Should be the same
@@ -1413,6 +1665,9 @@ def lcur_param_var_t(event_file,time, dt=0.2, dt_min=0.2, phi_angle=0, delta_the
     :param hdf5: Switch to specify if the MCRaT output files were HDF5 format or not, default is True. Should be set to
             False when an old version of MCRaT was used which outputted the data in text files
     :param save_spex: Switch that allows the time resolved spectra to be saved to a text file
+    :param photon_type: can be set to 's', 'i', or left as None in order to select thermal synchrotron photons, injected photons, or all the photons in the simulation for analysis
+    :param energy_range: has units of keV, can be left as None to choose photons of all energy ranges for analysis or it can be set to an array with [min energy, max energy] e.g. [1, 10] for 1 to 10 keV (limits inclusive)
+
     :return: returns arrays of the various time resolved parameters and their errors. The order of the variables
             returned are: light curve, light curve error, alpha,beta,break energy, errors in the spectral parameters
             (a (times.size,3,2) array where times is the start of the light curve time bins), start times of the time bins, the best fit model in each time bin,
@@ -1421,17 +1676,17 @@ def lcur_param_var_t(event_file,time, dt=0.2, dt_min=0.2, phi_angle=0, delta_the
     """
 
 
-    from mclib_revise import lcur_var_t
+    from mclib import lcur_var_t
     plt.ion()
     if save_spex:
         append=True
     else:
         append=False
 
-    angle=np.double(event_files[i].split('_')[-1])
+    angle=np.double(event_file.split('_')[-1])
 
 
-    lc,lcur_e, num_ph, avg_e_ph, P, I, Q, U, V, Perr, P_angle, time=lcur_var_t(event_file,time[0],time[-1], dt, dt_min, liso_c=liso_c, units=unit, theta=angle, dtheta=delta_theta, sim_dims=dim, iso_lumi=riken_switch, h5=hdf5)
+    lc,lcur_e, num_ph, avg_e_ph, P, I, Q, U, V, Perr, P_angle, num_scatt, time=lcur_var_t(event_file,time_start,time_end, dt, dt_min, liso_c=liso_c, units=unit, theta=angle, dtheta=delta_theta, sim_dims=dim, h5=hdf5, photon_type=photon_type, energy_range=energy_range, use_Lcrit=use_Lcrit)
 
 
     #initalize matrices to hold best fit values, loop goes to one less value to encompass range from time_end-1 to time_end
@@ -1450,7 +1705,7 @@ def lcur_param_var_t(event_file,time, dt=0.2, dt_min=0.2, phi_angle=0, delta_the
 
     #get curve fit of spectrum for each time period
     count=0
-    for i in range(time.size):
+    for i in range(time.size-1):
         print(i)
         #print(i,time[count+1])
         print(lc[np.where(time[i]==time)], P[np.where(time[i]==time)])
@@ -1461,7 +1716,7 @@ def lcur_param_var_t(event_file,time, dt=0.2, dt_min=0.2, phi_angle=0, delta_the
                 t_end=time[i]+np.abs(0.2)
             else:
                 t_end = time[i + 1]
-            fit, error, model=cfit(event_file,t_start,t_end, hdf5=hdf5, save_spex=save_spex, append=append)
+            fit, error, model=cfit(event_file,t_start,t_end, hdf5=hdf5, save_spex=save_spex, append=append, photon_type=photon_type)
             fit=np.array(fit)
             error=np.array(error)
             #print('In curve fit')
@@ -1477,13 +1732,16 @@ def lcur_param_var_t(event_file,time, dt=0.2, dt_min=0.2, phi_angle=0, delta_the
                     fit[:]=np.nan
                     model=""
 
+                if fit[2]<0:
+                    #if e peak is negative dont plot points
+                    fit[:]=np.nan
+                    error[:,:]=np.nan
 
+                if fit[0]>10:
+                    #if e peak is negative dont plot points
+                    fit[:]=np.nan
+                    error[:,:]=np.nan
 
-
-            #if fit[2]<0:
-                #if e peak is negative dont plot points
-            #	fit[:]=np.nan
-            #	error[:,:]=np.nan
 
         except TypeError:
             print('No data points for time interval')
@@ -1519,12 +1777,12 @@ def lcur_param_var_t(event_file,time, dt=0.2, dt_min=0.2, phi_angle=0, delta_the
         count+=1
 
     if plotting:
-        lcur_param_plot(event_file,lc, lcur_e, alpha,beta,e_o,err,time, model_use, P, I, Q, U, V, Perr, P_angle, dt=-1, plotting=save_plot, lc_only=lc_only, pol_only=pol_only, h5=hdf5, liso_c=liso_c)
+        lcur_param_plot(event_file,lc, lcur_e, alpha,beta,e_o,err,time, model_use, P, I, Q, U, V, Perr, P_angle, num_scatt, dt=-1, plotting=save_plot, lc_only=lc_only, pol_only=pol_only, h5=plot3, liso_c=liso_c)
 
-    return lc, lcur_e, alpha,beta,e_o,err, time, model_use, P, I, Q, U, V, Perr, P_angle, num_ph
+    return lc, lcur_e, alpha,beta,e_o,err, time, model_use, P, I, Q, U, V, Perr, P_angle, num_ph, num_scatt
 
 
-def lcur_param_plot(event_file,lcur, lcur_e, alpha,beta,e_o,err,t, model, P, I, Q, U, V, Perr, P_angle, dt=1, lc_only=False, pol_only=False, plotting=True, h5=False, liso_c=None):
+def lcur_param_plot(event_file,lcur, lcur_e, alpha,beta,e_o,err,t, model, P, I, Q, U, V, Perr, P_angle, num_scatt, dt=1, lc_only=False, pol_only=False, plotting=True, h5=False, liso_c=None, plot_optical=True):
     """
     The plotting function for the results of lcur_param and lcur_param_var_t functions.
 
@@ -1553,11 +1811,13 @@ def lcur_param_plot(event_file,lcur, lcur_e, alpha,beta,e_o,err,t, model, P, I, 
     :return: No returns
     """
     import matplotlib
+    from mclib import lcur as lc
+    import matplotlib.patheffects as pe
 
     plt.rcParams.update({'font.size':14})
     #plt.figure()
     #print(err[:,0,:].T.shape, alpha.shape)
-    theta=np.float(event_file[::-1][0])
+    theta=np.double(event_file.split('_')[-1])
     #get center of time bin old
     if dt>0:
         t_cen=(t+(t+dt))/2
@@ -1573,17 +1833,33 @@ def lcur_param_plot(event_file,lcur, lcur_e, alpha,beta,e_o,err,t, model, P, I, 
 
     #this if for figures for paper
     string=''
-    """
-    if 'sp' in event_file:
+
+    if '16TI' in event_file:
         if theta==1 :
             #if event_file[0:4]=='16OI':
-            string='(a) 40spikes'
-        elif theta==3:
-            string = '(b) 40sp_down'
+            string='(a) 16TI\n     '+r'$\theta_\mathrm{v}=1^\circ$'
+        elif theta==7:
+            string = '(b) 16TI\n     '+r'$\theta_\mathrm{v}=7^\circ$'
         else:
-            string='(c) 1spike'
-    """
+            string='(c) 16TI\n     '+r'$\theta_\mathrm{v}=12^\circ$'
+    else:
+        if theta==3:
+            string = '(a) 40sp_down\n\t'+r'$\theta_\mathrm{v}=3^\circ$'
+        else:
+            string = '(b) 40sp_down\n\t'+r'$\theta_\mathrm{v}=7^\circ$'
 
+
+
+    #do this for plotting optical alongside bolometri
+    if plot_optical:
+        #s_lc = lc(event_file, t, theta=theta, energy_range=[1.5e-3, 7.7e-3])[0] # just want the light curve
+        s_lc = lc(event_file, t, theta=theta, energy_range=[1.81e-3, 2.62e-3])[0]
+        lcur_max = lcur[~np.isnan(lcur)].max()
+        lcur = lcur / lcur_max
+        s_lc_max = s_lc[~np.isnan(s_lc)].max()
+        s_lc = s_lc / s_lc_max
+        str_lc_max=np.format_float_scientific(lcur_max, precision=2)
+        str_s_lc_max=np.format_float_scientific(s_lc_max, precision=2)
 
     #calc proper error propagation for e_pk
     err[:,2,0]=np.sqrt(((2+alpha)* err[:,2,0])**2 + (e_o*err[:,0,0])**2  )
@@ -1639,7 +1915,7 @@ def lcur_param_plot(event_file,lcur, lcur_e, alpha,beta,e_o,err,t, model, P, I, 
         axarr[0].yaxis.set_major_formatter(formatter)
         #axarr[0].ticklabel_format(style='sci', axis='y', scilimits=(0,0))
         #axarr[0].bar( t_cen,lcur,width=dt, align='center', color='None')
-        axarr[0].plot( t,lcur,ls='steps-post', color='k',lw=2)
+        axarr[0].plot( t,lcur,ds='steps-post', color='k',lw=2)
         axarr[0].set_ylabel('Light\nCurve (erg/s)')
 
         #annotate is for paper figures
@@ -1724,8 +2000,17 @@ def lcur_param_plot(event_file,lcur, lcur_e, alpha,beta,e_o,err,t, model, P, I, 
         axarr[0].yaxis.set_major_formatter(formatter)
         #axarr[0].ticklabel_format(style='sci', axis='y', scilimits=(0,0))
         #axarr[0].bar( t_cen,lcur,width=dt, align='center', color='None')
-        axarr[0].plot( t,lcur,ls='steps-post', color='k',lw=2)
-        axarr[0].set_ylabel('Light\nCurve (erg/s)')
+        if not plot_optical:
+            axarr[0].plot( t,lcur,ds='steps-post', color='b',lw=2)
+            axarr[0].set_ylabel('L (erg/s)')
+        else:
+            bolo_line=axarr[0].plot( t,lcur,ds='steps-post', color='deepskyblue',lw=2, label=r'Bolometric, L$_\mathrm{max}$=%s x10$^{%s}$ erg/s' % (str_lc_max.split('e+')[0], str_lc_max.split('e+')[1]))
+            synch_line = axarr[0].plot(t, s_lc, ds='steps-post', color='deeppink', lw=2,
+                                       label=r'Optical, L$_\mathrm{max}$=%s x10$^{%s}$ erg/s' % (
+                                       str_s_lc_max.split('e+')[0], str_s_lc_max.split('e+')[1]),ls='-')
+                                       #path_effects=[pe.Stroke(linewidth=3, foreground='k'), pe.Normal()])
+            f.legend(loc='upper center', fontsize=10, ncol=2)
+            axarr[0].set_ylabel(r'L/L$_\mathrm{max}$')
         #axarr[0].set_ylim([0,lcur.max()])
 
         #axarr[0].margins=(1.2)
@@ -1736,9 +2021,9 @@ def lcur_param_plot(event_file,lcur, lcur_e, alpha,beta,e_o,err,t, model, P, I, 
 
         #annotate is for paper figures
         if 'down' in event_file:
-            axarr[0].annotate(string,xy=(1, 1), xycoords='axes fraction', fontsize=16, xytext=(-120, -10), textcoords='offset points', ha='left', va='top')
+            axarr[0].annotate(string,xy=(1, 1), xycoords='axes fraction', fontsize=14, xytext=(-120, -10), textcoords='offset points', ha='left', va='top')
         else:
-            axarr[0].annotate(string,xy=(0, 1), xycoords='axes fraction', fontsize=16, xytext=(10, -10), textcoords='offset points', ha='left', va='top')
+            axarr[0].annotate(string,xy=(0, 1), xycoords='axes fraction', fontsize=14, xytext=(65, -10), textcoords='offset points', ha='left', va='top')#5 for xytext x
         #plt.annotate(string,xy=(1, 1), xycoords='axes fraction', fontsize=16, xytext=(-30, -10), textcoords='offset points', ha='left', va='top')
 
         #axarr[0].locator_params(axis='y', nbins=6)
@@ -1751,8 +2036,8 @@ def lcur_param_plot(event_file,lcur, lcur_e, alpha,beta,e_o,err,t, model, P, I, 
             spex_handle_idx=2
 
         #matplotlib.rcParams['axes.autolimit_mode'] = 'round_numbers'
-        neg_alpha_index=np.where(alpha<0)
-        pos_alpha_index=np.where(alpha>0)
+        neg_alpha_index=np.where(alpha<0)[0]
+        pos_alpha_index=np.where(alpha>0)[0]
 
 
 
@@ -1855,6 +2140,14 @@ def lcur_param_plot(event_file,lcur, lcur_e, alpha,beta,e_o,err,t, model, P, I, 
             #axarr[2].autoscale_view(scalex=False)
             #axarr[2].set_ylim([0,P[index].max()*100])
             axarr[1].set_ylabel(r'$\Pi (\%)$')
+            if (axarr[1].get_ylim()[1] > 100):
+                axarr[1].set_ylim([0, 100])
+                axarr[1].set_yticks([ 0, 25, 50, 75, 100])
+            if (axarr[1].get_ylim()[0] < 0):
+                axarr[1].set_ylim([0, axarr[1].get_ylim()[1]])
+
+
+
             new_ax_3=axarr[1].twinx()
             new_ax_3.errorbar(t_cen[index], P_angle[index] , yerr=np.abs(Perr[index,1] ), xerr=np.ones(t[index].size) * xerr_2, color='darkmagenta', marker='.', ls='None')
             new_ax_3.plot(np.arange(t_cen.min(), t_cen.max()), np.zeros(np.size(np.arange(t_cen.min(), t_cen.max()))), ls='--', color='darkmagenta', alpha=0.5 )
@@ -1862,6 +2155,8 @@ def lcur_param_plot(event_file,lcur, lcur_e, alpha,beta,e_o,err,t, model, P, I, 
             new_ax_3.set_ylabel(r'$\chi$ ($^\circ$)', color='darkmagenta')
             #new_ax_3.set_ylim([0, 180])
             new_ax_3.set_ylim([-90, 90])
+            new_ax_3.set_yticks([-90, -45, 0, 45, 90])
+
 
             #axarr[1].set_xlabel('Time since Jet Launch (s)')
 
@@ -1899,15 +2194,19 @@ def lcur_param_plot(event_file,lcur, lcur_e, alpha,beta,e_o,err,t, model, P, I, 
     if plotting:
         if lc_only:
             if dt > 0:
-                f.savefig('EVENT_FILE_ANALYSIS_PLOTS/'+event_file.replace('.','_')+'_lc.pdf', bbox_inches='tight')
+                savestring=event_file.replace('.','_')+'_lc'
             else:
-                f.savefig('EVENT_FILE_ANALYSIS_PLOTS/' + event_file.replace('.', '_') + '_lc_liso_c_%s_dt_var.pdf'%(np.str(liso_c)),bbox_inches='tight')
+                savestring= event_file.replace('.', '_') + '_lc_liso_c_%s_dt_var'%(np.str(liso_c))
         else:
             if dt > 0:
-                f.savefig('EVENT_FILE_ANALYSIS_PLOTS/'+event_file.replace('.','_')+'_dt_'+np.str(dt).replace('.','_')+'.pdf', bbox_inches='tight')
+                savestring=event_file.replace('.','_')+'_dt_'+np.str(dt).replace('.','_')
             else:
-                f.savefig('EVENT_FILE_ANALYSIS_PLOTS/' + event_file.replace('.', '_') + '_liso_c_%s_dt_var.pdf'%(np.str(liso_c)),bbox_inches='tight')
+                savestring= event_file.replace('.', '_') + '_liso_c_%s_dt_var'%(np.str(liso_c))
 
+        if plot_optical:
+            savestring=savestring+'_w_optical'
+
+        f.savefig('EVENT_FILE_ANALYSIS_PLOTS/' + savestring +'.pdf', bbox_inches='tight')
 
 def get_yonetoku_rel(simid_array, t_start, t_end, dt=1, h5=False, save_plot=False):
     """
@@ -1926,7 +2225,7 @@ def get_yonetoku_rel(simid_array, t_start, t_end, dt=1, h5=False, save_plot=Fals
     """
     import matplotlib
     plt.rcParams.update({'font.size':14})
-    from mclib_revise import lcur
+    from mclib import lcur
     from matplotlib.font_manager import FontProperties
     import matplotlib.lines as mlines
     import matplotlib
@@ -1992,7 +2291,7 @@ def get_yonetoku_rel(simid_array, t_start, t_end, dt=1, h5=False, save_plot=Fals
             angle=np.double(i[-2:])
         except ValueError:
             angle=np.float(i[::-1][0])
-        lc[:],lc_e[:], num_ph, dum, p, l, q, u, v, perr, p_angle=lcur(i,np.arange(0,t_end[count],dt), units='erg/s', theta=angle, h5=h5)
+        lc[:],lc_e[:], num_ph, dum, p, l, q, u, v, perr, p_angle, num_scatt, t=lcur(i,np.arange(0,t_end[count],dt), units='erg/s', theta=angle, h5=h5)
         L_iso_sim[count]=lc.max()/(1e52) #scale to yonetoku paper
         L_err_sim[count]=lc_e[lc.argmax()]/(1e52)
 
@@ -2152,7 +2451,7 @@ def get_yonetoku_rel(simid_array, t_start, t_end, dt=1, h5=False, save_plot=Fals
     plt.tight_layout()
     plt.show()
     if save_plot:
-        fig.savefig('yonetoku_KN_CMC.pdf',bbox_inches='tight')
+        fig.savefig('yonetoku.pdf',bbox_inches='tight')
 
     return E_p[E_p!=0],E_p_err[E_p!=0],L_iso[E_p!=0]/10,L_iso_err[E_p!=0]/10
 
@@ -2194,7 +2493,7 @@ def get_amati_rel(simid_array, time_start, time_end, save_plot=False, h5=False):
     """
     import matplotlib
     plt.rcParams.update({'font.size':14})
-    from mclib_revise import lcur
+    from mclib import lcur
     from matplotlib.font_manager import FontProperties
     import matplotlib.lines as mlines
     from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes
@@ -2257,7 +2556,7 @@ def get_amati_rel(simid_array, time_start, time_end, save_plot=False, h5=False):
         t=np.arange(time_start[count],time_end[count],1)
         lc=np.zeros([t.size])
         lc_e=np.zeros([t.size])
-        lc[:],lc_e[:], num_ph, dum, p, l, q, u, v, perr, p_angle=lcur(i,np.arange(time_start[count],time_end[count],1),units='erg/s', theta=angle, h5=h5)
+        lc[:],lc_e[:], num_ph, dum, p, l, q, u, v, perr, p_angle, num_scatt=lcur(i,np.arange(time_start[count],time_end[count],1),units='erg/s', theta=angle, h5=h5)
 
 
 
@@ -2516,7 +2815,7 @@ def plot_golenetskii(sims, t_end, delta_t=1, detectable=False, save_plot=False, 
         #lc_e=np.zeros([t.size])
 
         #angle=np.float(sims[i][-1])
-        lc, lcur_e, alpha,beta,e_o,err, time, model_use, P, I, Q, U, V, Perr, P_angle, num_ph = \
+        lc, lcur_e, alpha,beta,e_o,err, time, model_use, P, I, Q, U, V, Perr, P_angle, num_ph, num_scatt = \
             lcur_param(i, 0, t_end[count], dt=delta_t, plotting=False, choose_best=True, hdf5=h5)
 
         #calc proper error propagation for e_pk
@@ -2658,7 +2957,7 @@ def polarizationVsAngle(event_files, time_start,time_end, dt=1, phi_angle=0, del
     def gamma(angle_ratio, p, gamma0=100):
         return gamma0/np.sqrt(1+angle_ratio**(2*p))
 
-    from mclib_revise import lcur
+    from mclib import lcur
 
     if compare_to_lund:
         plot_lumi=False
@@ -2684,7 +2983,7 @@ def polarizationVsAngle(event_files, time_start,time_end, dt=1, phi_angle=0, del
             angles[i] /= thetaj #for POL test
             angles[i] *=thetaj*180/np.pi
         if compare_to_lund or plot_lumi:
-            lc,lcur_e, num_ph, avg_e_ph, P, I, Q, U, V, Perr, P_angle=lcur(event_files[i],np.array([time_start[i], time_end[i]]),units=unit, theta=angles[i], dtheta=delta_theta, sim_dims=dim, h5=hdf5)
+            lc,lcur_e, num_ph, avg_e_ph, P, I, Q, U, V, Perr, P_angle, num_scatt=lcur(event_files[i],np.array([time_start[i], time_end[i]]),units=unit, theta=angles[i], dtheta=delta_theta, sim_dims=dim, h5=hdf5)
             print('printing info:', ' angle: ', angles[i], ' Polarization: ',P, ' Polarization Error: ', Perr, ' Polarization Angle: ', P_angle, ' Q: ', Q, ' U: ', U, ' num_ph: ', num_ph)
             avg_pol[i]=P[0] #np.average(P, weights=lc)
             avg_pol_angle[i] = P_angle[0]

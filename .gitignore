@@ -3,3 +3,9 @@ _*/
 *.bat
 conf.py
 Makefile
+EVENT_FILES/ 
+EVENT_FILE_ANALYSIS_PLOTS/
+*.mp4
+*.pdf
+*.pickle
+*.jp*
