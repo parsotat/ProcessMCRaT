@@ -9,3 +9,4 @@ EVENT_FILE_ANALYSIS_PLOTS/
 *.pdf
 *.pickle
 *.jp*
+PERSONAL_ANALYSIS/
