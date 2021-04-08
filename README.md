@@ -116,16 +116,11 @@ The following are necessary to use the ProcessMCRaT code :
 
 ### Installation
 
-1. Clone the repo
+1. Use pip install
    ```sh
-   git clone https://github.com/parsotat/ProcessMCRaT.git
+   pip install ProcessMCRaT
    ```
-2. Install the ProcessMCRaT library in order to use it on your system by running
-   ```sh
-   python setup.py install 
-   ```
-   within the `ProcessMCRaT` folder
-3. Test the installation by running `python -c "import mclib"`
+3. Test the installation by running `python -c "from processmcrat import mclib as m"`
 
 
 <!-- _These steps are provided in greater detail in the  [Documentation](https://github.com/parsotat/ProcessMCRaT/tree/master/Doc)_ -->
@@ -138,7 +133,7 @@ The typical steps in using the ProcessMCRaT library is as follows:
 
 1. Import ProcessMCRaT's mclib in Python
 ```sh
-import mclib as m
+from processmcrat import mclib as m
 ```
 2. Create an event file for the MCRaT simulation
 ```sh
