@@ -32,7 +32,7 @@ These scripts and the documentation are under development and are still adapting
 [![MIT License][license-shield]][license-url]  
 [![Google Scholar Badge](https://img.shields.io/badge/Google-Scholar-lightgrey)](https://scholar.google.com/citations?user=cIxaj3MAAAAJ&hl=en)
 [![ResearchGate Badge](https://img.shields.io/badge/Research-Gate-9cf)](https://www.researchgate.net/profile/Tyler-Parsotan)
-<a href="https://ascl.net/2005.019"><img src="https://img.shields.io/badge/ascl-2005.019-blue.svg?colorB=262255" alt="ascl:2005.019" /></a>
+<!-- <a href="https://ascl.net/2005.019"><img src="https://img.shields.io/badge/ascl-2005.019-blue.svg?colorB=262255" alt="ascl:2005.019" /></a> -->
 
 
 <!-- PROJECT LOGO -->
@@ -45,7 +45,7 @@ These scripts and the documentation are under development and are still adapting
   <h3 align="center">The ProcessMCRaT Library</h3>
 
   <p align="center">
-    The ProcessMCRaT library is a collection of scripts that can be used to process the output of [MCRaT](https://github.com/lazzati-astro/MCRaT) simulations.
+    The ProcessMCRaT library is a collection of scripts that can be used to process the output of the <a href="https://github.com/lazzati-astro/MCRaT">MCRaT</a> code.
     <br />
     <a href="https://github.com/parsotat/ProcessMCRaT/tree/master/Doc"><strong>Explore the docs »</strong></a>
     <br />
@@ -95,7 +95,7 @@ These scripts and the documentation are under development and are still adapting
 
 A collection of python scripts are being developed  in order to aid the general comunity in using the MCRaT code and processing the results of the radiative transfer simulations. These scripts are both tools and examples that can be used or modified to better fit the specific needs of the community. Some portions of the library are specifically compatible with FLASH hydrodynamics files, such as `mcrat_movie.py`, however the main utility fuctions that are meant to process the output of the MCRaT code are complete.
 
-These scripts and the documentation are under development and are still adapting to the developments that are occuring with MCRaT.  While the documentation is being developed, with example jupyter notebooks, the <a href="#usage">Usage</a> section shows how to use the main utility functions to produce spectra and light curves from the MCRaT outputs.
+These scripts and the documentation are under development and are still adapting to the developments that are occuring with MCRaT.  While the documentation is being developed, with example jupyter notebooks, the <a href="#usage">Usage</a> section introduces how to use the main utility functions to produce spectra and light curves from the MCRaT outputs.
 
 ### Built With
 
