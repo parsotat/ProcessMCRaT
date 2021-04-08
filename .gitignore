@@ -10,3 +10,6 @@ EVENT_FILE_ANALYSIS_PLOTS/
 *.pickle
 *.jp*
 PERSONAL_ANALYSIS/
+ProcessMCRaT.egg-info/
+build/
+dist/

@@ -1,6 +1,6 @@
 from setuptools import setup
 
-with open("README.md", 'r') as f:
+with open("README.rst", 'r') as f:
     long_description = f.read()
 
 setup(
@@ -13,7 +13,7 @@ setup(
    author_email='parsotat@oregonstate.edu',
    url="https://github.com/parsotat/ProcessMCRaT",
    classifiers=[
-        'Development Status :: 0 - Beta',
+        'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Science/Research',
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python',
@@ -22,6 +22,6 @@ setup(
    ],
    keywords='astronomy radiation-transfer hydrodynamics',
    packages=['processmcrat','processmcrat.test'],  #same as name
-   install_requires=['numpy', 'scipy', 'matplotlib', 'h5py', 'tables', 'random'], #external packages as dependencies
+   install_requires=['numpy', 'scipy', 'matplotlib', 'h5py', 'tables'], #external packages as dependencies
    python_requires='>=3.3',
 )
