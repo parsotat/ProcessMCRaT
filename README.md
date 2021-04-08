@@ -158,6 +158,7 @@ where the arguments that can be passed to the `event_h5` function can be found i
 
 1. In the near future there will be extensive documentation of the code including jupyter notebooks that will help guide users on using the library. 
 2. Additionally, the library will be able to be easily installed via the `conda` command line interface
+3. The code will include the means to include various instrument response functions in the creation of mock observed light curves, spectra, and polarizations
 
 See the [open issues](https://github.com/parsotat/ProcessMCRaT/issues) for a list of proposed features (and known issues).
 
