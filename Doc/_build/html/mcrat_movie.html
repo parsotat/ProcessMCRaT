@@ -1,0 +1,228 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>mcrat_movie.py &#8212; ProcessMCRaT  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="read_process_files.py" href="read_process_files.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-mcrat_movie">
+<span id="mcrat-movie-py"></span><h1>mcrat_movie.py<a class="headerlink" href="#module-mcrat_movie" title="Permalink to this headline">¶</a></h1>
+<p>This routine allows the user to make movies of the photons propagating through the hydro simulation.
+This routine can also plot the average temperature of the photons vs the average temperature of the matter near the photons</p>
+<p>currently this code only works with FLASH hydrodynamic simulations</p>
+<p>1st: read FLASH File and MCRaT file</p>
+<p>2nd: plot flash temperature and mcrat positions of a bunch of photons</p>
+<p>3rd: plot temp vs radius for photons and matter</p>
+<dl class="function">
+<dt id="mcrat_movie.calc_spectrum">
+<code class="sig-prename descclassname">mcrat_movie.</code><code class="sig-name descname">calc_spectrum</code><span class="sig-paren">(</span><em class="sig-param">p0</em>, <em class="sig-param">weight</em><span class="sig-paren">)</span><a class="headerlink" href="#mcrat_movie.calc_spectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>produces spectrum in keV</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p0</strong> – </p></li>
+<li><p><strong>weight</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mcrat_movie.follow_lc_data">
+<code class="sig-prename descclassname">mcrat_movie.</code><code class="sig-name descname">follow_lc_data</code><span class="sig-paren">(</span><em class="sig-param">hydro_sim_dir</em>, <em class="sig-param">hydro_sim_name</em>, <em class="sig-param">last_frame</em>, <em class="sig-param">mcrat_sim_data_dir</em>, <em class="sig-param">maxx</em>, <em class="sig-param">miny</em>, <em class="sig-param">maxy</em>, <em class="sig-param">theta</em>, <em class="sig-param">time</em>, <em class="sig-param">dt</em>, <em class="sig-param">fps</em>, <em class="sig-param">num_photon_plot=10000000.0</em>, <em class="sig-param">read_type=False</em>, <em class="sig-param">energy_range=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mcrat_movie.follow_lc_data" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>hydro_sim_dir</strong> – </p></li>
+<li><p><strong>hydro_sim_name</strong> – </p></li>
+<li><p><strong>last_frame</strong> – </p></li>
+<li><p><strong>mcrat_sim_data_dir</strong> – </p></li>
+<li><p><strong>maxx</strong> – in real units, not code units</p></li>
+<li><p><strong>miny</strong> – </p></li>
+<li><p><strong>maxy</strong> – </p></li>
+<li><p><strong>theta</strong> – in degrees</p></li>
+<li><p><strong>time</strong> – </p></li>
+<li><p><strong>dt</strong> – </p></li>
+<li><p><strong>fps</strong> – </p></li>
+<li><p><strong>num_photon_plot</strong> – </p></li>
+<li><p><strong>read_type</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mcrat_movie.get_flash_data">
+<code class="sig-prename descclassname">mcrat_movie.</code><code class="sig-name descname">get_flash_data</code><span class="sig-paren">(</span><em class="sig-param">file_num</em>, <em class="sig-param">f</em>, <em class="sig-param">max_x</em>, <em class="sig-param">min_y</em>, <em class="sig-param">max_y</em>, <em class="sig-param">flash_l_scale</em><span class="sig-paren">)</span><a class="headerlink" href="#mcrat_movie.get_flash_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function collects all the data from a given FLASH file and prepares it to be plotted with imshow.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_num</strong> – The frame number</p></li>
+<li><p><strong>f</strong> – The path to the file as well as the FLASH file name preceeding the file number</p></li>
+<li><p><strong>max_x</strong> – The maximum x that should be plotted (the input should be in physical units, not in code units)</p></li>
+<li><p><strong>min_y</strong> – The minimum y of the portion of the hydro frame that will be plotted (the input should be in code units)</p></li>
+<li><p><strong>max_y</strong> – The maximum y of the portion of the hydro frame that will be plotted (the input should be in code units)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>returns a 2D array of the density for plotting with imshow</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mcrat_movie.get_indexes_data">
+<code class="sig-prename descclassname">mcrat_movie.</code><code class="sig-name descname">get_indexes_data</code><span class="sig-paren">(</span><em class="sig-param">mcrat_f</em>, <em class="sig-param">num</em>, <em class="sig-param">ph_num</em>, <em class="sig-param">angle</em>, <em class="sig-param">t</em>, <em class="sig-param">dt</em>, <em class="sig-param">fps</em>, <em class="sig-param">read_comv=False</em>, <em class="sig-param">read_stokes=False</em>, <em class="sig-param">read_type=False</em>, <em class="sig-param">dtheta_deg=1</em>, <em class="sig-param">energy_range=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mcrat_movie.get_indexes_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function gets the set of indexes of the photons that will be plotted in the imshow window as well as the
+indexes of all the photons in order to calculate the spectrum</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mcrat_f</strong> – </p></li>
+<li><p><strong>num</strong> – </p></li>
+<li><p><strong>ph_num</strong> – </p></li>
+<li><p><strong>angle</strong> – </p></li>
+<li><p><strong>t</strong> – </p></li>
+<li><p><strong>dt</strong> – </p></li>
+<li><p><strong>fps</strong> – </p></li>
+<li><p><strong>read_comv</strong> – </p></li>
+<li><p><strong>read_stokes</strong> – </p></li>
+<li><p><strong>dtheta_deg</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mcrat_movie.get_plot_data">
+<code class="sig-prename descclassname">mcrat_movie.</code><code class="sig-name descname">get_plot_data</code><span class="sig-paren">(</span><em class="sig-param">frame_number</em>, <em class="sig-param">flash_file</em>, <em class="sig-param">mcrat_file</em>, <em class="sig-param">t_ph=None</em>, <em class="sig-param">t_f=None</em>, <em class="sig-param">plot_temp_curves=False</em>, <em class="sig-param">read_comv=False</em>, <em class="sig-param">read_stokes=False</em>, <em class="sig-param">read_type=False</em>, <em class="sig-param">dtheta_deg=1</em><span class="sig-paren">)</span><a class="headerlink" href="#mcrat_movie.get_plot_data" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>frame_number</strong> – </p></li>
+<li><p><strong>flash_file</strong> – </p></li>
+<li><p><strong>mcrat_file</strong> – </p></li>
+<li><p><strong>t_ph</strong> – </p></li>
+<li><p><strong>t_f</strong> – </p></li>
+<li><p><strong>plot_temp_curves</strong> – </p></li>
+<li><p><strong>read_comv</strong> – </p></li>
+<li><p><strong>read_stokes</strong> – </p></li>
+<li><p><strong>read_type</strong> – </p></li>
+<li><p><strong>dtheta_deg</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">ProcessMCRaT</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="mclib.html">mclib.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="read_process_files.html">read_process_files.py</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">mcrat_movie.py</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="read_process_files.html" title="previous chapter">read_process_files.py</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Tyler Parsotan.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/mcrat_movie.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

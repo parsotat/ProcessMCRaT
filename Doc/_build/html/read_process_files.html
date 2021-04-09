@@ -1,0 +1,793 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>read_process_files.py &#8212; ProcessMCRaT  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="mcrat_movie.py" href="mcrat_movie.html" />
+    <link rel="prev" title="mclib.py" href="mclib.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-read_process_files">
+<span id="read-process-files-py"></span><h1>read_process_files.py<a class="headerlink" href="#module-read_process_files" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="read_process_files.Band">
+<code class="sig-prename descclassname">read_process_files.</code><code class="sig-name descname">Band</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">a</em>, <em class="sig-param">b</em>, <em class="sig-param">c</em>, <em class="sig-param">d</em><span class="sig-paren">)</span><a class="headerlink" href="#read_process_files.Band" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function that evaluates the Band function</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – x is the energy in keV</p></li>
+<li><p><strong>a</strong> – alpha parameter</p></li>
+<li><p><strong>b</strong> – beta parameter</p></li>
+<li><p><strong>c</strong> – break energy in keV</p></li>
+<li><p><strong>d</strong> – normalization of the returned spectrum</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Returns the Band function evaluated for the parameters of interest (units of cts/s)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="read_process_files.Goodman">
+<code class="sig-prename descclassname">read_process_files.</code><code class="sig-name descname">Goodman</code><span class="sig-paren">(</span><em class="sig-param">max_spex</em>, <em class="sig-param">max_energy</em><span class="sig-paren">)</span><a class="headerlink" href="#read_process_files.Goodman" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function that returns Goodman’s scalable spherical explosion spectra to compare against a spectra acquired by a
+spherical explosion run in MCRAT. To compare this to simulation data, the simulation spectrum needs to be in units
+of erg/s.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>max_spex</strong> – maximum value of the data’s spectrum.</p></li>
+<li><p><strong>max_energy</strong> – The energy bin where the maximum of the data lies</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>returns the scaled version of Goodman’s spectrum</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="read_process_files.amati">
+<code class="sig-prename descclassname">read_process_files.</code><code class="sig-name descname">amati</code><span class="sig-paren">(</span><em class="sig-param">value='o'</em><span class="sig-paren">)</span><a class="headerlink" href="#read_process_files.amati" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the Amati relationship and it’s 1 sigma dispersion as given by Tsutsui et al. (2009).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>value</strong> – a string that can be ‘o’, ‘+’, or ‘-‘. The default is set to ‘o’ for the actual Amati relationship.
+‘+’ gives the upper bound of uncertainty and ‘-‘ gives the lower bound of uncertainty.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>returns arrays of the a and y values of the amati relation/ error in the relation</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="read_process_files.band_hist_data">
+<code class="sig-prename descclassname">read_process_files.</code><code class="sig-name descname">band_hist_data</code><span class="sig-paren">(</span><em class="sig-param">pickle_file</em>, <em class="sig-param">event_files</em>, <em class="sig-param">time_start</em>, <em class="sig-param">time_end</em>, <em class="sig-param">dt</em>, <em class="sig-param">plotting=False</em>, <em class="sig-param">save_plot=False</em>, <em class="sig-param">choose_best=False</em><span class="sig-paren">)</span><a class="headerlink" href="#read_process_files.band_hist_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function that collects a set of parameters from time resolved spectral fits of MCRaT data. This allows them to be
+histogrammed to look at the distribution of alpha, beta and e_pk for example.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pickle_file</strong> – the name of the pickle file that will contain all of the spectral parameter values so it is only
+necessary to run this lengthy calculation once.</p></li>
+<li><p><strong>event_files</strong> – The event files that will be analyzed to fit time resolved spectra and acquire the spectral
+parameters, a 1D array of strings</p></li>
+<li><p><strong>time_start</strong> – The start time of the light curve that will be analyzed, a 1D array that is the same size as
+event_files</p></li>
+<li><p><strong>time_end</strong> – The end time of the light curve that will be analyzed, a 1D array that is the same size as
+event_files</p></li>
+<li><p><strong>dt</strong> – The width of time bins that photons will be collected within to produce the time resolved spectra, this
+will be across all of the event files that will be analyzed</p></li>
+<li><p><strong>plotting</strong> – Switch to determine if the call to produce the light curves for each event file should plot
+all the light curves that it produces so the user can inspect the spectral fits in each time interval</p></li>
+<li><p><strong>save_plot</strong> – Switch to determine if the call to produce the light curves for each event file should
+save all the light curves that it produces (saves time in that the user doesn’t have to recall the
+lcur_param function to make plots of the light curves)</p></li>
+<li><p><strong>choose_best</strong> – Switch to ignore spectral parameters that haven’t been well constrained (they may not have
+error bars)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Returns 2D arrays of alpha, beta, and break energies that contain all the time resolved parameter fits for
+each event file that was passed to the function.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="read_process_files.band_hist_plot">
+<code class="sig-prename descclassname">read_process_files.</code><code class="sig-name descname">band_hist_plot</code><span class="sig-paren">(</span><em class="sig-param">pickle_file</em>, <em class="sig-param">plotting=True</em>, <em class="sig-param">save_plot=False</em>, <em class="sig-param">scale=1</em><span class="sig-paren">)</span><a class="headerlink" href="#read_process_files.band_hist_plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to plot the histogrammed Band/COMP spectral parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pickle_file</strong> – The produced pickle file name from the band_hist_data function</p></li>
+<li><p><strong>plotting</strong> – Switch to show the produced plots</p></li>
+<li><p><strong>save_plot</strong> – Switch to save the plotted histograms</p></li>
+<li><p><strong>scale</strong> – Scaling to scale the histograms if necessary</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Returns 2D arrays of alpha, beta, and break energies that contain all the time resolved parameter fits for
+each event file that was passed to the band_hist_data function.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="read_process_files.blackbody">
+<code class="sig-prename descclassname">read_process_files.</code><code class="sig-name descname">blackbody</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">t</em>, <em class="sig-param">d</em><span class="sig-paren">)</span><a class="headerlink" href="#read_process_files.blackbody" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function that produces a blackbody spectrum.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – Energy in keV</p></li>
+<li><p><strong>t</strong> – temp in kelvin</p></li>
+<li><p><strong>d</strong> – normalization of the spectrum</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>returns the blackbody spectrum parameterized by some temperature at the energies of interest</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="read_process_files.cfit">
+<code class="sig-prename descclassname">read_process_files.</code><code class="sig-name descname">cfit</code><span class="sig-paren">(</span><em class="sig-param">event_file</em>, <em class="sig-param">time_start</em>, <em class="sig-param">time_end</em>, <em class="sig-param">dnulog=0.1</em>, <em class="sig-param">hdf5=True</em>, <em class="sig-param">plotting=False</em>, <em class="sig-param">save_plot=False</em>, <em class="sig-param">save_spex=None</em>, <em class="sig-param">append=False</em>, <em class="sig-param">photon_type=None</em>, <em class="sig-param">calc_pol=False</em>, <em class="sig-param">calc_synch=False</em><span class="sig-paren">)</span><a class="headerlink" href="#read_process_files.cfit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function that fits either the COMP function of the Band function to time integrated or time resolved spectra from
+MCRaT and also acquires the 1 sigma error in the fitted values. The best fit spectra, accounting for the extra
+degree of freedom is chosen by conducting an F-test.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>event_file</strong> – the base name of the event file that holds all of the info about the mock observed photons
+from MCRaT</p></li>
+<li><p><strong>time_start</strong> – the start time of a given time bin to collect photons into a spectrum</p></li>
+<li><p><strong>time_end</strong> – the end of the time bin for collecting photons into a spectrum to be fit by this function</p></li>
+<li><p><strong>dnulog</strong> – the spacing between energy bins when binning the mock observed MCRaT photons (in keV)</p></li>
+<li><p><strong>hdf5</strong> – switch to let the function know if the MCRaT output files are hdf5 files or not</p></li>
+<li><p><strong>plotting</strong> – switch to let the function knwo that it should plot the MCraT spectra and the fits to the spectra</p></li>
+<li><p><strong>save_plot</strong> – switch to let the function know if it should save the plots</p></li>
+<li><p><strong>save_spex</strong> – string to let the function save the tabulated spectrum to a file given by this string</p></li>
+<li><p><strong>append</strong> – switch to let the function know if it should append data to the file given by save_spex</p></li>
+<li><p><strong>photon_type</strong> – can be set to ‘s’, ‘i’, or left as None in order to select thermal synchrotron photons, injected photons, or all the photons in the simulation for analysis</p></li>
+<li><p><strong>calc_pol</strong> – switch to determine of polarization as a function of energy should be calculated and plotted</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>returns the best fitted parameters to the function, a (3,2) array that has each parameters’ (alpha, beta
+and break energy) upper and lower 1 sigma errors, and a character denoting the function that provided the best fit (‘c’ for
+COMP or ‘b’ for Band)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="read_process_files.comp">
+<code class="sig-prename descclassname">read_process_files.</code><code class="sig-name descname">comp</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">a</em>, <em class="sig-param">c</em>, <em class="sig-param">d</em><span class="sig-paren">)</span><a class="headerlink" href="#read_process_files.comp" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns the Comptonized (COMP) spectrum for a given set of energies</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – the energies that the Comptonized function will be evaluated at (should be in keV)</p></li>
+<li><p><strong>a</strong> – the alpha parameter</p></li>
+<li><p><strong>c</strong> – the break energy</p></li>
+<li><p><strong>d</strong> – the normalization of the spectrum</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>returns the COMP spectrum at the energies of interest (units of cts/s)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="read_process_files.fluidGammaVsTheta">
+<code class="sig-prename descclassname">read_process_files.</code><code class="sig-name descname">fluidGammaVsTheta</code><span class="sig-paren">(</span><em class="sig-param">fluid_dir</em>, <em class="sig-param">r_interest</em>, <em class="sig-param">t_interest</em>, <em class="sig-param">fps</em>, <em class="sig-param">theta_max</em><span class="sig-paren">)</span><a class="headerlink" href="#read_process_files.fluidGammaVsTheta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to calculate the lorentz factor profile as a function of theta directly from the hydrodynamic files.
+It calculates which frame to analyze based off of what radius the user is interested in and the times in the outflow
+the user is interested in</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fluid_dir</strong> – String that points to the directory of the hydrodynamic files, should include the base name of the
+hydro file (excluding any numbers)</p></li>
+<li><p><strong>r_interest</strong> – The radius at which the user wants the flow to be analyzed</p></li>
+<li><p><strong>t_interest</strong> – An array of times in the ouflow that the user wants to be analyzed</p></li>
+<li><p><strong>fps</strong> – The frames per second of the passed hydrodynamic simulation</p></li>
+<li><p><strong>theta_max</strong> – The maximum angle to get the lorentz factor profile</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>All the theta data points, in degrees, the average lorentz profile at the angle data points, and the array
+of the times that the user was interested in</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="read_process_files.get_FERMI_best_data">
+<code class="sig-prename descclassname">read_process_files.</code><code class="sig-name descname">get_FERMI_best_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#read_process_files.get_FERMI_best_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>A function to acquire data about the FERMI Best GRB sample, as is saved in the file named FERMI_BEST_GRB.dat.
+The data is from Yu et al. (2016).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>returns arrays of the Band or COMP function fitted GRB spectral parameters</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="read_process_files.get_amati_rel">
+<code class="sig-prename descclassname">read_process_files.</code><code class="sig-name descname">get_amati_rel</code><span class="sig-paren">(</span><em class="sig-param">simid_array</em>, <em class="sig-param">time_start</em>, <em class="sig-param">time_end</em>, <em class="sig-param">save_plot=False</em>, <em class="sig-param">h5=False</em><span class="sig-paren">)</span><a class="headerlink" href="#read_process_files.get_amati_rel" title="Permalink to this definition">¶</a></dt>
+<dd><p>A function to plot the MCRaT analyzed GRB alongside the amati relationship and a list of observed GRBs as
+provided by GRB_list.dat (observed GRBS are from Nava et al. (2012))</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>simid_array</strong> – An array of the event file name bases of the MCRaT result that will be plotted</p></li>
+<li><p><strong>t_start</strong> – An array of the start times for each event file passed to simid_array</p></li>
+<li><p><strong>t_end</strong> – An array of the end times for each event file passed to simid_array</p></li>
+<li><p><strong>save_plot</strong> – Switch to save the plot as a PDF or not</p></li>
+<li><p><strong>h5</strong> – Switch to specify if the MCRaT output files were HDF5 format or not, default is True. Should be set to
+False when an old version of MCRaT was used which outputtted the data in text files</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>No returns</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="read_process_files.get_lundman_pol_data">
+<code class="sig-prename descclassname">read_process_files.</code><code class="sig-name descname">get_lundman_pol_data</code><span class="sig-paren">(</span><em class="sig-param">p=4</em>, <em class="sig-param">thetaj=0.01</em><span class="sig-paren">)</span><a class="headerlink" href="#read_process_files.get_lundman_pol_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function gets the appropriate values of polarization vs theta for various values of p and theta_j from the
+plots of Lundman et al. (2014b). The only accepted parameter combinations are p=4 with thetaj=0.01 or 0.1 and
+p=2 with thetaj=0.01</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> – The p value for the width of the analytic jet from Lundman et al. (2014b)</p></li>
+<li><p><strong>thetaj</strong> – The opening angle of the analytic jet profile from Lundman et al. (2014b)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Returns a (nx2) array where n is the number of angles points read in fro the file and the columns are the
+theta/thetaj values followed by the polarization degree</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="read_process_files.get_yonetoku_rel">
+<code class="sig-prename descclassname">read_process_files.</code><code class="sig-name descname">get_yonetoku_rel</code><span class="sig-paren">(</span><em class="sig-param">simid_array</em>, <em class="sig-param">t_start</em>, <em class="sig-param">t_end</em>, <em class="sig-param">dt=1</em>, <em class="sig-param">h5=False</em>, <em class="sig-param">save_plot=False</em><span class="sig-paren">)</span><a class="headerlink" href="#read_process_files.get_yonetoku_rel" title="Permalink to this definition">¶</a></dt>
+<dd><p>A function to plot the MCRaT analyzed GRB alongside the yonetoku relationship and a list of observed GRBs as
+provided by GRB_list.dat (observed GRBS are from Nava et al. (2012))</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>simid_array</strong> – An array of the event file name bases of the MCRaT result that will be plotted</p></li>
+<li><p><strong>t_start</strong> – An array of the start times for each event file passed to simid_array</p></li>
+<li><p><strong>t_end</strong> – An array of the end times for each event file passed to simid_array</p></li>
+<li><p><strong>dt</strong> – The time bin width, default is 1 following how the relationship is derived</p></li>
+<li><p><strong>h5</strong> – Switch to specify if the MCRaT output files were HDF5 format or not, default is True. Should be set to
+False when an old version of MCRaT was used which outputtted the data in text files</p></li>
+<li><p><strong>save_plot</strong> – Switch to save the plot as a PDF or not</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Returns arrays of the plotted peak energy, its error, the luminosity and the erro in the luminosity for
+each event file that was provided to simid_array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="read_process_files.golenetskii">
+<code class="sig-prename descclassname">read_process_files.</code><code class="sig-name descname">golenetskii</code><span class="sig-paren">(</span><em class="sig-param">value='o'</em><span class="sig-paren">)</span><a class="headerlink" href="#read_process_files.golenetskii" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the golenetskii relationship and it’s 2 sigma dispersion as given by Lu et al. (2012).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>value</strong> – a string that can be ‘o’, ‘+’, or ‘-‘. The default is set to ‘o’ for the actual golenetskii relationship.
+‘+’ gives the upper bound of uncertainty and ‘-‘ gives the lower bound of uncertainty.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>returns arrays of the a and y values of the relation/ error in the relation</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="read_process_files.lcur_param">
+<code class="sig-prename descclassname">read_process_files.</code><code class="sig-name descname">lcur_param</code><span class="sig-paren">(</span><em class="sig-param">event_file</em>, <em class="sig-param">time_start</em>, <em class="sig-param">time_end</em>, <em class="sig-param">dt=1</em>, <em class="sig-param">phi_angle=0</em>, <em class="sig-param">delta_theta=1</em>, <em class="sig-param">unit='erg/s'</em>, <em class="sig-param">plotting=True</em>, <em class="sig-param">save_plot=False</em>, <em class="sig-param">choose_best=False</em>, <em class="sig-param">lc_only=False</em>, <em class="sig-param">pol_only=False</em>, <em class="sig-param">dim=2</em>, <em class="sig-param">hdf5=True</em>, <em class="sig-param">save_spex=None</em>, <em class="sig-param">photon_type=None</em>, <em class="sig-param">energy_range=None</em><span class="sig-paren">)</span><a class="headerlink" href="#read_process_files.lcur_param" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function takes the MCRaT ‘detected’ photons from the event file and time bins them to produce light curves. The
+photons in a given time bin are then fitted with either the COMP or Band functions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>event_file</strong> – the base name of the event file that holds all of the info about the mock observed photons
+from MCRaT</p></li>
+<li><p><strong>time_start</strong> – the start time to begin binning the photons</p></li>
+<li><p><strong>time_end</strong> – the end time to stop binning the photons</p></li>
+<li><p><strong>dt</strong> – the light curve time bin width</p></li>
+<li><p><strong>phi_angle</strong> – unused parameter, meant for future 3D development</p></li>
+<li><p><strong>delta_theta</strong> – delta theta of the observer viewing angle for accepting photons, in degrees. Should be the same
+value as what is passed into event_h5’s dtheta_deg</p></li>
+<li><p><strong>unit</strong> – A string of the units that will be used for the light curve/spectrum ‘erg/s’ or ‘cts/s’</p></li>
+<li><p><strong>plotting</strong> – Switch to allow the function to show the plots of the light curve/spectral parameters</p></li>
+<li><p><strong>save_plot</strong> – Switch to allow the function to save the produced plot</p></li>
+<li><p><strong>choose_best</strong> – Switch that permits the function to overwrite spectral parameters that do not have error bars
+to be ignored if set to True. If this is set to False all spectral parameters will be considered/plotted</p></li>
+<li><p><strong>lc_only</strong> – switch that tells the function to only plot the light curve and peak energy of the time resolved
+spectra and none of the other parametres</p></li>
+<li><p><strong>pol_only</strong> – Switch to allow the function to only plot the light curve and the polarization when set to True</p></li>
+<li><p><strong>dim</strong> – The number of dimensions of the MCRaT simulation that is being analyzed. There is no support for 3D at
+this time so this switch should be set to 2, which is it’s default value</p></li>
+<li><p><strong>hdf5</strong> – Switch to specify if the MCRaT output files were HDF5 format or not, default is True. Should be set to
+False when an old version of MCRaT was used which outputtted the data in text files</p></li>
+<li><p><strong>save_spex</strong> – Switch that allows the time resolved spectra to be saved to a text file</p></li>
+<li><p><strong>photon_type</strong> – can be set to ‘s’, ‘i’, or left as None in order to select thermal synchrotron photons, injected photons, or all the photons in the simulation for analysis</p></li>
+<li><p><strong>energy_range</strong> – has units of keV, can be left as None to choose photons of all energy ranges for analysis or it can be set to an array with [min energy, max energy] e.g. [1, 10] for 1 to 10 keV (limits inclusive)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>returns arrays of the various time resolved parameters and their errors. The order of the variables
+returned are: light curve, light curve error, alpha,beta,break energy, errors in the spectral parameters
+(a (times.size,3,2) array where times is the start of the light curve time bins), start times of the time bins, the best fit model in each time bin,
+polarization, stokes I, stokes Q, stokes U, stokes V, polarization and polarization angle errors (a ((times.size,2)) array), polarization angle,
+number of photons in each time bin</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="read_process_files.lcur_param_plot">
+<code class="sig-prename descclassname">read_process_files.</code><code class="sig-name descname">lcur_param_plot</code><span class="sig-paren">(</span><em class="sig-param">event_file</em>, <em class="sig-param">lcur</em>, <em class="sig-param">lcur_e</em>, <em class="sig-param">alpha</em>, <em class="sig-param">beta</em>, <em class="sig-param">e_o</em>, <em class="sig-param">err</em>, <em class="sig-param">t</em>, <em class="sig-param">model</em>, <em class="sig-param">P</em>, <em class="sig-param">I</em>, <em class="sig-param">Q</em>, <em class="sig-param">U</em>, <em class="sig-param">V</em>, <em class="sig-param">Perr</em>, <em class="sig-param">P_angle</em>, <em class="sig-param">num_scatt</em>, <em class="sig-param">dt=1</em>, <em class="sig-param">lc_only=False</em>, <em class="sig-param">pol_only=False</em>, <em class="sig-param">plotting=True</em>, <em class="sig-param">h5=False</em>, <em class="sig-param">liso_c=None</em>, <em class="sig-param">plot_optical=True</em><span class="sig-paren">)</span><a class="headerlink" href="#read_process_files.lcur_param_plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>The plotting function for the results of lcur_param and lcur_param_var_t functions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>event_file</strong> – The event file name, a string that will be ncorporated into the saved pdf of the plot that is produced</p></li>
+<li><p><strong>lcur</strong> – the values of the light curve at each time bin as an array</p></li>
+<li><p><strong>lcur_e</strong> – the values of the error in he light curve values at each time bin</p></li>
+<li><p><strong>alpha</strong> – an array of the fitted alpha parameters for each time resolved spectrum</p></li>
+<li><p><strong>beta</strong> – an array of the fitted beta parameters for each time resolved spectrum</p></li>
+<li><p><strong>e_o</strong> – an array of the fitted break energies for each time resolved spectrum</p></li>
+<li><p><strong>err</strong> – A (t.size,3,2) array of errors in the spectral parameters</p></li>
+<li><p><strong>t</strong> – An array of time bins both beginning and end that will be plotted</p></li>
+<li><p><strong>model</strong> – An array of model types for the types of spectrum that best fit each time binned spectrum</p></li>
+<li><p><strong>P</strong> – An array of he polarization at each time bin</p></li>
+<li><p><strong>I</strong> – </p></li>
+<li><p><strong>Q</strong> – </p></li>
+<li><p><strong>U</strong> – </p></li>
+<li><p><strong>V</strong> – </p></li>
+<li><p><strong>Perr</strong> – The error in the polarization at each time bin</p></li>
+<li><p><strong>P_angle</strong> – The polarization angle of the photons detected in each time bin</p></li>
+<li><p><strong>dt</strong> – the size of the time bin if the time bins are uniformly size otherwise set it to be a negative umber</p></li>
+<li><p><strong>lc_only</strong> – Switch to denote if the function should only plot the light curve or not</p></li>
+<li><p><strong>pol_only</strong> – Switch to denote if the function should plot just the light curve and the polarization parameters</p></li>
+<li><p><strong>plotting</strong> – Switch, set to True by default, to show the plot produced</p></li>
+<li><p><strong>h5</strong> – A switch to denote that the MCRaT simulation that is being analyzed produced HDF5 files (for backwatds compatibility)</p></li>
+<li><p><strong>liso_c</strong> – The value of the critical isotropic luminosity that was used to create the variable time bins</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>No returns</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="read_process_files.lcur_param_var_t">
+<code class="sig-prename descclassname">read_process_files.</code><code class="sig-name descname">lcur_param_var_t</code><span class="sig-paren">(</span><em class="sig-param">event_file</em>, <em class="sig-param">time_start</em>, <em class="sig-param">time_end</em>, <em class="sig-param">dt=0.2</em>, <em class="sig-param">dt_min=0.2</em>, <em class="sig-param">phi_angle=0</em>, <em class="sig-param">delta_theta=1</em>, <em class="sig-param">liso_c=None</em>, <em class="sig-param">unit='erg/s'</em>, <em class="sig-param">plotting=True</em>, <em class="sig-param">save_plot=False</em>, <em class="sig-param">choose_best=False</em>, <em class="sig-param">lc_only=False</em>, <em class="sig-param">pol_only=False</em>, <em class="sig-param">dim=2</em>, <em class="sig-param">riken_switch=False</em>, <em class="sig-param">hdf5=True</em>, <em class="sig-param">save_spex=None</em>, <em class="sig-param">photon_type=None</em>, <em class="sig-param">energy_range=None</em>, <em class="sig-param">use_Lcrit=False</em>, <em class="sig-param">plot3=False</em><span class="sig-paren">)</span><a class="headerlink" href="#read_process_files.lcur_param_var_t" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function takes the MCRaT ‘detected’ photons from the event file and time bins them to produce light curves with
+variable time bins. The photons in a given time bin are then fitted with either the COMP or Band functions.</p>
+<p>This function should be called after viewing the data in uniform time bins. It uses a minimum luminosity cutoff to
+form time bins, if this critical limit is achieved, the time bin is recorded otherwise the function will keep
+increasing a giving time bin in a light curve to ensure that the critical luminosity is achieved.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>event_file</strong> – the base name of the event file that holds all of the info about the mock observed photons
+from MCRaT</p></li>
+<li><p><strong>time</strong> – a python list or numpy array with the start time and the end time in chronological order e.g. time=[0, 35]</p></li>
+<li><p><strong>dt</strong> – the light curve time bin width</p></li>
+<li><p><strong>phi_angle</strong> – unused parameter, meant for future 3D development</p></li>
+<li><p><strong>delta_theta</strong> – delta theta of the observer viewing angle for accepting photons, in degrees. Should be the same
+value as what is passed into event_h5’s dtheta_deg</p></li>
+<li><p><strong>liso_c</strong> – The critical luminosity that has to be achieved in order for the function to close a given time bin</p></li>
+<li><p><strong>unit</strong> – A string of the units that will be used for the light curve/spectrum ‘erg/s’ or ‘cts/s’</p></li>
+<li><p><strong>plotting</strong> – Switch to allow the function to show the plots of the light curve/spectral parameters</p></li>
+<li><p><strong>save_plot</strong> – Switch to allow the function to save the produced plot</p></li>
+<li><p><strong>choose_best</strong> – Switch that permits the function to overwrite spectral parameters that do not have error bars
+to be ignored if set to True. If this is set to False all spectral parameters will be considered/plotted</p></li>
+<li><p><strong>lc_only</strong> – switch that tells the function to only plot the light curve and peak energy of the time resolved
+spectra and none of the other parametres</p></li>
+<li><p><strong>pol_only</strong> – Switch to allow the function to only plot the light curve and the polarization when set to True</p></li>
+<li><p><strong>dim</strong> – The number of dimensions of the MCRaT simulation that is being analyzed. There is no support for 3D at
+this time so this switch should be set to 2, which is it’s default value</p></li>
+<li><p><strong>hdf5</strong> – Switch to specify if the MCRaT output files were HDF5 format or not, default is True. Should be set to
+False when an old version of MCRaT was used which outputted the data in text files</p></li>
+<li><p><strong>save_spex</strong> – Switch that allows the time resolved spectra to be saved to a text file</p></li>
+<li><p><strong>photon_type</strong> – can be set to ‘s’, ‘i’, or left as None in order to select thermal synchrotron photons, injected photons, or all the photons in the simulation for analysis</p></li>
+<li><p><strong>energy_range</strong> – has units of keV, can be left as None to choose photons of all energy ranges for analysis or it can be set to an array with [min energy, max energy] e.g. [1, 10] for 1 to 10 keV (limits inclusive)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>returns arrays of the various time resolved parameters and their errors. The order of the variables
+returned are: light curve, light curve error, alpha,beta,break energy, errors in the spectral parameters
+(a (times.size,3,2) array where times is the start of the light curve time bins), start times of the time bins, the best fit model in each time bin,
+polarization, stokes I, stokes Q, stokes U, stokes V, polarization and polarization angle errors (a ((times.size,2)) array), polarization angle,
+number of photons in each time bin</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="read_process_files.lundmanPolarizationGamma">
+<code class="sig-prename descclassname">read_process_files.</code><code class="sig-name descname">lundmanPolarizationGamma</code><span class="sig-paren">(</span><em class="sig-param">p</em>, <em class="sig-param">theta_j</em>, <em class="sig-param">gamma_0</em>, <em class="sig-param">max_angle</em><span class="sig-paren">)</span><a class="headerlink" href="#read_process_files.lundmanPolarizationGamma" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function that calculates Lundman et al.’s (2014b) lorentz factor profile as a function of theta</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> – The p value for the width of the analytic jet from Lundman et al. (2014b)</p></li>
+<li><p><strong>theta_j</strong> – The opening angle of the analytic jet profile from Lundman et al. (2014b)</p></li>
+<li><p><strong>gamma_0</strong> – The jet core lorentz factor</p></li>
+<li><p><strong>max_angle</strong> – The maximum angle to calculate the lorentz factor of</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Returns arrays of the angles and the lorentz factors at those angles</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="read_process_files.param_err">
+<code class="sig-prename descclassname">read_process_files.</code><code class="sig-name descname">param_err</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">data</em>, <em class="sig-param">err</em>, <em class="sig-param">best_par</em>, <em class="sig-param">chi_sq</em>, <em class="sig-param">par</em><span class="sig-paren">)</span><a class="headerlink" href="#read_process_files.param_err" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to calculate the 1 sigma errors in the comptonized fit to the spectrum.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – energies of the spectrum in keV</p></li>
+<li><p><strong>data</strong> – The spectrum data points that are being fitted</p></li>
+<li><p><strong>err</strong> – the errors in each data point</p></li>
+<li><p><strong>best_par</strong> – the best fit parameters of the Band function to the MCRaT spectrum</p></li>
+<li><p><strong>chi_sq</strong> – The value of chi squared of the best fit (value of best_par)</p></li>
+<li><p><strong>par</strong> – The Band spectrum parameter of interest that we would like to find the errors of</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>returns a (1x2) array of the negative error bar and the positive error bar</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="read_process_files.param_err_comp">
+<code class="sig-prename descclassname">read_process_files.</code><code class="sig-name descname">param_err_comp</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">data</em>, <em class="sig-param">err</em>, <em class="sig-param">best_par</em>, <em class="sig-param">chi_sq</em>, <em class="sig-param">par</em><span class="sig-paren">)</span><a class="headerlink" href="#read_process_files.param_err_comp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to calculate the errors in the comptonized fit to the spectrum. Returns 1 sigma error bars.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – energies of the spectrum in keV</p></li>
+<li><p><strong>data</strong> – The spectrum data points that are being fitted</p></li>
+<li><p><strong>err</strong> – the errors in each data point</p></li>
+<li><p><strong>best_par</strong> – the best fit parameters of the COMP function to the MCRaT spectrum</p></li>
+<li><p><strong>chi_sq</strong> – The value of chi squared of the best fit (value of best_par)</p></li>
+<li><p><strong>par</strong> – The COMP spectrum parameter of interest that we would like to find the errors of (‘a’, ‘b’, ‘c’ which
+corresponds to the definitions of the COMP function)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>returns a (1x2) array of the negative error bar and the positive error bar</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="read_process_files.param_err_loop">
+<code class="sig-prename descclassname">read_process_files.</code><code class="sig-name descname">param_err_loop</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">data</em>, <em class="sig-param">err</em>, <em class="sig-param">best_par</em>, <em class="sig-param">chi_sq</em>, <em class="sig-param">par</em>, <em class="sig-param">d_par</em><span class="sig-paren">)</span><a class="headerlink" href="#read_process_files.param_err_loop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to calculate the deviation in a Band spectrum parameter such that there is a change of ~1 in the chi squared
+value of the fit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – energies of the spectrum in keV</p></li>
+<li><p><strong>data</strong> – The spectrum data points that are being fitted</p></li>
+<li><p><strong>err</strong> – the errors in each data point</p></li>
+<li><p><strong>best_par</strong> – the best fit parameters of the Band function to the MCRaT spectrum</p></li>
+<li><p><strong>chi_sq</strong> – The value of chi squared of the best fit (value of best_par)</p></li>
+<li><p><strong>par</strong> – The Band spectrum parameter of interest that we would like to find the errors of</p></li>
+<li><p><strong>d_par</strong> – The initial guess in the change in parameter that would lead to a change in chi squared of ~1</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>returns the amount the parameter of interest can change before the fitted chi squared changes by ~1</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="read_process_files.param_err_loop_comp">
+<code class="sig-prename descclassname">read_process_files.</code><code class="sig-name descname">param_err_loop_comp</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">data</em>, <em class="sig-param">err</em>, <em class="sig-param">best_par</em>, <em class="sig-param">chi_sq</em>, <em class="sig-param">par</em>, <em class="sig-param">d_par</em><span class="sig-paren">)</span><a class="headerlink" href="#read_process_files.param_err_loop_comp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to calculate the deviation in a COMP spectrum parameter such that there is a change of ~1 in the chi squared
+value of the fit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – energies of the spectrum in keV</p></li>
+<li><p><strong>data</strong> – The spectrum data points that are being fitted</p></li>
+<li><p><strong>err</strong> – the errors in each data point</p></li>
+<li><p><strong>best_par</strong> – the best fit parameters of the COMP function to the MCRaT spectrum</p></li>
+<li><p><strong>chi_sq</strong> – The value of chi squared of the best fit (value of best_par)</p></li>
+<li><p><strong>par</strong> – The COMP spectrum parameter of interest that we would like to find the errors of</p></li>
+<li><p><strong>d_par</strong> – The initial guess in the change in parameter that would lead to a change in chi squared of ~1</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>returns the amount the parameter of interest can change before the fitted chi squared changes by ~1</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="read_process_files.plot_golenetskii">
+<code class="sig-prename descclassname">read_process_files.</code><code class="sig-name descname">plot_golenetskii</code><span class="sig-paren">(</span><em class="sig-param">sims</em>, <em class="sig-param">t_end</em>, <em class="sig-param">delta_t=1</em>, <em class="sig-param">detectable=False</em>, <em class="sig-param">save_plot=False</em>, <em class="sig-param">h5=True</em><span class="sig-paren">)</span><a class="headerlink" href="#read_process_files.plot_golenetskii" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to plot the MCRaT results alongside the golenetskii relationship</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sims</strong> – An array containing strings of event file base names that will be plotted</p></li>
+<li><p><strong>t_end</strong> – An array of times that the light curves of the above sim values end</p></li>
+<li><p><strong>delta_t</strong> – The size of the time binds used to get the synthetic GRB light curve/time resolved spectra</p></li>
+<li><p><strong>detectable</strong> – Switch to plot the luminosities below 10^50 ergs/s or not, set to False by default</p></li>
+<li><p><strong>save_plot</strong> – Switch to save the plot as a PDF or not</p></li>
+<li><p><strong>h5</strong> – Switch to specify if the MCRaT output files were HDF5 format or not, default is True. Should be set to
+False when an old version of MCRaT was used which outputted the data in text files</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="read_process_files.plotfluidGammaVsTheta">
+<code class="sig-prename descclassname">read_process_files.</code><code class="sig-name descname">plotfluidGammaVsTheta</code><span class="sig-paren">(</span><em class="sig-param">derivative=False</em>, <em class="sig-param">comp_lundman=False</em>, <em class="sig-param">saveplot=False</em><span class="sig-paren">)</span><a class="headerlink" href="#read_process_files.plotfluidGammaVsTheta" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function plots the lorentz factor profile of hydrodynamic outflows, as a function of theta, alongside
+Lundman et al.’s (2014b) lorentz factor profile</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>derivative</strong> – Switch to plot the derivative of the lorentz factor with respect to theta</p></li>
+<li><p><strong>comp_lundman</strong> – Switch to compare the hydro simulation to the lorentz factor profile from Lundman et al. (2014b)</p></li>
+<li><p><strong>saveplot</strong> – Switch to save the plot as a PDF or not</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="read_process_files.polarizationVsAngle">
+<code class="sig-prename descclassname">read_process_files.</code><code class="sig-name descname">polarizationVsAngle</code><span class="sig-paren">(</span><em class="sig-param">event_files</em>, <em class="sig-param">time_start</em>, <em class="sig-param">time_end</em>, <em class="sig-param">dt=1</em>, <em class="sig-param">phi_angle=0</em>, <em class="sig-param">delta_theta=1</em>, <em class="sig-param">unit='erg/s'</em>, <em class="sig-param">plotting=True</em>, <em class="sig-param">save_plot=False</em>, <em class="sig-param">dim=2</em>, <em class="sig-param">hdf5=True</em>, <em class="sig-param">compare_to_lund=False</em>, <em class="sig-param">p=4</em>, <em class="sig-param">thetaj=0.01</em>, <em class="sig-param">plot_lumi=False</em><span class="sig-paren">)</span><a class="headerlink" href="#read_process_files.polarizationVsAngle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to plot how time integrated polarization of the MCRaT simulation changes as a function of observer angle.
+There are option to compare the results to those of Lundman et al. (2014b) and to also overplot the peak luminoity
+of the light curve at the given angle.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>event_files</strong> – An array of the MCRaT event file base names that are numerically ordered from smallest to largest</p></li>
+<li><p><strong>time_start</strong> – An array of the start times of the light curves for the event files specified above</p></li>
+<li><p><strong>time_end</strong> – An array of the end times of the light curves for the event files specified above</p></li>
+<li><p><strong>dt</strong> – If also plotting the peak of the light curve, dt specifies the width of the time bins of the light curves</p></li>
+<li><p><strong>phi_angle</strong> – A placeholder variable for future 3D compatability</p></li>
+<li><p><strong>delta_theta</strong> – delta theta of the observer viewieng angle for accepting photons, also in degrees.
+Should be the same as what was used in the function call to produce the event files passed to this function</p></li>
+<li><p><strong>unit</strong> – The units of the produced light curve if plotting the light curve peak as well. The default is ‘erg/s’
+but can also pass ‘cts/s’</p></li>
+<li><p><strong>plotting</strong> – Switch, set to True by default, to show the plot produced</p></li>
+<li><p><strong>save_plot</strong> – Switch to save the plot as a PDF or not</p></li>
+<li><p><strong>dim</strong> – Sets the number of dimensions of the MCraT simulation analyzed, should be set to 2 since there is no 3d
+compatability yet.</p></li>
+<li><p><strong>hdf5</strong> – Switch to specify if the MCRaT output files were HDF5 format or not, default is True. Should be set to
+False when an old version of MCRaT was used which outputted the data in text files</p></li>
+<li><p><strong>compare_to_lund</strong> – Switch to specify if the user wants to compare their results to those of
+Lundman et al. (2014b)</p></li>
+<li><p><strong>p</strong> – If compare_to_lund is set to True, the user needs to specify the proper p value for the lorentz factor
+profile. The default is p=4, also accepts p=2.</p></li>
+<li><p><strong>thetaj</strong> – If compare_to_lund is set to True, the user needs to specify the opening angel of the jet in radians,
+the default is set to 0.01 rad, also accepts 0.1 rad when p=4.</p></li>
+<li><p><strong>plot_lumi</strong> – A switch to plot the peak luminosity of the light curve associated with the passed event_files</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Arrays of the plotted time integrated polarizations and their errors and the polarization angles and their
+associated 1 sigma errors</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="read_process_files.read_flash">
+<code class="sig-prename descclassname">read_process_files.</code><code class="sig-name descname">read_flash</code><span class="sig-paren">(</span><em class="sig-param">fnam</em>, <em class="sig-param">length_scale=1000000000.0</em>, <em class="sig-param">make1D=True</em><span class="sig-paren">)</span><a class="headerlink" href="#read_process_files.read_flash" title="Permalink to this definition">¶</a></dt>
+<dd><p>Legacy code that was used to read in FLASH data frames in the old python version of the code, still is used in some
+functions comparing MCRaT information to fluid quantities</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fnam</strong> – the file name fo the FLASH file, including directory it is located in</p></li>
+<li><p><strong>make1D</strong> – switch to set the output to be either 1D, if set to True (the default), or keep the returned
+information as 2D arrays</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>returns all of the FLASH file information (x, y, dx, dy, vx, vy, gamma, density, lab density, radius,
+theta, pressure) at each hydro node</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="read_process_files.read_mcrat">
+<code class="sig-prename descclassname">read_process_files.</code><code class="sig-name descname">read_mcrat</code><span class="sig-paren">(</span><em class="sig-param">file_name</em><span class="sig-paren">)</span><a class="headerlink" href="#read_process_files.read_mcrat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Legacy code to read in MCRaT data when it used to output data in text files</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>file_name</strong> – the file name of the MCRaT data file including the directory that it is located</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>returns all the data in the given file of interest</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="read_process_files.read_mcrat_h5">
+<code class="sig-prename descclassname">read_process_files.</code><code class="sig-name descname">read_mcrat_h5</code><span class="sig-paren">(</span><em class="sig-param">file_name</em>, <em class="sig-param">read_comv=False</em>, <em class="sig-param">read_stokes=False</em>, <em class="sig-param">read_type=False</em><span class="sig-paren">)</span><a class="headerlink" href="#read_process_files.read_mcrat_h5" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads in MCRaT data for current version of MCRaT that outputs data in hdf5 files. Also has support for various
+MCRaT switches that can be turned on by the user.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_name</strong> – the file name of the MCRaT data file including the directory that it is located</p></li>
+<li><p><strong>read_comv</strong> – switch that lets the function know if it should expect/ return comoving 4 momenta data, set to true
+if this switch is set to ON in mcrat_input.h</p></li>
+<li><p><strong>read_stokes</strong> – switch that lets the function know if it should expect/ return stokes parameters, set to true
+if this switch is set to ON in mcrat_input.h</p></li>
+<li><p><strong>read_type</strong> – switch that lets the function know if it should expect/ return photon type, set to true
+if this switch is set to ON in mcrat_input.h</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>returns the data read in from the MCRaT data frame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="read_process_files.wien">
+<code class="sig-prename descclassname">read_process_files.</code><code class="sig-name descname">wien</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">t</em>, <em class="sig-param">d</em><span class="sig-paren">)</span><a class="headerlink" href="#read_process_files.wien" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function that produces a Wien spectrum.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – Energy in keV</p></li>
+<li><p><strong>t</strong> – Temp in kelvin</p></li>
+<li><p><strong>d</strong> – Normalization of the spectrum</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>returns the Wien spectrum parameterized by some temperature at the energies of interest</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">ProcessMCRaT</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="mclib.html">mclib.py</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">read_process_files.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mcrat_movie.html">mcrat_movie.py</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="mclib.html" title="previous chapter">mclib.py</a></li>
+      <li>Next: <a href="mcrat_movie.html" title="next chapter">mcrat_movie.py</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Tyler Parsotan.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/read_process_files.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,4 +1,5 @@
 _*/
+!Doc/*
 *.rst
 *.bat
 conf.py
@@ -9,6 +10,7 @@ EVENT_FILE_ANALYSIS_PLOTS/
 *.pdf
 *.pickle
 *.jp*
+!Doc/processmcrat_logo.*
 PERSONAL_ANALYSIS/
 ProcessMCRaT.egg-info/
 build/

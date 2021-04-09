@@ -1,0 +1,99 @@
+\begin{sphinxtheindex}
+\let\bigletter\sphinxstyleindexlettergroup
+\let\spxpagem \sphinxstyleindexpagemain
+\let\spxentry \sphinxstyleindexentry
+\let\spxextra \sphinxstyleindexextra
+
+  \bigletter A
+  \item \spxentry{amati()}\spxextra{in module read\_process\_files}, \hyperpage{7}
+
+  \indexspace
+  \bigletter B
+  \item \spxentry{Band()}\spxextra{in module read\_process\_files}, \hyperpage{7}
+  \item \spxentry{band\_hist\_data()}\spxextra{in module read\_process\_files}, \hyperpage{7}
+  \item \spxentry{band\_hist\_plot()}\spxextra{in module read\_process\_files}, \hyperpage{8}
+  \item \spxentry{blackbody()}\spxextra{in module read\_process\_files}, \hyperpage{8}
+
+  \indexspace
+  \bigletter C
+  \item \spxentry{calc\_spectrum()}\spxextra{in module mcrat\_movie}, \hyperpage{19}
+  \item \spxentry{cfit()}\spxextra{in module read\_process\_files}, \hyperpage{8}
+  \item \spxentry{comp()}\spxextra{in module read\_process\_files}, \hyperpage{9}
+
+  \indexspace
+  \bigletter E
+  \item \spxentry{event3D()}\spxextra{in module mclib}, \hyperpage{1}
+  \item \spxentry{event4()}\spxextra{in module mclib}, \hyperpage{1}
+  \item \spxentry{event\_h5()}\spxextra{in module mclib}, \hyperpage{2}
+
+  \indexspace
+  \bigletter F
+  \item \spxentry{fluidGammaVsTheta()}\spxextra{in module read\_process\_files}, \hyperpage{9}
+  \item \spxentry{follow\_lc\_data()}\spxextra{in module mcrat\_movie}, \hyperpage{19}
+
+  \indexspace
+  \bigletter G
+  \item \spxentry{get\_amati\_rel()}\spxextra{in module read\_process\_files}, \hyperpage{10}
+  \item \spxentry{get\_FERMI\_best\_data()}\spxextra{in module read\_process\_files}, \hyperpage{9}
+  \item \spxentry{get\_flash\_data()}\spxextra{in module mcrat\_movie}, \hyperpage{20}
+  \item \spxentry{get\_indexes\_data()}\spxextra{in module mcrat\_movie}, \hyperpage{20}
+  \item \spxentry{get\_lundman\_pol\_data()}\spxextra{in module read\_process\_files}, 
+		\hyperpage{10}
+  \item \spxentry{get\_plot\_data()}\spxextra{in module mcrat\_movie}, \hyperpage{20}
+  \item \spxentry{get\_yonetoku\_rel()}\spxextra{in module read\_process\_files}, \hyperpage{10}
+  \item \spxentry{golenetskii()}\spxextra{in module read\_process\_files}, \hyperpage{10}
+  \item \spxentry{Goodman()}\spxextra{in module read\_process\_files}, \hyperpage{7}
+
+  \indexspace
+  \bigletter L
+  \item \spxentry{lcur()}\spxextra{in module mclib}, \hyperpage{2}
+  \item \spxentry{lcur\_old()}\spxextra{in module mclib}, \hyperpage{3}
+  \item \spxentry{lcur\_param()}\spxextra{in module read\_process\_files}, \hyperpage{11}
+  \item \spxentry{lcur\_param\_plot()}\spxextra{in module read\_process\_files}, \hyperpage{12}
+  \item \spxentry{lcur\_param\_var\_t()}\spxextra{in module read\_process\_files}, \hyperpage{12}
+  \item \spxentry{lcur\_var\_t()}\spxextra{in module mclib}, \hyperpage{3}
+  \item \spxentry{Lorentz\_Boost()}\spxextra{in module mclib}, \hyperpage{1}
+  \item \spxentry{lorentzBoostVectorized()}\spxextra{in module mclib}, \hyperpage{4}
+  \item \spxentry{lundmanPolarizationGamma()}\spxextra{in module read\_process\_files}, 
+		\hyperpage{14}
+
+  \indexspace
+  \bigletter M
+  \item \spxentry{mclib}\spxextra{module}, \hyperpage{1}
+  \item \spxentry{mcrat\_movie}\spxextra{module}, \hyperpage{19}
+
+  \indexspace
+  \bigletter P
+  \item \spxentry{param\_err()}\spxextra{in module read\_process\_files}, \hyperpage{14}
+  \item \spxentry{param\_err\_comp()}\spxextra{in module read\_process\_files}, \hyperpage{14}
+  \item \spxentry{param\_err\_loop()}\spxextra{in module read\_process\_files}, \hyperpage{14}
+  \item \spxentry{param\_err\_loop\_comp()}\spxextra{in module read\_process\_files}, 
+		\hyperpage{15}
+  \item \spxentry{plot\_golenetskii()}\spxextra{in module read\_process\_files}, \hyperpage{15}
+  \item \spxentry{plotfluidGammaVsTheta()}\spxextra{in module read\_process\_files}, \hyperpage{15}
+  \item \spxentry{polarizationVsAngle()}\spxextra{in module read\_process\_files}, \hyperpage{16}
+
+  \indexspace
+  \bigletter R
+  \item \spxentry{read\_event\_file()}\spxextra{in module mclib}, \hyperpage{4}
+  \item \spxentry{read\_flash()}\spxextra{in module read\_process\_files}, \hyperpage{17}
+  \item \spxentry{read\_mcrat()}\spxextra{in module read\_process\_files}, \hyperpage{17}
+  \item \spxentry{read\_mcrat\_h5()}\spxextra{in module read\_process\_files}, \hyperpage{17}
+  \item \spxentry{read\_process\_files}\spxextra{module}, \hyperpage{7}
+  \item \spxentry{readanddecimate()}\spxextra{in module mclib}, \hyperpage{5}
+
+  \indexspace
+  \bigletter S
+  \item \spxentry{single\_cs()}\spxextra{in module mclib}, \hyperpage{5}
+  \item \spxentry{single\_electron()}\spxextra{in module mclib}, \hyperpage{5}
+  \item \spxentry{spex()}\spxextra{in module mclib}, \hyperpage{5}
+
+  \indexspace
+  \bigletter W
+  \item \spxentry{wien()}\spxextra{in module read\_process\_files}, \hyperpage{17}
+
+  \indexspace
+  \bigletter Z
+  \item \spxentry{zero\_norm()}\spxextra{in module mclib}, \hyperpage{6}
+
+\end{sphinxtheindex}

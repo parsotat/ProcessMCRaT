@@ -1,0 +1,420 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>mclib.py &#8212; ProcessMCRaT  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="read_process_files.py" href="read_process_files.html" />
+    <link rel="prev" title="Welcome to ProcessMCRaT’s documentation!" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-mclib">
+<span id="mclib-py"></span><h1>mclib.py<a class="headerlink" href="#module-mclib" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="mclib.Lorentz_Boost">
+<code class="sig-prename descclassname">mclib.</code><code class="sig-name descname">Lorentz_Boost</code><span class="sig-paren">(</span><em class="sig-param">boost</em>, <em class="sig-param">P_ph</em><span class="sig-paren">)</span><a class="headerlink" href="#mclib.Lorentz_Boost" title="Permalink to this definition">¶</a></dt>
+<dd><p>This routine performs a Lorentz boost of a 4-momentum. The boost is specified with a 3-vel.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>boost</strong> – The velocity vector of the frame that the photon will be boosted into.</p></li>
+<li><p><strong>P_ph</strong> – The photon 4 momentum that will be boosted into the desired frame of reference.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the boosted photon 4 mometum</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mclib.event3D">
+<code class="sig-prename descclassname">mclib.</code><code class="sig-name descname">event3D</code><span class="sig-paren">(</span><em class="sig-param">r_obs</em>, <em class="sig-param">theta_deg</em>, <em class="sig-param">phi_deg</em>, <em class="sig-param">dtheta_deg</em>, <em class="sig-param">path</em>, <em class="sig-param">lastfile</em>, <em class="sig-param">sim_type</em>, <em class="sig-param">riken_switch=False</em><span class="sig-paren">)</span><a class="headerlink" href="#mclib.event3D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Place holder function to conduct a synthetic observation of MCRaT simulated outflow using a 3D hydro simulationp.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>r_obs</strong> – </p></li>
+<li><p><strong>theta_deg</strong> – </p></li>
+<li><p><strong>phi_deg</strong> – </p></li>
+<li><p><strong>dtheta_deg</strong> – </p></li>
+<li><p><strong>path</strong> – </p></li>
+<li><p><strong>lastfile</strong> – </p></li>
+<li><p><strong>sim_type</strong> – </p></li>
+<li><p><strong>riken_switch</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mclib.event4">
+<code class="sig-prename descclassname">mclib.</code><code class="sig-name descname">event4</code><span class="sig-paren">(</span><em class="sig-param">r_obs</em>, <em class="sig-param">theta_deg</em>, <em class="sig-param">dtheta_deg</em>, <em class="sig-param">path</em>, <em class="sig-param">lastfile</em>, <em class="sig-param">sim_type</em>, <em class="sig-param">withintheta_deg=False</em>, <em class="sig-param">riken_switch=False</em>, <em class="sig-param">save_event=True</em><span class="sig-paren">)</span><a class="headerlink" href="#mclib.event4" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to collect MCRaT photons in space that will be observed. legacy code from when MCRaT produced text files
+as its output.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>r_obs</strong> – radius of where the detector will be placed, should be at a radius such that all the photons have
+propagated past the detector by the end of the MCRaT simulation</p></li>
+<li><p><strong>theta_deg</strong> – observer viewing angle in degrees</p></li>
+<li><p><strong>dtheta_deg</strong> – delta theta of the observer viewieng angle for accepting photons, also in degrees</p></li>
+<li><p><strong>path</strong> – path to the directory that holds ll the output MCRaT files, should be a string</p></li>
+<li><p><strong>lastfile</strong> – the number of the last MCRaT output file, this should be an int</p></li>
+<li><p><strong>sim_type</strong> – A string that will be the name of the output file of this function</p></li>
+<li><p><strong>withintheta_deg</strong> – this is a depreciated key</p></li>
+<li><p><strong>riken_switch</strong> – this is a depreciated key</p></li>
+<li><p><strong>save_event</strong> – switch to create the event file that will be read in by other functions</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>returns photon’s that would be observed and thier energy, detector crossing time, and their weight</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mclib.event_h5">
+<code class="sig-prename descclassname">mclib.</code><code class="sig-name descname">event_h5</code><span class="sig-paren">(</span><em class="sig-param">r_obs</em>, <em class="sig-param">theta_deg</em>, <em class="sig-param">dtheta_deg</em>, <em class="sig-param">path</em>, <em class="sig-param">lastfile</em>, <em class="sig-param">sim_type</em>, <em class="sig-param">fps=5</em>, <em class="sig-param">read_comv=False</em>, <em class="sig-param">read_stokes=False</em>, <em class="sig-param">read_type=False</em>, <em class="sig-param">save_event_file=True</em>, <em class="sig-param">append=False</em><span class="sig-paren">)</span><a class="headerlink" href="#mclib.event_h5" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to collect MCRaT photons in space that will be observed. Saves event files in EVENT_FILES/ directory that
+must be created before calling this functionp.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>r_obs</strong> – radius of where the detector will be placed, should be at a radius such that all the photons have
+propagated past the detector by the end of the MCRaT simulation</p></li>
+<li><p><strong>theta_deg</strong> – observer viewing angle in degrees</p></li>
+<li><p><strong>dtheta_deg</strong> – delta theta of the observer viewing angle for accepting photons, also in degrees</p></li>
+<li><p><strong>path</strong> – path to the directory that holds ll the output MCRaT files, should be a string</p></li>
+<li><p><strong>lastfile</strong> – the number of the last MCRaT output file, this should be an int</p></li>
+<li><p><strong>sim_type</strong> – A string that will be the name of the output file of this function</p></li>
+<li><p><strong>fps</strong> – an int that represents the number fo frames per second in the hydro simulation used</p></li>
+<li><p><strong>read_comv</strong> – switch to denote of the MCRaT files contain the comoving photon 4 momenta</p></li>
+<li><p><strong>read_stokes</strong> – switch to denote if the MCRaT output files have the stokes parameters</p></li>
+<li><p><strong>save_event_file</strong> – switch to determine if the function should save the event file or not</p></li>
+<li><p><strong>append</strong> – switch to denote if the function should append the extracted data to a pre-existing event file</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>returns (N,8) array where N is the number of photons ‘detected’. The array contains:
+the crossing time of the photon, the lab energy in keV, the weight, the index in the list of photons,
+the stokes parameters and the comoving energy in keV</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mclib.lcur">
+<code class="sig-prename descclassname">mclib.</code><code class="sig-name descname">lcur</code><span class="sig-paren">(</span><em class="sig-param">simid</em>, <em class="sig-param">t</em>, <em class="sig-param">units='erg/s'</em>, <em class="sig-param">theta=1.0</em>, <em class="sig-param">dtheta=1.0</em>, <em class="sig-param">phi=0</em>, <em class="sig-param">dphi=1</em>, <em class="sig-param">sim_dims=2</em>, <em class="sig-param">h5=True</em>, <em class="sig-param">photon_type=None</em>, <em class="sig-param">energy_range=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mclib.lcur" title="Permalink to this definition">¶</a></dt>
+<dd><p>reads in the event file and bins photons in uniform time bins to create light curves</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>simid</strong> – a string of the event file base name of the event file created in event_h5 (everything but the .evt)</p></li>
+<li><p><strong>t</strong> – an array of time bin edges</p></li>
+<li><p><strong>units</strong> – string specifying units, can be erg/s or cts/s</p></li>
+<li><p><strong>theta</strong> – observer viewing angle in degrees</p></li>
+<li><p><strong>dtheta</strong> – the size of the observer viewing angle bin in degrees (same as is specified in event_h5 function)</p></li>
+<li><p><strong>phi</strong> – azimuthal angle for mock observer in degrees (only for 3D simulations, not fully supported)</p></li>
+<li><p><strong>dphi</strong> – the size of the observer azimuthal viewing angle bin in degrees (only for 3D simulations, not fully
+supported)</p></li>
+<li><p><strong>sim_dims</strong> – The number of dimensions of the hydro simulation used</p></li>
+<li><p><strong>h5</strong> – specify if the format of the MCRaT output files is hdf5 files or not (denotes if using an old format or
+a newer format of saving files)</p></li>
+<li><p><strong>photon_type</strong> – can be set to ‘s’, ‘i’, or left as None in order to select thermal synchrotron photons, injected photons, or all the photons in the simulation for analysis</p></li>
+<li><p><strong>energy_range</strong> – has units of keV, can be left as None to choose photons of all energy ranges for analysis or it can be set to an array with [min energy, max energy] e.g. [1, 10] for 1 to 10 keV (limits inclusive)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>returns the time binned quantities of luminosity, luminosity error, number of photons in each bin, the
+average eenrgy of photons in each bin, polarization, the stokes parameters, polarization error and
+polarization angle</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mclib.lcur_old">
+<code class="sig-prename descclassname">mclib.</code><code class="sig-name descname">lcur_old</code><span class="sig-paren">(</span><em class="sig-param">simid</em>, <em class="sig-param">t</em>, <em class="sig-param">units='erg/s'</em>, <em class="sig-param">theta=1.0</em>, <em class="sig-param">dtheta=1.0</em>, <em class="sig-param">phi=0</em>, <em class="sig-param">dphi=1</em>, <em class="sig-param">sim_dims=2</em>, <em class="sig-param">h5=True</em>, <em class="sig-param">photon_type=None</em>, <em class="sig-param">energy_range=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mclib.lcur_old" title="Permalink to this definition">¶</a></dt>
+<dd><p>reads in the event file and bins photons in uniform time bins to create light curves</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>simid</strong> – a string of the event file base name of the event file created in event_h5 (everything but the .evt)</p></li>
+<li><p><strong>t</strong> – an array of time bin edges</p></li>
+<li><p><strong>units</strong> – string specifying units, can be erg/s or cts/s</p></li>
+<li><p><strong>theta</strong> – observer viewing angle in degrees</p></li>
+<li><p><strong>dtheta</strong> – the size of the observer viewing angle bin in degrees (same as is specified in event_h5 function)</p></li>
+<li><p><strong>phi</strong> – azimuthal angle for mock observer in degrees (only for 3D simulations, not fully supported)</p></li>
+<li><p><strong>dphi</strong> – the size of the observer azimuthal viewing angle bin in degrees (only for 3D simulations, not fully
+supported)</p></li>
+<li><p><strong>sim_dims</strong> – The number of dimensions of the hydro simulation used</p></li>
+<li><p><strong>h5</strong> – specify if the format of the MCRaT output files is hdf5 files or not (denotes if using an old format or
+a newer format of saving files)</p></li>
+<li><p><strong>photon_type</strong> – can be set to ‘s’, ‘i’, or left as None in order to select thermal synchrotron photons, injected photons, or all the photons in the simulation for analysis</p></li>
+<li><p><strong>energy_range</strong> – has units of keV, can be left as None to choose photons of all energy ranges for analysis or it can be set to an array with [min energy, max energy] e.g. [1, 10] for 1 to 10 keV (limits inclusive)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>returns the time binned quantities of luminosity, luminosity error, number of photons in each bin, the
+average eenrgy of photons in each bin, polarization, the stokes parameters, polarization error and
+polarization angle</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mclib.lcur_var_t">
+<code class="sig-prename descclassname">mclib.</code><code class="sig-name descname">lcur_var_t</code><span class="sig-paren">(</span><em class="sig-param">simid</em>, <em class="sig-param">time_start</em>, <em class="sig-param">time_end</em>, <em class="sig-param">dt</em>, <em class="sig-param">dt_min=0.2</em>, <em class="sig-param">liso_c=1e+50</em>, <em class="sig-param">units='erg/s'</em>, <em class="sig-param">theta=1.0</em>, <em class="sig-param">dtheta=1.0</em>, <em class="sig-param">phi=0</em>, <em class="sig-param">dphi=1</em>, <em class="sig-param">sim_dims=2</em>, <em class="sig-param">h5=True</em>, <em class="sig-param">photon_type=None</em>, <em class="sig-param">energy_range=None</em>, <em class="sig-param">use_Lcrit=False</em><span class="sig-paren">)</span><a class="headerlink" href="#mclib.lcur_var_t" title="Permalink to this definition">¶</a></dt>
+<dd><p>Produces time binned quantities for non-uniform time bins. The time bins must be larger than some critical
+luminosity and some minimum dt that the user specifies.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>simid</strong> – a string of the event file base name of the event file created in event_h5 (everything but the .evt)</p></li>
+<li><p><strong>time_start</strong> – starting time of the light curve</p></li>
+<li><p><strong>time_end</strong> – end time of the light curve binning</p></li>
+<li><p><strong>dt</strong> – initial dt of the time bins</p></li>
+<li><p><strong>dt_min</strong> – the minimum acceptable dt for the light curve</p></li>
+<li><p><strong>liso_c</strong> – the mimimum isotropic luminosity for a given time bin (in the same units specified by units)</p></li>
+<li><p><strong>units</strong> – a string of the units of the light curve that will be produced (erg/s or cts/s)</p></li>
+<li><p><strong>theta</strong> – the observer viewing angle in degrees</p></li>
+<li><p><strong>dtheta</strong> – the size of the observer viewing angle bin in degrees (same as is specified in event_h5 function)</p></li>
+<li><p><strong>phi</strong> – azimuthal angle for mock observer in degrees (only for 3D simulations, not fully supported)</p></li>
+<li><p><strong>dphi</strong> – the size of the observer azimuthal viewing angle bin in degrees (only for 3D simulations, not fully
+supported)</p></li>
+<li><p><strong>sim_dims</strong> – The number of dimensions of the hydro simulation used</p></li>
+<li><p><strong>h5</strong> – specify if the format of the MCRaT output files is hdf5 files or not (denotes if using an old format or
+a newer format of saving files)</p></li>
+<li><p><strong>photon_type</strong> – can be set to ‘s’, ‘i’, or left as None in order to select thermal synchrotron photons, injected photons, or all the photons in the simulation for analysis</p></li>
+<li><p><strong>energy_range</strong> – has units of keV, can be left as None to choose photons of all energy ranges for analysis or it can be set to an array with [min energy, max energy] e.g. [1, 10] for 1 to 10 keV (limits inclusive)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>returns the time binned quantities of luminosity, luminosity error, number of photons in each bin, the
+average eenrgy of photons in each bin, polarization, the stokes parameters, polarization error and
+polarization angle</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mclib.lorentzBoostVectorized">
+<code class="sig-prename descclassname">mclib.</code><code class="sig-name descname">lorentzBoostVectorized</code><span class="sig-paren">(</span><em class="sig-param">boost</em>, <em class="sig-param">P_ph</em><span class="sig-paren">)</span><a class="headerlink" href="#mclib.lorentzBoostVectorized" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to quickly lorentz boost a set of photon 4 momenta, and ensures that the 0 norm condition is met.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>boost</strong> – The velocity vector of the frame that the photon will be boosted into. The shape of the array
+should be (3,N), where N is the number of photons that will be lorentz boosted</p></li>
+<li><p><strong>P_ph</strong> – The photon’s 4 momentum that will be boosted into the desired frame of reference. The shape of the array
+should be (4,N)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>returns (4,N) array of the boosted photon’s 4 momenta</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mclib.read_event_file">
+<code class="sig-prename descclassname">mclib.</code><code class="sig-name descname">read_event_file</code><span class="sig-paren">(</span><em class="sig-param">simid</em>, <em class="sig-param">h5=True</em><span class="sig-paren">)</span><a class="headerlink" href="#mclib.read_event_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>An example function for reading the event files produced by event_h5.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>simid</strong> – the name of the event file to be read</p></li>
+<li><p><strong>h5</strong> – switch to set whether the MCRaT simulation used hdf5 files (should always be set to true for the current versions of MCRaT)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>returns the data from the event file</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mclib.readanddecimate">
+<code class="sig-prename descclassname">mclib.</code><code class="sig-name descname">readanddecimate</code><span class="sig-paren">(</span><em class="sig-param">fnam</em>, <em class="sig-param">inj_radius</em><span class="sig-paren">)</span><a class="headerlink" href="#mclib.readanddecimate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Legacy code from the python version of MCRaT to read and process FLASH files</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fnam</strong> – string of directory and file name of the FLASH file that will be loaded and processed</p></li>
+<li><p><strong>inj_radius</strong> – The radius that photons are injected in cm</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>returns FLASH values of various quantities at cells</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mclib.single_cs">
+<code class="sig-prename descclassname">mclib.</code><code class="sig-name descname">single_cs</code><span class="sig-paren">(</span><em class="sig-param">P_el</em>, <em class="sig-param">P_ph</em><span class="sig-paren">)</span><a class="headerlink" href="#mclib.single_cs" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function conducts a single compton scatter in the electron rest frame. The photon has to be in the comoving
+frame first. Legacy code from Python version of MCRaT.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>P_el</strong> – electron 4 momentum</p></li>
+<li><p><strong>P_ph</strong> – photon comoving 4 momentum</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>returns post-scattered photon 4 momentum in the comoving frame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mclib.single_electron">
+<code class="sig-prename descclassname">mclib.</code><code class="sig-name descname">single_electron</code><span class="sig-paren">(</span><em class="sig-param">T</em>, <em class="sig-param">P_ph</em><span class="sig-paren">)</span><a class="headerlink" href="#mclib.single_electron" title="Permalink to this definition">¶</a></dt>
+<dd><p>This routine simulates one electron from a thermal distribution at a
+temperature T. The electron has the correct angular distribution for a
+photon traveling with direction P_ph</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="mclib.spex">
+<code class="sig-prename descclassname">mclib.</code><code class="sig-name descname">spex</code><span class="sig-paren">(</span><em class="sig-param">simid</em>, <em class="sig-param">numin</em>, <em class="sig-param">numax</em>, <em class="sig-param">tmin</em>, <em class="sig-param">tmax</em>, <em class="sig-param">units='erg/s'</em>, <em class="sig-param">h5=True</em>, <em class="sig-param">photon_type=None</em>, <em class="sig-param">calc_pol=False</em><span class="sig-paren">)</span><a class="headerlink" href="#mclib.spex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Produces spectra of phtons detected within any time interval</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>simid</strong> – a string of the event file base name of the event file created in event_h5 (everything but the .evt)</p></li>
+<li><p><strong>numin</strong> – array of energy values of the left most cutoff of the energy bins in the spectrum in keV</p></li>
+<li><p><strong>numax</strong> – array of energy values of the right most cutoff of the energy bins in the spectrum in keV</p></li>
+<li><p><strong>tmin</strong> – minimum of time bin that we are interested in collecting photons in to analyze</p></li>
+<li><p><strong>tmax</strong> – max of time bin that we are interested in collecting photons in to analyze</p></li>
+<li><p><strong>units</strong> – a string of the units of the spectrum that will be produced (erg/s or cts/s), each unit is then divided by the width of the enrgy bin in keV</p></li>
+<li><p><strong>h5</strong> – specify if the format of the MCRaT output files is hdf5 files or not (denotes if using an old format or
+a newer format of saving files)</p></li>
+<li><p><strong>photon_type</strong> – can be set to ‘s’, ‘i’, or left as None in order to select thermal synchrotron photons, injected photons, or all the photons in the simulation for analysis</p></li>
+<li><p><strong>energy_range</strong> – has units of keV, can be left as None to choose photons of all energy ranges for analysis or it can be set to an array with [min energy, max energy] e.g. [1, 10] for 1 to 10 keV (limits inclusive)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>returns the spectrum with the specified units, for the photons in each energy bin</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mclib.zero_norm">
+<code class="sig-prename descclassname">mclib.</code><code class="sig-name descname">zero_norm</code><span class="sig-paren">(</span><em class="sig-param">P</em><span class="sig-paren">)</span><a class="headerlink" href="#mclib.zero_norm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a photon 4 momentum and checks if it satisfies the 0 norm condition of photons. If not, it corrects the 4
+mometum by assuming that the energy is correct.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>P</strong> – photon 4 monetum</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>returns the correct 0 normed photon 4 momentum</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">ProcessMCRaT</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">mclib.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="read_process_files.html">read_process_files.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mcrat_movie.html">mcrat_movie.py</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Welcome to ProcessMCRaT’s documentation!</a></li>
+      <li>Next: <a href="read_process_files.html" title="next chapter">read_process_files.py</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Tyler Parsotan.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/mclib.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
