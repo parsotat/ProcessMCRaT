@@ -8,7 +8,7 @@ EVENT_FILES/
 EVENT_FILE_ANALYSIS_PLOTS/
 *.mp4
 *.pdf
-!Doc/*/*.pdf
+!Doc/_build/latex/*.pdf
 *.pickle
 *.jp*
 !Doc/processmcrat_logo.*
