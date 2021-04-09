@@ -13,6 +13,8 @@ These scripts and the documentation are under development and are still adapting
 ***
 *** To avoid retyping too much info. Do a search and replace for the following:
 *** parsotat, ProcessMCRaT, twitter_handle, email, project_title, project_description
+
+steps to upload a distribution to PyPi is at: https://stackoverflow.com/questions/1471994/what-is-setup-py
 -->
 
 
@@ -39,7 +41,7 @@ These scripts and the documentation are under development and are still adapting
 <br />
 <p align="center">
   <a href="https://github.com/parsotat/ProcessMCRaT">
-    <img src="Doc/ProcessMCRaT_Logo.jpg" alt="Logo">
+    <img src="Doc/processmcrat_logo.jpg" alt="Logo">
   </a>
 
   <h3 align="center">The ProcessMCRaT Library</h3>
