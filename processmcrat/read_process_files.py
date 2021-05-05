@@ -710,7 +710,8 @@ def cfit(event_file,time_start, time_end, dnulog=0.1, hdf5=True, plotting=False,
 
     # restrict to 8 keV and on
     fermi_gbm_e_min=8
-    idx = np.where(nucen > fermi_gbm_e_min)
+    fermi_gbm_e_max=40e3
+    idx = np.where((nucen > fermi_gbm_e_min) & (nucen <= fermi_gbm_e_max))
     spex = spex[idx]
     nucen = nucen[idx]
     spexe = spexe[idx]
