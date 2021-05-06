@@ -1,1 +1,3 @@
 v0.0.1, 4/8/21 -- Initial release.
+v0.2.0, 5/5/21 -- Changed to an object oriented structure for the package.
+v0.2.0, 5/5/21 -- Fixed error with data files not being included with package.
