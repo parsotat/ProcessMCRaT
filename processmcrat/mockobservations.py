@@ -165,7 +165,7 @@ class MockObservation(object):
         :param appendfile:
         :return:
         """
-        obs_id=create_obs_id(id)
+        obs_id=self.create_obs_id(id)
         file_name=obs_id +'.evt'
 
         if save_directory is None:

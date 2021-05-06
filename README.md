@@ -16,6 +16,7 @@ These scripts and the documentation are under development and are still adapting
 
 steps to upload a distribution to PyPi is at: https://stackoverflow.com/questions/1471994/what-is-setup-py
 can test a the distribution locally with 'pip install -e .' from the main directory
+to clone repo with notebook/mcdata need to install git LFS
 -->
 
 

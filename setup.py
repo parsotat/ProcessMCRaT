@@ -8,7 +8,7 @@ with open('requirements.txt') as f:
 
 setup(
    name='ProcessMCRaT',
-   version='0.3.0',
+   version='0.3.1',
    description='The ProcessMCRaT library is a collection of scripts that can be used to process the output of the MCRaT code.',
    license="MIT",
    long_description=long_description,
