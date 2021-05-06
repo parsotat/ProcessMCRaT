@@ -15,6 +15,7 @@ These scripts and the documentation are under development and are still adapting
 *** parsotat, ProcessMCRaT, twitter_handle, email, project_title, project_description
 
 steps to upload a distribution to PyPi is at: https://stackoverflow.com/questions/1471994/what-is-setup-py
+can test a the distribution locally with 'pip install -e .' from the main directory
 -->
 
 
