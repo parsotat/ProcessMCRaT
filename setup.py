@@ -1,7 +1,10 @@
 from setuptools import setup
 
-with open("README.rst", 'r') as f:
-    long_description = f.read()
+try:
+    with open("README.rst", 'r') as f:
+        long_description = f.read()
+except FileNotFoundError:
+    long_description = ''
     
 with open('requirements.txt') as f:
     required = f.read().splitlines()
