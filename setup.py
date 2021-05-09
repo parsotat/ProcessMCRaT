@@ -8,7 +8,7 @@ except FileNotFoundError:
     
 with open('requirements.txt') as f:
     required = f.read().splitlines()
-
+#update version in init as well
 setup(
    name='ProcessMCRaT',
    version='0.3.3',
