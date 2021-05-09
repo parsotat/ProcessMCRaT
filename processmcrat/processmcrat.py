@@ -11,6 +11,8 @@ import h5py as h5
 import numpy as np
 from astropy import units as u
 from astropy import constants as const
+from astropy.units import UnitConversionError
+
 
 
 class PhotonList(object):
@@ -58,17 +60,20 @@ class PhotonList(object):
         self.file_index=file_index
 
     def get_energies(self, unit=u.keV):
-        #if passed a unit alue with a scaling factor like u.eV/1000 the first one will work otherwise its just a unit
         try:
-            return self.p0*(const.c.cgs.value*u.erg).to(unit.unit, equivalencies=u.spectral()).value*unit.value
-        except AttributeError:
-            return self.p0 * (const.c.cgs.value * u.erg).to(unit, equivalencies=u.spectral()).value
+            return self.p0 * (const.c.cgs.value * u.erg).to(unit).value
+        except UnitConversionError:
+            #trying to get wavelength so need to convert to si units for energy first
+            x=self.p0 * (const.c.cgs.value * u.erg)
+            return x.to(unit, equivalencies=u.spectral()).value
 
     def get_comv_energies(self, unit=u.keV):
         try:
-            return self.comv_p0*(const.c.cgs.value*u.erg).to(unit.unit, equivalencies=u.spectral()).value*unit.value
-        except AttributeError:
-            return self.comv_p0 * (const.c.cgs.value * u.erg).to(unit, equivalencies=u.spectral()).value
+            return self.comv_p0*(const.c.cgs.value*u.erg).to(unit).value
+        except UnitConversionError:
+            #trying to get wavelength so need to convert to si units for energy first
+            x=self.comv_p0 * (const.c.cgs.value * u.erg)
+            return x.to(unit, equivalencies=u.spectral()).value
 
 
 def curdir():
