@@ -121,7 +121,7 @@ def plot_spectral_fit_hist(spect_dict_list, observational_data=None):
 
         plt.show()
 
-    return alphas, betas, peak_energies, figs, axes
+    return figs, axes, alphas, betas, peak_energies
 
 def plot_spectrum(spectrum_dict, photon_num_min=10, plot_polarization=False, plot_fit=False):
     """

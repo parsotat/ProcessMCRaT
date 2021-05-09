@@ -60,15 +60,15 @@ class PhotonList(object):
     def get_energies(self, unit=u.keV):
         #if passed a unit alue with a scaling factor like u.eV/1000 the first one will work otherwise its just a unit
         try:
-            return self.p0*(const.c.cgs.value*u.erg.to(unit.unit, equivalencies=u.spectral()))*unit.value
+            return self.p0*(const.c.cgs.value*u.erg).to(unit.unit, equivalencies=u.spectral()).value*unit.value
         except AttributeError:
-            return self.p0 * (const.c.cgs.value * u.erg.to(unit, equivalencies=u.spectral()))
+            return self.p0 * (const.c.cgs.value * u.erg).to(unit, equivalencies=u.spectral()).value
 
     def get_comv_energies(self, unit=u.keV):
         try:
-            return self.comv_p0*(const.c.cgs.value*u.erg.to(unit.unit, equivalencies=u.spectral()))*unit.value
+            return self.comv_p0*(const.c.cgs.value*u.erg).to(unit.unit, equivalencies=u.spectral()).value*unit.value
         except AttributeError:
-            return self.comv_p0 * (const.c.cgs.value * u.erg.to(unit, equivalencies=u.spectral()))
+            return self.comv_p0 * (const.c.cgs.value * u.erg).to(unit, equivalencies=u.spectral()).value
 
 
 def curdir():

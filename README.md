@@ -36,8 +36,8 @@ to clone repo with notebook/mcdata need to install git LFS
 [![MIT License][license-shield]][license-url]  
 [![Google Scholar Badge](https://img.shields.io/badge/Google-Scholar-lightgrey)](https://scholar.google.com/citations?user=cIxaj3MAAAAJ&hl=en)
 [![ResearchGate Badge](https://img.shields.io/badge/Research-Gate-9cf)](https://www.researchgate.net/profile/Tyler-Parsotan)
-<!-- <a href="https://ascl.net/2005.019"><img src="https://img.shields.io/badge/ascl-2005.019-blue.svg?colorB=262255" alt="ascl:2005.019" /></a> -->
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/parsotat/ProcessMCRaT/HEAD?filepath=notebooks%2Fprocessmcrat_example.ipynb)
+<!-- <a href="https://ascl.net/2005.019"><img src="https://img.shields.io/badge/ascl-2005.019-blue.svg?colorB=262255" alt="ascl:2005.019" /></a> -->
 
 
 <!-- PROJECT LOGO -->
@@ -125,7 +125,7 @@ The following are necessary to use the ProcessMCRaT code :
    ```sh
    pip install ProcessMCRaT
    ```
-3. Test the installation by running `python -c "from processmcrat import mclib as m"`
+3. Test the installation by running `python -c "import processmcrat as pm"`
 
 
 <!-- _These steps are provided in greater detail in the  [Documentation](https://github.com/parsotat/ProcessMCRaT/tree/master/Doc)_ -->
