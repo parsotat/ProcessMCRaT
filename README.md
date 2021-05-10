@@ -16,7 +16,6 @@ These scripts and the documentation are under development and are still adapting
 
 steps to upload a distribution to PyPi is at: https://stackoverflow.com/questions/1471994/what-is-setup-py
 can test a the distribution locally with 'pip install -e .' from the main directory
-to clone repo with notebook/mcdata need to install git LFS
 -->
 
 
@@ -98,9 +97,10 @@ to clone repo with notebook/mcdata need to install git LFS
 
 <!-- [![Product Name Screen Shot][product-screenshot]](https://example.com) -->
 
-A collection of python scripts are being developed  in order to aid the general comunity in using the MCRaT code and processing the results of the radiative transfer simulations. These scripts are both tools and examples that can be used or modified to better fit the specific needs of the community. Some portions of the library are specifically compatible with FLASH hydrodynamics files, such as `mcrat_movie.py`, however the main utility fuctions that are meant to process the output of the MCRaT code are complete.
+The ProcessMCRaT package allows for the outputs of the MCRaT simulations to be processed in a number of different ways. The package allows the user to quickly analyze the MCRaT simulation by conveniently creating a number of mock observations for a variety of observer viewing angles and then use those observations to calculate spectra, light curves, and polarizations. The package also includes convenience plotting functions that allow quick, convenient plotting of these various quantities to fully explore the MCRaT results. These functions are also meant to be examples of how to work with the outputs of the ProcessMCRaT library.
 
-These scripts and the documentation are under development and are still adapting to the developments that are occuring with MCRaT.  While the documentation is being developed, with example jupyter notebooks, the <a href="#usage">Usage</a> section introduces how to use the main utility functions to produce spectra and light curves from the MCRaT outputs.
+There is also a Jupyter notebook that is included on Github that outlines the usage of the library, and many functionalities that the library offers. This notebook can be accessed by cloning the repository or loading the notebook in Binder  (see the <a href="#usage">Usage</a> section). The detailed documentation for each function is still under development, but the Jupyter notebook covers the ways that each function can be used.
+
 
 ### Built With
 
@@ -125,40 +125,29 @@ The following are necessary to use the ProcessMCRaT code :
    ```sh
    pip install ProcessMCRaT
    ```
-3. Test the installation by running `python -c "import processmcrat as pm"`
+3. Test the installation by running `python -c "import processmcrat as pm"` or by trying the Jupyter documentation notebook included in the  github 
+    *   To gain access to the Jupyter notebook, either clone the repo with `git clone https://github.com/parsotat/ProcessMCRaT.git` and run `Jupyter notebook` at the comand line in the notebooks directory
 
-
-<!-- _These steps are provided in greater detail in the  [Documentation](https://github.com/parsotat/ProcessMCRaT/tree/master/Doc)_ -->
+<!-- _These steps are provided in greater detail in the included [Jupyter notebook](https://github.com/parsotat/ProcessMCRaT/tree/master/notebooks)_ -->
 
 
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-The typical steps in using the ProcessMCRaT library is as follows:
+The typical steps in using the ProcessMCRaT library is shown in the included Jupyter notebook, with explainations of the many functions that are included in the package. To access the notebook, either:
+*   To gain access to the Jupyter notebook, either clone the repo with `git clone https://github.com/parsotat/ProcessMCRaT.git` and run `Jupyter notebook` at the comand line in the notebooks directory
+Or
+*   Access the notebook interactively online via Binder. You can click the launch Binder link at the top of the ReadMe or go directly to [https://mybinder.org/v2/gh/parsotat/ProcessMCRaT/HEAD?filepath=notebooks%2Fprocessmcrat_example.ipynb](https://mybinder.org/v2/gh/parsotat/ProcessMCRaT/HEAD?filepath=notebooks%2Fprocessmcrat_example.ipynb)
 
-1. Import ProcessMCRaT's mclib in Python
-```sh
-from processmcrat import mclib as m
-```
-2. Create an event file for the MCRaT simulation
-```sh
-m.event_h5(...)
-```
-where the arguments that can be passed to the `event_h5` function can be found in the partially completed  [Documentation](https://github.com/parsotat/ProcessMCRaT/tree/master/Doc)
-
-3. Calculate the light curves and spectra from the event file using the `lcur` or `spex` functions
-
-
-<!-- _For more details, please refer to the [Documentation](https://github.com/parsotat/ProcessMCRaT/tree/master/Doc)_ -->
+<!-- _For more details, please refer to the included [Jupyter notebook](https://github.com/parsotat/ProcessMCRaT/tree/master/notebooks)_ -->
 
 
 
 <!-- ROADMAP -->
 ## Roadmap
 
-1. In the near future there will be extensive documentation of the code including jupyter notebooks that will help guide users on using the library. 
-2. Additionally, the library will be able to be easily installed via the `conda` command line interface
-3. The code will include the means to include various instrument response functions in the creation of mock observed light curves, spectra, and polarizations
+1. The code will include the means to include various instrument response functions in the creation of mock observed light curves, spectra, and polarizations.
+2. The package will also include support for analyzing the position of photons in a given hydrodynamic simulation, allowing for analysis of hydrodynamic structures and mock observables at the same time. 
 
 See the [open issues](https://github.com/parsotat/ProcessMCRaT/issues) for a list of proposed features (and known issues).
 
