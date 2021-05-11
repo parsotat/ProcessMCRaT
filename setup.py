@@ -11,15 +11,15 @@ with open('requirements.txt') as f:
 #update version in init as well
 setup(
    name='ProcessMCRaT',
-   version='0.3.3',
-   description='The ProcessMCRaT library is a collection of scripts that can be used to process the output of the MCRaT code.',
+   version='1.0.0',
+   description='The ProcessMCRaT library is a python package that can be used to process the output of the MCRaT code.',
    license="MIT",
    long_description=long_description,
    author='Tyler Parsotan',
    author_email='parsotat@oregonstate.edu',
    url="https://github.com/parsotat/ProcessMCRaT",
    classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Science/Research',
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python',

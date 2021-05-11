@@ -4,3 +4,4 @@ v0.3.0, 5/5/21 -- Fixed error with data files not being included with package.
 v0.3.1, 5/6/21 -- Fixed error with saving event file.
 v0.3.2, 5/8/21 -- Fixed error with energy unit to wavelength unit.
 v0.3.3, 5/8/21 -- Properly fixed error with energy unit to wavelength unit.
+v1.0.0, 5/10/21 -- Finalized first version of the package. Updated README.

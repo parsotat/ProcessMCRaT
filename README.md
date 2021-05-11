@@ -49,7 +49,7 @@ can test a the distribution locally with 'pip install -e .' from the main direct
   <h3 align="center">The ProcessMCRaT Library</h3>
 
   <p align="center">
-    The ProcessMCRaT library is a collection of scripts that can be used to process the output of the <a href="https://github.com/lazzati-astro/MCRaT">MCRaT</a> code.
+    The ProcessMCRaT library is a python package that can be used to process the output of the <a href="https://github.com/lazzati-astro/MCRaT">MCRaT</a> code.
     <br />
     <a href="https://github.com/parsotat/ProcessMCRaT/tree/master/Doc"><strong>Explore the docs »</strong></a>
     <br />

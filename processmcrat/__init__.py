@@ -4,7 +4,7 @@ __all__ = [
         'mclib',
         'plotting'
         ]
-__version__='3.3.0' # make sure this matches the setup.py
+__version__='1.0.0' # make sure this matches the setup.py
 
 from .processmcrat import *
 from .mclib import *
