@@ -501,9 +501,9 @@ class MockObservation(object):
             if idx[0].size > 0:
                 if 'erg' in spectrum_unit.to_string():
                     spectrum[i] = np.sum(self.detected_photons.weight[idx] * \
-                                   self.detected_photons.get_energies(unit=unit.erg)[idx])/delta_energy[i]  #/ (delta_t)
+                                   self.detected_photons.get_energies(unit=unit.erg)[idx])/delta_energy[i] / (delta_t)
                 elif 'ct' in spectrum_unit.to_string():
-                    spectrum[i] = np.sum(self.detected_photons.weight[idx])/delta_energy[i] #/ (delta_t)
+                    spectrum[i] = np.sum(self.detected_photons.weight[idx])/delta_energy[i]/ (delta_t)
                 else:
                     print('The spectrum unit can only be set as erg/s/energy_unit or counts/s/energy_unit currently.')
 
