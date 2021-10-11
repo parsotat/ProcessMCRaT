@@ -334,7 +334,7 @@ class MockObservation(object):
                 else:
                     print('The light curve unit can only be set as erg/s or counts/s currently.')
 
-                lc_err[i] = lc[i] / np.sqrt(idx[0].size)
+                lc_err[i] = lc[i] / np.sqrt(idx[0].size) #do i need to implement same error here as for the spectrum?
                 ph_num[i] = idx[0].size
                 num_scatt[i] = np.average(self.detected_photons.scatterings[idx], weights=self.detected_photons.weight[idx])
                 if self.read_stokes:
@@ -370,7 +370,7 @@ class MockObservation(object):
         lc, lc_err, ph_num, num_scatt, pol_deg, stokes_i, stokes_q, stokes_u, stokes_v, pol_angle, pol_err, fit, fit_errors, model_use=\
             self._time_iterator(times, lc_unit, photon_type=photon_type, energy_range=energy_range, energy_unit=energy_unit, fit_spectrum=fit_spectrum, spectral_sample_num=spectral_sample_num)
 
-        if self.hydrosim_dim == 2:
+        if self.hydrosim_dim == 2: #include this factor in the spectra
             factor = 2 * np.pi * (
                         np.cos(np.deg2rad(self.theta_observer - self.acceptancetheta_observer / 2.))\
                         - np.cos(np.deg2rad(self.theta_observer + self.acceptancetheta_observer / 2.)))
@@ -507,7 +507,8 @@ class MockObservation(object):
                 else:
                     print('The spectrum unit can only be set as erg/s/energy_unit or counts/s/energy_unit currently.')
 
-                spectrum_error[i] = spectrum[i] / np.sqrt(idx[0].size)
+                spectrum_error[i] = np.sqrt(np.mean(self.detected_photons.weight[idx]**2)/np.mean(self.detected_photons.weight[idx])**2)*\
+                                    spectrum[i]/np.sqrt(idx[0].size) #spectrum[i] / np.sqrt(idx[0].size) see https://arxiv.org/pdf/0909.0708.pdf for variance calculation
                 ph_num[i] = idx[0].size
                 num_scatt[i] = np.average(self.detected_photons.scatterings[idx], weights=self.detected_photons.weight[idx])
 
