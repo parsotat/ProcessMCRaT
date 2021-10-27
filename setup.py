@@ -16,7 +16,7 @@ setup(
    license="MIT",
    long_description=long_description,
    author='Tyler Parsotan',
-   author_email='parsotat@oregonstate.edu',
+   author_email='parsotat@umbc.edu',
    url="https://github.com/parsotat/ProcessMCRaT",
    classifiers=[
         'Development Status :: 5 - Production/Stable',
