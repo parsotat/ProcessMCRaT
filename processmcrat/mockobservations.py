@@ -59,7 +59,7 @@ class MockObservation(object):
         Sets up the MockObservation object that allows the user to create mock observations. There are two ways to
         initialize this: 1) using a McratSimLoad object or 2) reading in a previously created event file
 
-        :param theta_observer:
+        :param theta_observer: observer theta in degrees
         :param acceptancetheta_observer:
         :param r_observer:
         :param frames_per_sec:
@@ -86,6 +86,7 @@ class MockObservation(object):
 
             loaded_photons = mcratsimload_obj.loaded_photons
 
+            """ old way of calculating detection times
             # calculate projection of photons position vector onto vector in the observer's direction
             photon_radius = np.sqrt(loaded_photons.r0 ** 2 + loaded_photons.r1 ** 2 + loaded_photons.r2 ** 2)
             photon_theta_position = np.arctan2(np.sqrt(loaded_photons.r0 ** 2 + loaded_photons.r1 ** 2),
@@ -112,6 +113,52 @@ class MockObservation(object):
             projected_velocity = const.c.cgs.value * np.cos(photon_theta_velocity[jj] - np.deg2rad(self.theta_observer))
             photon_travel_time = dr / projected_velocity
             detection_times = np.abs(photon_travel_time) + frame_time - (self.r_observer / const.c.cgs.value)
+            """
+
+            #calculate observer coordinates based on inputs from user and set up photon quantities to be in 2D or full 3D
+            if hydrosim_dim ==2:
+                observer_position = self.r_observer * np.array([np.sin(np.deg2rad(self.theta_observer)), \
+                                                                np.cos(np.deg2rad(self.theta_observer))])
+                photon_position = np.array([np.sqrt(loaded_photons.r0 ** 2 + loaded_photons.r1 ** 2), loaded_photons.r2])
+                photon_velocity = np.array([np.sqrt(loaded_photons.p1 ** 2 + loaded_photons.p2 ** 2), loaded_photons.p3])\
+                                  * const.c.cgs.value / loaded_photons.p0
+                photon_theta_velocity = np.rad2deg(np.arctan2(photon_velocity[0], photon_velocity[1]))
+            else:
+                observer_position = self.r_observer * np.array(
+                    [np.cos(np.deg2rad(self.phi_observer))*np.sin(np.deg2rad(self.theta_observer)), \
+                     np.sin(np.deg2rad(self.phi_observer))*np.sin(np.deg2rad(self.theta_observer)), \
+                     np.cos(np.deg2rad(self.theta_observer))])
+                photon_position = np.array([loaded_photons.r0, loaded_photons.r1, loaded_photons.r2])
+                photon_velocity = np.array([loaded_photons.p1, loaded_photons.p2, loaded_photons.p3]) \
+                                  * const.c.cgs.value / loaded_photons.p0
+                photon_theta_velocity = np.rad2deg(np.arccos(photon_velocity[2]/np.linalg.norm(photon_velocity, axis=0)))
+                #convert arctan angle to degrees from 0-360 degrees for phi
+                photon_phi_velocity = (np.rad2deg(np.arctan2(photon_velocity[1], photon_velocity[0])) + 360) % 360
+
+            #identify which photons are moving towards the observer, angles are all in degrees
+            jj = np.where((photon_theta_velocity >= self.theta_observer - self.acceptancetheta_observer / 2.) \
+                          & (photon_theta_velocity < self.theta_observer + self.acceptancetheta_observer / 2.))[0]
+            if self.hydrosim_dim == 3:
+                kk=np.where((photon_phi_velocity >= self.phi_observer - self.acceptancephi_observer / 2.) \
+                          & (photon_phi_velocity < self.phi_observer + self.acceptancephi_observer / 2.))[0]
+                jj=np.intersect1d(jj,kk) #combine both requirements and get indexes of photons that meet both
+
+            #Calculate the difference between the location of the detector and the photon
+            dr = observer_position[:, np.newaxis] - photon_position
+
+            # project photon velocity onto the displacement vector dr
+            photon_velocity_project_dr = observer_position[:, np.newaxis] * np.dot(observer_position,
+                                                                                   photon_velocity) / r_observer ** 2
+
+            #calculate photon travel time as distance divided by speed
+            photon_travel_time = np.linalg.norm(dr, axis=0)/np.linalg.norm(photon_velocity_project_dr, axis=0)
+
+            #calculate detection time
+            frame_time = self.frame_num / self.fps
+            detection_times = np.abs(photon_travel_time) + frame_time - (self.r_observer / const.c.cgs.value)
+
+            #apply condition
+            detection_times=detection_times[jj]
 
             self.detected_photons = ObservedPhotonList(loaded_photons.r0[jj], loaded_photons.r1[jj],
                                                        loaded_photons.r2[jj], loaded_photons.p0[jj], \

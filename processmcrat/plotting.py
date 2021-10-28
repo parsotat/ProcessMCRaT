@@ -202,7 +202,7 @@ def plot_spectrum(spectrum_dict, photon_num_min=10, plot_polarization=False, plo
                                 textcoords='offset points', ha='left', va='bottom')
 
         if spectrum_dict['model_use'] == 'c':
-            axarr_spex.plot(nucen, comptonized_function(spectrum_dict['energy_bin_center'][idx], spectrum_dict['fit']['alpha'], spectrum_dict['fit']['break_energy'], spectrum_dict['fit']['normalization']), color='k', label='Fitted COMP',
+            axarr_spex.plot(spectrum_dict['energy_bin_center'][idx], comptonized_function(spectrum_dict['energy_bin_center'][idx], spectrum_dict['fit']['alpha'], spectrum_dict['fit']['break_energy'], spectrum_dict['fit']['normalization']), color='k', label='Fitted COMP',
                             ls='solid', lw=3, zorder=3)
 
             axarr_spex.annotate(r'$\alpha$' + '=' + np.str(spectrum_dict['fit']['alpha']).split('.')[0] + '.' + np.str(spectrum_dict['fit']['alpha']).split('.')[1][0] +
