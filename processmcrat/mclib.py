@@ -31,6 +31,11 @@ def band_function(energies, alpha, beta, break_energy, normalization, energy_uni
 	except AttributeError:
 		break_energy = break_energy
 
+	try:
+		normalization=normalization.value
+	except AttributeError:
+		normalization = normalization
+
 
 	model=np.empty(energies.size)
 	kk=np.where(energies<((alpha-beta)*break_energy))
@@ -54,9 +59,60 @@ def wien_function(energies, temp, normalization, energy_unit=unit.keV):
 	"""
 
 	energies=energies*energy_unit.to(unit.erg)
+	try:
+		energies=energies.value
+	except AttributeError:
+		energies = energies
+
+	try:
+		temp=temp.value
+	except AttributeError:
+		temp = temp
+  
+	try:
+		normalization=normalization.value
+	except AttributeError:
+		normalization = normalization
+
+
 
 	model =np.empty(energies.size)
 	model=(energies**3/(const.h.cgs.value*const.c.cgs.value)**2)*np.exp(-energies/(const.k_B.cgs.value*temp))
+	energies=energies*unit.erg.to(energy_unit)
+	model=model/np.trapz(model,x=energies)*normalization
+
+	return model
+ 
+def blackbody_function(energies, temp, normalization, energy_unit=unit.keV):
+	"""
+
+	:param energies:
+	:param temp:
+	:param normalization:
+	:param energy_unit:
+	:return:
+	"""
+
+	energies=energies*energy_unit.to(unit.erg)
+	try:
+		energies=energies.value
+	except AttributeError:
+		energies = energies
+
+	try:
+		temp=temp.value
+	except AttributeError:
+		temp = temp
+  
+	try:
+		normalization=normalization.value
+	except AttributeError:
+		normalization = normalization
+
+
+	model =np.empty(energies.size)
+	model=(energies**3/(const.h.cgs.value*const.c.cgs.value)**2)/(np.exp(energies/(const.k_B.cgs.value*temp))-1)
+	energies = energies * unit.erg.to(energy_unit)
 	model=model/np.trapz(model,x=energies)*normalization
 
 	return model
@@ -80,6 +136,11 @@ def comptonized_function(energies, alpha, break_energy, normalization, energy_un
 		break_energy=break_energy.value
 	except AttributeError:
 		break_energy = break_energy
+  
+	try:
+		normalization=normalization.value
+	except AttributeError:
+		normalization = normalization
 
 
 	model=np.empty(energies.size)
