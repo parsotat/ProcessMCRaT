@@ -86,15 +86,14 @@ def curdir():
 class McratSimLoad(object):
     def __init__(self, file_directory=None):
         """
-        Initalized the mload class with the directory that the MCRaT files are located in, and the frames per second of
-        the simulation (this is found in the MCRaT mc.par file).
+        Initalized the mload class with the directory that the MCRaT files are located in
         :param file_directory:
         :param frames_per_second:
         """
         if file_directory is not None:
             self.file_directory=file_directory
         else:
-            self.file_directory=curdir()
+            self.file_directory=os.curdir()
 
     def load_frame(self, frame_num, read_comv=False, read_stokes=False, read_type=False):
         """

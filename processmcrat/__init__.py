@@ -4,9 +4,10 @@ __all__ = [
         'mclib',
         'plotting'
         ]
-__version__='1.0.0' # make sure this matches the setup.py
+__version__='2.0.0' # make sure this matches the setup.py
 
 from .processmcrat import *
 from .mclib import *
 from .mockobservations import *
 from .plotting import *
+from .hydrosim_io import *

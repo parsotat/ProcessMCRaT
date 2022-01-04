@@ -70,7 +70,10 @@ class MockObservation(object):
 
         self.theta_observer = theta_observer
         self.acceptancetheta_observer = acceptancetheta_observer
-        self.phi_observer = phi_observer
+        if (phi_observer<0.0 or phi_observer>360.0):
+            self.phi_observer = (phi_observer+ 360) % 360 #put it in domain of 0-360 degrees
+        else:
+            self.phi_observer = phi_observer
         self.acceptancephi_observer = acceptancephi_observer
         self.r_observer = r_observer
         self.fps = frames_per_sec
@@ -139,16 +142,24 @@ class MockObservation(object):
             jj = np.where((photon_theta_velocity >= self.theta_observer - self.acceptancetheta_observer / 2.) \
                           & (photon_theta_velocity < self.theta_observer + self.acceptancetheta_observer / 2.))[0]
             if self.hydrosim_dim == 3:
-                kk=np.where((photon_phi_velocity >= self.phi_observer - self.acceptancephi_observer / 2.) \
-                          & (photon_phi_velocity < self.phi_observer + self.acceptancephi_observer / 2.))[0]
+                phi_min=(self.phi_observer - self.acceptancephi_observer / 2. + 360) % 360
+                phi_max=(self.phi_observer + self.acceptancephi_observer / 2. + 360) % 360
+            
+                #see if the acceptance phi goes from a negative number to a positive number
+                if (phi_min > phi_max):
+                    #if it is, make the condiiton be or to collect the values between the two limits which etend past the 0 degree limit
+                    kk=np.where((photon_phi_velocity >= phi_min) \
+                          | (photon_phi_velocity < phi_max))[0]
+                else:
+                    kk=np.where((photon_phi_velocity >= phi_min) \
+                          & (photon_phi_velocity < phi_max))[0]
                 jj=np.intersect1d(jj,kk) #combine both requirements and get indexes of photons that meet both
 
             #Calculate the difference between the location of the detector and the photon
             dr = observer_position[:, np.newaxis] - photon_position
 
             # project photon velocity onto the displacement vector dr
-            photon_velocity_project_dr = observer_position[:, np.newaxis] * np.dot(observer_position,
-                                                                                   photon_velocity) / r_observer ** 2
+            photon_velocity_project_dr = observer_position[:, np.newaxis] * np.dot(observer_position, photon_velocity) / r_observer ** 2
 
             #calculate photon travel time as distance divided by speed
             photon_travel_time = np.linalg.norm(dr, axis=0)/np.linalg.norm(photon_velocity_project_dr, axis=0)
