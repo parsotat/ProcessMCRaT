@@ -16,26 +16,30 @@ from processmcrat import curdir
 import tables as tb
 
 class HydroSimLoad(object):
-    def __init__(self, fileroot_name, file_directory=None, sim_type='flash', coordinate_sys='cartesian', density_scale=1*u.g/u.cm**3,\
-                 length_scale=1*u.cm, velocity_scale=const.c.cgs):
+    def __init__(self, fileroot_name, file_directory=None, hydrosim_type='flash', coordinate_sys='cartesian', density_scale=1*u.g/u.cm**3,\
+                 length_scale=1*u.cm, velocity_scale=const.c.cgs, hydrosim_dim=2):
         """
         Initalized the hydrosimload class with the directory that the hydro files are located in, the
         :param file_directory:
         """
-        if file_directory is not None:
-            self.file_directory=file_directory
-        else:
-            self.file_directory=curdir()
-        self.fileroot_name=fileroot_name
 
-        self.coordinate_sys=coordinate_sys
-        self.sim_type=sim_type
-        self.density_scale=density_scale
-        self.length_scale=length_scale
-        self.velocity_scale=velocity_scale
-        self.pressure_scale=density_scale*velocity_scale**2
-        self.magnetic_scale=np.sqrt(4*np.pi*density_scale*velocity_scale**2)
-        self.time_scale=length_scale/velocity_scale
+        if isinstance(density_scale, u.Quantity) and isinstance(length_scale, u.Quantity) and isinstance(velocity_scale, u.Quantity):
+            if file_directory is not None:
+                self.file_directory=file_directory
+            else:
+                self.file_directory=curdir()
+            self.fileroot_name=fileroot_name
+
+            self.coordinate_sys=coordinate_sys
+            self.hydrosim_type=hydrosim_type
+            self.density_scale=density_scale
+            self.length_scale=length_scale
+            self.velocity_scale=velocity_scale
+            self.pressure_scale=density_scale*velocity_scale**2
+            self.magnetic_scale=np.sqrt(4*np.pi*density_scale*velocity_scale**2)
+            self.time_scale=length_scale/velocity_scale
+        else:
+            print('Make sure that the density, length and velocity scales have units associated with them.')
 
     def load_frame(self, frame_num):
 
@@ -45,13 +49,15 @@ class HydroSimLoad(object):
         if frame_num < 10: sfrm = '000' + str(frame_num)
 
         self.frame_num=sfrm
-        if 'flash' in self.coordinate_sys or 'Flash' in self.coordinate_sys:
+        if 'flash' in self.hydrosim_type or 'Flash' in self.hydrosim_type:
             hydro_dict=self._read_flash_file(sfrm)
-        elif 'pluto' in self.coordinate_sys or 'PLUTO' in self.coordinate_sys:
+        elif 'pluto' in self.hydrosim_type or 'PLUTO' in self.hydrosim_type:
             print("Pluto and Pluto-chombo are not yet supported.")
             #hydro_dict=self.read_pluto_file(sfrm)
+        else:
+            print(self.hydrosim_type+" is not supported as this time.")
 
-        self.hydro_data= hydro_dict
+        self.hydro_data = hydro_dict
 
     def _read_flash_file(self, frame_num):
 
@@ -96,16 +102,37 @@ class HydroSimLoad(object):
         nty = nty.read()
         file.close()
         jj = np.where(nty == 1)
-        xx = np.array(xx[jj, 0, :, :]) * self.length_scale
-        #  yy=np.array(yy[jj,0,:,:]+1) this takes care of the fact that lngths scales with 1e9
-        yy = np.array(yy[jj, 0, :, :]) * self.length_scale
-        szxx = np.array(szxx[jj, 0, :, :]) * self.length_scale
-        szyy = np.array(szyy[jj, 0, :, :]) * self.length_scale
-        vx = np.array(vx[jj, 0, :, :])*self.velocity_scale
-        vy = np.array(vy[jj, 0, :, :])*self.velocity_scale
-        dens = np.array(dens[jj, 0, :, :])*self.density_scale
-        pres = np.array(pres[jj, 0, :, :])*self.pressure_scale
+        xx = np.array(xx[jj, 0, :, :]).flatten() * self.length_scale
+        yy = np.array(yy[jj, 0, :, :]).flatten() * self.length_scale
+        szxx = np.array(szxx[jj, 0, :, :]).flatten() * self.length_scale
+        szyy = np.array(szyy[jj, 0, :, :]).flatten() * self.length_scale
+        vx = np.array(vx[jj, 0, :, :]).flatten()*self.velocity_scale
+        vy = np.array(vy[jj, 0, :, :]).flatten()*self.velocity_scale
+        dens = np.array(dens[jj, 0, :, :]).flatten()*self.density_scale
+        pres = np.array(pres[jj, 0, :, :]).flatten()*self.pressure_scale
+        gg = 1. / np.sqrt(1. - ((vx.cgs/const.c.cgs) ** 2 + (vy.cgs/const.c.cgs) ** 2))
 
-        hydro_dict=dict(x0=xx, x1=yy, x2=None, dx0=szxx, dx1=szyy, dx2=None, pres=pres, dens=dens, v0=vx, v1=vy, )
+        hydro_dict=dict(x0=xx, x1=yy, dx0=szxx, dx1=szyy, pres=pres, dens=dens, v0=vx, v1=vy, gamma=gg)
 
         return hydro_dict
+
+    def apply_spatial_limits(self, x0_min, x0_max, x1_min, x1_max, x2_min=None, x2_max=None):
+
+        #make sure that all limits have units associated with them
+        if isinstance(x0_min, u.Quantity) and isinstance(x0_max, u.Quantity) and isinstance(x1_min,u.Quantity) and \
+                isinstance(x1_max,u.Quantity) and (isinstance(x2_min, u.Quantity) or x2_min is None) and \
+                (isinstance(x2_max, u.Quantity) or x2_max is None):
+            if x2_max is None and x2_min is None:
+                idx = np.where((self.hydro_data['x0']  >= x0_min) & (self.hydro_data['x0'] < x0_max) \
+                               & (self.hydro_data['x1'] >= x1_min) & (self.hydro_data['x1'] < x1_max))[0]
+            else:
+                idx = np.where((self.hydro_data['x0'] >= x0_min) & (self.hydro_data['x0'] < x0_max) \
+                               & (self.hydro_data['x1'] >= x1_min) & (self.hydro_data['x1'] < x1_max)\
+                               & (self.hydro_data['x2'] >= x2_min) & (self.hydro_data['x2'] < x2_max))[0]
+
+            self.spatial_limit_idx=idx
+        else:
+            print('Make sure that each minimum and maximum coordinate value has astropy units associated with it.')
+
+    def get_data(self, key):
+        return self.hydro_data[key][self.spatial_limit_idx]
