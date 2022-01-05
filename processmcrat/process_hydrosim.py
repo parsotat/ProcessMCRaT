@@ -15,7 +15,7 @@ from astropy.units import UnitConversionError
 from processmcrat import curdir
 import tables as tb
 
-class HydroSimLoad(object):
+class HydroSim(object):
     def __init__(self, fileroot_name, file_directory=None, hydrosim_type='flash', coordinate_sys='cartesian', density_scale=1*u.g/u.cm**3,\
                  length_scale=1*u.cm, velocity_scale=const.c.cgs, hydrosim_dim=2):
         """
@@ -38,6 +38,7 @@ class HydroSimLoad(object):
             self.pressure_scale=density_scale*velocity_scale**2
             self.magnetic_scale=np.sqrt(4*np.pi*density_scale*velocity_scale**2)
             self.time_scale=length_scale/velocity_scale
+            self.spatial_limit_idx=None
         else:
             print('Make sure that the density, length and velocity scales have units associated with them.')
 
@@ -135,4 +136,8 @@ class HydroSimLoad(object):
             print('Make sure that each minimum and maximum coordinate value has astropy units associated with it.')
 
     def get_data(self, key):
-        return self.hydro_data[key][self.spatial_limit_idx]
+        if self.spatial_limit_idx is not None:
+            data=self.hydro_data[key][self.spatial_limit_idx]
+        else:
+            data=self.hydro_data[key]
+        return data
