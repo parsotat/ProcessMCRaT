@@ -4,6 +4,8 @@ from astropy.visualization import quantity_support
 quantity_support()
 
 from .hydrosim_lib import *
+from .plotting import random_photon_index
+from .mclib import lc_time_to_radius
 
 
 def create_image(hydro_obj, key, logscale=True):

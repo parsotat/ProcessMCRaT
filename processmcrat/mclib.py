@@ -409,3 +409,20 @@ def calc_amati_values(spectra_list, lightcurve_list):
 	angles = angles[angles.argsort()]
 
 	return E_iso_sim, E_iso_err_sim, E_p_sim, E_p_err_sim, angles
+
+def lc_time_to_radius(frame, fps, time):
+	return ((frame/fps)-time)*const.c.cgs
+
+def calc_line_of_sight(theta_observer, x0_min, x0_max, x1_min, x1_max):
+	x_range = np.linspace(x0_min, x0_max, 100000)
+	y_angle = np.tan(np.deg2rad(theta_observer)) ** -1 * x_range
+	idx = np.where((y_angle > x1_min) & (y_angle < x1_max))
+
+	return x_range[idx], y_angle[idx]
+
+def calc_equal_arrival_time_surface(theta_observer, frame, fps, x0_min, x0_max, time):
+	r=lc_time_to_radius(frame, fps, time)
+	x_range = np.linspace(x0_min, x0_max, 100000)
+	y_range = -np.tan(np.deg2rad(theta_observer)) * (x_range - r * np.sin(np.deg2rad(theta_observer))) + r * np.cos(np.deg2rad(theta_observer))
+
+	return x_range, y_range

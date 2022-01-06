@@ -15,6 +15,7 @@ from astropy import constants as const
 from astropy.modeling import InputParameterError
 from astropy.units import UnitsError
 from astropy.visualization import quantity_support
+import random
 quantity_support()
 
 from .mclib import *
@@ -1015,3 +1016,14 @@ def plot_polarization_peak_energy(spect_dict_list, polarization_dict_list, label
 
 
     return fig, ax
+
+def random_photon_index(mcrat_obj, num_ph):
+    if num_ph>mcrat_obj.detected_photons.p0.size:
+        choose_ph_num=mcrat_obj.detected_photons.p0.size
+        rnd_index=range(0, mcrat_obj.detected_photons.p0.size)
+    else:
+        choose_ph_num=num_ph
+        #choose ph_num indexes
+        rnd_index = random.sample(range(0, mcrat_obj.detected_photons.p0.size), choose_ph_num)
+
+    return rnd_index
