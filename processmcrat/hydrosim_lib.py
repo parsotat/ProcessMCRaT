@@ -241,7 +241,7 @@ def calculate_photon_vs_fluid(file_num, file_num_max, file_directory, mcrat_obs_
 
             w=mcrat_sim.loaded_photons.weight[idx]
 
-            print(w.size, y_t_min[0], y_t_max[0], ph_y[0])
+            print(w.size, y_t_min[0], y_t_max[0], ph_y[0], mcrat_sim.loaded_photons.comv_p0.sum())
             #stop
 
             if np.size(idx) > 0:
@@ -260,7 +260,7 @@ def calculate_photon_vs_fluid(file_num, file_num_max, file_directory, mcrat_obs_
                     fluid_vy = hydro_v1[idx]
 
                     # have to build up the fluid beta
-                    fluid_beta = np.array([fluid_vx * np.cos(ph_phi), fluid_vx * np.sin(ph_phi), fluid_vy])
+                    fluid_beta = np.array([fluid_vx * np.cos(ph_phi), fluid_vx * np.sin(ph_phi), fluid_vy])/const.c.cgs.value
 
                     # and the photon 4 momentum
                     ph_lab_4_p = np.array([mcrat_sim.loaded_photons.p0[idx], mcrat_sim.loaded_photons.p1[idx], \
@@ -274,9 +274,11 @@ def calculate_photon_vs_fluid(file_num, file_num_max, file_directory, mcrat_obs_
                     photon_temp = np.average(calc_photon_temp(deboosted_photon_4_p[0, :] * const.c.cgs.value), \
                                              weights=w)
 
+
                 else:
                     photon_temp=mcrat_sim.loaded_photons.get_comv_energies( u.erg )[idx]*u.erg
                     photon_temp = np.average(calc_photon_temp(photon_temp), weights=w)
+
 
                 #calculate averages for other quantities
                 size = np.size(idx)
