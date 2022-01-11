@@ -411,7 +411,7 @@ def calc_amati_values(spectra_list, lightcurve_list):
 	return E_iso_sim, E_iso_err_sim, E_p_sim, E_p_err_sim, angles
 
 def lc_time_to_radius(frame, fps, time):
-	return ((frame/fps)-time)*const.c.cgs
+	return ((frame/fps)-time)*const.c.cgs.value
 
 def calc_line_of_sight(theta_observer, x0_min, x0_max, x1_min, x1_max):
 	x_range = np.linspace(x0_min, x0_max, 100000)
@@ -420,9 +420,74 @@ def calc_line_of_sight(theta_observer, x0_min, x0_max, x1_min, x1_max):
 
 	return x_range[idx], y_angle[idx]
 
-def calc_equal_arrival_time_surface(theta_observer, frame, fps, x0_min, x0_max, time):
+def calc_equal_arrival_time_surface(theta_observer, frame, fps, x0_min, x0_max, time, individual_point=None):
 	r=lc_time_to_radius(frame, fps, time)
-	x_range = np.linspace(x0_min, x0_max, 100000)
+	if individual_point is None:
+		x_range = np.linspace(x0_min, x0_max, 100000)
+	else:
+		x_range=individual_point
 	y_range = -np.tan(np.deg2rad(theta_observer)) * (x_range - r * np.sin(np.deg2rad(theta_observer))) + r * np.cos(np.deg2rad(theta_observer))
 
 	return x_range, y_range
+
+def calc_photon_temp(comov_energy):
+	return comov_energy/(3*const.k_B.cgs)
+
+
+def lorentzBoostVectorized(boost, P_ph):
+	save_result=np.zeros_like(P_ph)*np.nan
+	indexes = np.where((boost ** 2).sum(axis=0) > 0)[0]
+	zero_beta_idx = np.where((boost ** 2).sum(axis=0) == 0)[0]
+	Lambda1 = np.zeros([4, 4, indexes.size])
+
+	# fill in matrix for each photon
+	beta = np.sqrt((boost[:, indexes] ** 2).sum(axis=0))
+	gamma = 1. / np.sqrt(1. - beta ** 2)
+	Lambda1[0, 0, :] = gamma
+	Lambda1[0, 1, :] = -boost[0, indexes] * gamma
+	Lambda1[0, 2, :] = -boost[1, indexes] * gamma
+	Lambda1[0, 3, :] = -boost[2, indexes] * gamma
+	Lambda1[1, 1, :] = 1. + (gamma - 1.) * boost[0, indexes] ** 2 / (beta ** 2)
+	Lambda1[1, 2, :] = (gamma - 1.) * boost[0, indexes] * boost[1, indexes] / (beta ** 2)
+	Lambda1[1, 3, :] = (gamma - 1.) * boost[0, indexes] * boost[2, indexes] / (beta ** 2)
+	Lambda1[2, 2, :] = 1. + (gamma - 1.) * boost[1, indexes] ** 2 / (beta ** 2)
+	Lambda1[2, 3, :] = (gamma - 1.) * boost[1, indexes] * boost[2, indexes] / (beta ** 2)
+	Lambda1[3, 3, :] = 1. + (gamma - 1.) * boost[2, indexes] ** 2 / (beta ** 2)
+
+	Lambda1[1, 0, :] = Lambda1[0, 1, :]
+	Lambda1[2, 0, :] = Lambda1[0, 2, :]
+	Lambda1[3, 0, :] = Lambda1[0, 3, :]
+	Lambda1[2, 1, :] = Lambda1[1, 2, :]
+	Lambda1[3, 1, :] = Lambda1[1, 3, :]
+	Lambda1[3, 2, :] = Lambda1[2, 3, :]
+
+	# perform dot product for each photon with beta>0
+	result = np.einsum('ijk,jk->ik', Lambda1, P_ph[:, indexes])
+	save_result[:,indexes]=result
+	# print(result.shape, indexes.shape, np.where((boost**2).sum(axis=0)<=0)[0], boost[:,np.where((boost**2).sum(axis=0)<=0)[0]], np.sqrt((boost[:,np.where((boost**2).sum(axis=0)<=0)[0]]**2).sum(axis=0)))
+	#if (zero_beta_idx.size > 0):
+	#	result = np.insert(result, zero_beta_idx, P_ph[:, zero_beta_idx], axis=1)
+	#save photns 4 momentum of photons in stationary elements
+	save_result[:, zero_beta_idx] =  P_ph[:, zero_beta_idx]
+
+	# print(result.shape)
+
+	save_result = zero_norm(save_result)
+	return save_result
+
+def zero_norm(P):
+	#test zero norm condition of 4 momenta, if its violated correct the 4 momenta assuming that the energy is correct
+
+	if P.ndim >1:
+		not_norm=np.where(P[0,:]**2 != np.linalg.norm(P[1:,:], axis=0)**2)[0]
+
+		P[1:,not_norm]=(P[1:,not_norm]/np.linalg.norm(P[1:,not_norm], axis=0))*P[0,not_norm]
+
+	else:
+		#print('Normalizing factor', np.linalg.norm(P[1:]))
+		if (P[0]**2 != np.linalg.norm(P[1:])**2):
+			#correct the 4 momentum
+			P[1:]=(P[1:]/np.linalg.norm(P[1:]))*P[0]
+
+	return P
+

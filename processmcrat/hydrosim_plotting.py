@@ -3,7 +3,6 @@ from scipy import interpolate
 from astropy.visualization import quantity_support
 quantity_support()
 
-from .hydrosim_lib import *
 from .plotting import random_photon_index
 from .mclib import lc_time_to_radius
 
@@ -11,11 +10,8 @@ from .mclib import lc_time_to_radius
 def create_image(hydro_obj, key, logscale=True):
     x0 = np.linspace((hydro_obj.get_data('x0').min()), (hydro_obj.get_data('x0').max()), num=1000)
     x1 = np.linspace((hydro_obj.get_data('x1').min()), (hydro_obj.get_data('x1').max()), num=1000)
-    if key in hydro_obj or 'temp' in key:
-        if 'temp' in key:
-            data=calc_temperature(hydro_obj)
-        else:
-            data=hydro_obj.get_data(key)
+    if key in hydro_obj:
+        data=hydro_obj.get_data(key)
     else:
         print(key+" is not a key in the HydroSim object")
 

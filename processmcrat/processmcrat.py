@@ -75,6 +75,30 @@ class PhotonList(object):
             x=self.comv_p0 * (const.c.cgs.value * u.erg)
             return x.to(unit, equivalencies=u.spectral()).value
 
+    def get_spherical_coordinates(self, dimensions):
+        if dimensions==2:
+            mc_x_eff = np.sqrt(self.r0 ** 2 + self.r1 ** 2)  # effective x axis for MCRaT simulation to compare to
+            # get radial positions of all photons
+            R_photon = np.sqrt(mc_x_eff ** 2 + self.r2 ** 2)  # only concerned with z and x plane
+
+            # get angle position of all photons in radians
+            Theta_photon = np.arctan2(mc_x_eff, self.r2)
+        else:
+            print("Calculating the photons spherical coordinate in 3D is not yet supported.")
+
+        return R_photon, Theta_photon
+
+    def get_cartesian_coordinates(self, dimensions):
+        if dimensions==2:
+            mc_x_eff = np.sqrt(self.r0 ** 2 + self.r1 ** 2)  # effective x axis for MCRaT simulation to compare to
+            # get radial positions of all photons
+            y= self.r2
+        else:
+            print("Calculating the photons cartesian coordinate in 3D is not yet supported.")
+
+        return mc_x_eff, y
+
+
 
 def curdir():
     """

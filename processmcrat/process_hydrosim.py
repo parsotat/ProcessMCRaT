@@ -15,6 +15,11 @@ from astropy.units import UnitConversionError
 from processmcrat import curdir
 import tables as tb
 
+radiation_dens_const=(4*const.sigma_sb/const.c)
+
+def calc_temperature(pres):
+    return (3 * (pres  / radiation_dens_const.decompose(bases=u.cgs.bases))) ** (1.0 / 4.0)
+
 class HydroSim(object):
     def __init__(self, fileroot_name, file_directory=None, hydrosim_type='flash', coordinate_sys='cartesian', density_scale=1*u.g/u.cm**3,\
                  length_scale=1*u.cm, velocity_scale=const.c.cgs, hydrosim_dim=2):
@@ -39,6 +44,7 @@ class HydroSim(object):
             self.magnetic_scale=np.sqrt(4*np.pi*density_scale*velocity_scale**2)
             self.time_scale=length_scale/velocity_scale
             self.spatial_limit_idx=None
+            self.dimensions=hydrosim_dim
         else:
             print('Make sure that the density, length and velocity scales have units associated with them.')
 
@@ -60,7 +66,7 @@ class HydroSim(object):
 
         self.hydro_data = hydro_dict
 
-    def _read_flash_file(self, frame_num):
+    def _read_flash_file(self, frame_num, make_1d=True):
 
         file = tb.open_file(self.file_directory+"/"+self.fileroot_name+frame_num)
         print('Reading Flash frame %s positional, density, pressure, and velocity information.'%(frame_num))
@@ -103,17 +109,30 @@ class HydroSim(object):
         nty = nty.read()
         file.close()
         jj = np.where(nty == 1)
-        xx = np.array(xx[jj, 0, :, :]).flatten() * self.length_scale
-        yy = np.array(yy[jj, 0, :, :]).flatten() * self.length_scale
-        szxx = np.array(szxx[jj, 0, :, :]).flatten() * self.length_scale
-        szyy = np.array(szyy[jj, 0, :, :]).flatten() * self.length_scale
-        vx = np.array(vx[jj, 0, :, :]).flatten()*self.velocity_scale
-        vy = np.array(vy[jj, 0, :, :]).flatten()*self.velocity_scale
-        dens = np.array(dens[jj, 0, :, :]).flatten()*self.density_scale
-        pres = np.array(pres[jj, 0, :, :]).flatten()*self.pressure_scale
+        xx = np.array(xx[jj, 0, :, :]) * self.length_scale
+        yy = np.array(yy[jj, 0, :, :]) * self.length_scale
+        szxx = np.array(szxx[jj, 0, :, :]) * self.length_scale
+        szyy = np.array(szyy[jj, 0, :, :]) * self.length_scale
+        vx = np.array(vx[jj, 0, :, :])*self.velocity_scale
+        vy = np.array(vy[jj, 0, :, :])*self.velocity_scale
+        dens = np.array(dens[jj, 0, :, :])*self.density_scale
+        pres = np.array(pres[jj, 0, :, :])*self.pressure_scale
         gg = 1. / np.sqrt(1. - ((vx.cgs/const.c.cgs) ** 2 + (vy.cgs/const.c.cgs) ** 2))
 
-        hydro_dict=dict(x0=xx, x1=yy, dx0=szxx, dx1=szyy, pres=pres, dens=dens, v0=vx, v1=vy, gamma=gg)
+        temp=calc_temperature(pres)
+        if make_1d:
+            xx=xx.flatten()
+            yy=yy.flatten()
+            szxx=szxx.flatten()
+            szyy=szyy.flatten()
+            vx=vx.flatten()
+            vy=vy.flatten()
+            dens=dens.flatten()
+            pres=pres.flatten()
+            gg=gg.flatten()
+            temp=temp.flatten()
+
+        hydro_dict=dict(x0=xx, x1=yy, dx0=szxx, dx1=szyy, temp=temp, pres=pres, dens=dens, v0=vx, v1=vy, gamma=gg)
 
         return hydro_dict
 
@@ -135,9 +154,64 @@ class HydroSim(object):
         else:
             print('Make sure that each minimum and maximum coordinate value has astropy units associated with it.')
 
+    def reset_spatial_limits(self):
+        self.spatial_limit_idx=None
+
     def get_data(self, key):
         if self.spatial_limit_idx is not None:
             data=self.hydro_data[key][self.spatial_limit_idx]
         else:
             data=self.hydro_data[key]
         return data
+
+    def coordinate_to_cartesian(self):
+        if ('flash' in self.hydrosim_type or 'Flash' in self.hydrosim_type) and self.dimensions==2:
+            x=self.get_data('x0')
+            y=self.get_data('x1')
+        else:
+            print("Converting the hydro coordinate system to cartesian coordinates is only possible with Flash 2D simulations at this time.")
+
+        return x,y
+
+    def coordinate_to_spherical(self):
+        if ('flash' in self.hydrosim_type or 'Flash' in self.hydrosim_type) and self.dimensions==2:
+            r=np.sqrt(self.get_data('x0') ** 2 + self.get_data('x1') ** 2)
+            theta=np.arctan2(self.get_data('x0'), self.get_data('x1'))
+        else:
+            print("Converting the hydro coordinate system to spherical coordinates is only possible with Flash 2D simulations at this time.")
+
+        return r, theta
+
+
+    def make_spherical_outflow(self, luminosity, gamma_infinity, r_0):
+        if isinstance(luminosity, u.Quantity) and isinstance(r_0, u.Quantity):
+            r, theta=self.coordinate_to_spherical()
+            gg=np.zeros(r.size)
+            pp=np.zeros(r.size)
+
+            jj = np.where(r < (r_0 * gamma_infinity))
+            kk = np.where(r >= (r_0 * gamma_infinity))
+
+            if jj[0].size > 0: gg[jj] = r[jj] / r_0
+            gg[kk] = gamma_infinity
+
+            vv = np.sqrt(1. - 1. / gg ** 2)
+            vx = const.c.cgs * vv * self.get_data('x0') / r
+            vy = const.c.cgs * vv * self.get_data('x1') / r
+
+            dd = luminosity / 4 / np.pi / r ** 2 / const.c.cgs ** 3 / gg / gamma_infinity
+
+            if jj[0].size > 0:
+                pp[jj] = luminosity / 12 / np.pi / const.c.cgs * r_0 ** 2 / r[jj] ** 4 / const.c.cgs ** 2
+            pp[kk] = luminosity / 12. / np.pi / const.c.cgs * r_0 ** (2. / 3.) / gamma_infinity ** (4. / 3.) * r[kk] ** (
+                        -8. / 3.) / const.c.cgs ** 2
+
+            self.hydro_data['v0']=vx
+            self.hydro_data['v1'] = vy
+            self.hydro_data['dens'] = dd
+            self.hydro_data['pres'] = pp
+            self.hydro_data['gamma'] = gg
+            self.hydro_data['temp'] = calc_temperature(pp)
+        else:
+            print('Make sure that luminosity and saturation radius have units associated with them.')
+

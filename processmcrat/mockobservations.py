@@ -148,11 +148,9 @@ class MockObservation(object):
                 #see if the acceptance phi goes from a negative number to a positive number
                 if (phi_min > phi_max):
                     #if it is, make the condiiton be or to collect the values between the two limits which etend past the 0 degree limit
-                    kk=np.where((photon_phi_velocity >= phi_min) \
-                          | (photon_phi_velocity < phi_max))[0]
+                    kk=np.where((photon_phi_velocity >= phi_min) | (photon_phi_velocity < phi_max))[0]
                 else:
-                    kk=np.where((photon_phi_velocity >= phi_min) \
-                          & (photon_phi_velocity < phi_max))[0]
+                    kk=np.where((photon_phi_velocity >= phi_min) & (photon_phi_velocity < phi_max))[0]
                 jj=np.intersect1d(jj,kk) #combine both requirements and get indexes of photons that meet both
 
             #Calculate the difference between the location of the detector and the photon
@@ -171,8 +169,8 @@ class MockObservation(object):
             #apply condition
             detection_times=detection_times[jj]
 
-            self.detected_photons = ObservedPhotonList(loaded_photons.r0[jj], loaded_photons.r1[jj],
-                                                       loaded_photons.r2[jj], loaded_photons.p0[jj], \
+            self.detected_photons = ObservedPhotonList(loaded_photons.r0[jj]*unit.cm, loaded_photons.r1[jj]*unit.cm,
+                                                       loaded_photons.r2[jj]*unit.cm, loaded_photons.p0[jj], \
                                                        loaded_photons.p1[jj], loaded_photons.p2[jj],
                                                        loaded_photons.p3[jj], loaded_photons.weight[jj], \
                                                        loaded_photons.scatterings[jj], loaded_photons.file_index[jj],

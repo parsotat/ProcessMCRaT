@@ -11,3 +11,5 @@ from .mclib import *
 from .mockobservations import *
 from .plotting import *
 from .process_hydrosim import *
+from .hydrosim_plotting import *
+from .hydrosim_lib import *
