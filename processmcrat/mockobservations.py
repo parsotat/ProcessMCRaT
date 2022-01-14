@@ -329,7 +329,7 @@ class MockObservation(object):
                                                    comv_p0=comv_p0, comv_p1=comv_p1, comv_p2=comv_p2, \
                                                    comv_p3=comv_p3, s0=s0, s1=s1, s2=s2, s3=s3, photon_type=pt)
 
-    def _select_photons(self, times, photon_type=None, energy_range=None, energy_unit=unit.keV):
+    def _select_photons(self, times, photon_type=None, energy_range=None, energy_unit=unit.keV, calc_comv=False):
         """
 
         :param times:
@@ -338,6 +338,13 @@ class MockObservation(object):
         :param energy_unit:
         :return:
         """
+
+        if energy_range is not None:
+            if calc_comv:
+                ph_energy=self.detected_photons.get_comv_energies(unit=energy_unit)
+            else:
+                ph_energy=self.detected_photons.get_energies(unit=energy_unit)
+
         if photon_type is None:
             if energy_range is None:
                 idx = np.where((self.detected_photons.detection_time >= times[0]) & \
@@ -347,8 +354,8 @@ class MockObservation(object):
                 idx = np.where((self.detected_photons.detection_time >= times[0]) \
                                & (self.detected_photons.detection_time < times[1]) & (
                                    ~np.isnan(self.detected_photons.s0)) \
-                               & (self.detected_photons.get_energies(unit=energy_unit) >= energy_range[0]) \
-                               & (self.detected_photons.get_energies(unit=energy_unit) < energy_range[1]))
+                               & (ph_energy >= energy_range[0]) \
+                               & (ph_energy < energy_range[1]))
         else:
             if energy_range is None:
                 idx = np.where((self.detected_photons.detection_time >= times[0]) \
@@ -360,8 +367,8 @@ class MockObservation(object):
                         self.detected_photons.detection_time < times[1]) \
                                & (~np.isnan(self.detected_photons.s0)) & (
                                        self.detected_photons.photon_type == photon_type) \
-                               & (self.detected_photons.get_energies(unit=energy_unit) >= energy_range[0]) \
-                               & (self.detected_photons.get_energies(unit=energy_unit) < energy_range[1]))
+                               & (ph_energy >= energy_range[0]) \
+                               & (ph_energy < energy_range[1]))
         return idx
 
     def _time_iterator(self, times, lc_unit, photon_type=None, energy_range=None, energy_unit=unit.keV,
@@ -567,7 +574,7 @@ class MockObservation(object):
         return lc_dict
 
     def _energy_iterator(self, time_min, time_max, spectrum_unit, energy_min, energy_max, energy_unit=unit.keV,
-                         photon_type=None):
+                         photon_type=None, calc_comv=False):
         """
         Function that iterates over a range of energies to calculate spectra and energy dependent polarization.
         :param time_min:
@@ -596,12 +603,17 @@ class MockObservation(object):
 
         for i in range(energy_max.size):
             idx = self._select_photons([time_min, time_max], photon_type=photon_type, \
-                                       energy_range=[energy_min[i], energy_max[i]], energy_unit=energy_unit)
+                                       energy_range=[energy_min[i], energy_max[i]], energy_unit=energy_unit, calc_comv=calc_comv)
             if idx[0].size > 0:
                 if 'erg' in spectrum_unit.to_string():
-                    spectrum[i] = np.sum(self.detected_photons.weight[idx] * \
-                                         self.detected_photons.get_energies(unit=unit.erg)[idx]) / delta_energy[i] / (
-                                      delta_t)
+                    if not calc_comv:
+                        spectrum[i] = np.sum(self.detected_photons.weight[idx] * \
+                                             self.detected_photons.get_energies(unit=unit.erg)[idx]) / delta_energy[i] / (
+                                          delta_t)
+                    else:
+                        spectrum[i] = np.sum(self.detected_photons.weight[idx] * \
+                                             self.detected_photons.get_comv_energies(unit=unit.erg)[idx]) / delta_energy[i] / (
+                                          delta_t)
                 elif 'ct' in spectrum_unit.to_string():
                     spectrum[i] = np.sum(self.detected_photons.weight[idx]) / delta_energy[i] / (delta_t)
                 else:
@@ -628,7 +640,7 @@ class MockObservation(object):
         return spectrum, spectrum_error, ph_num, num_scatt, pol_deg, stokes_i, stokes_q, stokes_u, stokes_v, pol_angle, pol_err
 
     def spectrum(self, time_start, time_end, spectrum_unit=unit.erg / unit.s / unit.keV, log_energy_range=[-7, 5], \
-                 delta_log_energy=0.1, energy_unit=unit.keV, photon_type=None, fit_spectrum=False, sample_num=1e4):
+                 delta_log_energy=0.1, energy_unit=unit.keV, photon_type=None, fit_spectrum=False, sample_num=1e4, calc_comv=False):
         """
         Function that calculates the mock observed spectrum and also fit the function with a Comp or Band function.
 
@@ -647,6 +659,9 @@ class MockObservation(object):
             raise UnitsError(
                 'The spectrum unit can only be set as erg/s/energy_unit or counts/s/energy_unit currently.')
 
+        if (np.sum(self.detected_photons.comv_p0) == 0) and calc_comv:
+            raise InputParameterError('The comoving photon data has not been loaded to produce a comoving spectrum.')
+
         # see if an instrument has been loaded and if the energy range parameter is none, if energy_range!=None then
         # we use the explicitly defined energy_range
         if self.is_instrument_loaded and (
@@ -661,7 +676,7 @@ class MockObservation(object):
 
         spectrum, spectrum_error, ph_num, num_scatt, pol_deg, stokes_i, stokes_q, stokes_u, stokes_v, pol_angle, pol_err = \
             self._energy_iterator(time_start, time_end, spectrum_unit, energy_min, energy_max, energy_unit=energy_unit,
-                                  photon_type=photon_type)
+                                  photon_type=photon_type, calc_comv=calc_comv)
 
         fit, fit_errors, model_use = np.zeros(4) * np.nan, np.zeros(3) * np.nan, ''
         if fit_spectrum and ('ct' in spectrum_unit.to_string()):
@@ -678,6 +693,7 @@ class MockObservation(object):
                          num_scatt=num_scatt * unit.dimensionless_unscaled,
                          energy_bin_center=energy_bin_center * energy_unit, \
                          theta_observer=self.theta_observer * unit.deg)
+
 
         if self.read_stokes:
             spec_dict['pol_deg'] = pol_deg * unit.dimensionless_unscaled

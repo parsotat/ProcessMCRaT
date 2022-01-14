@@ -46,9 +46,10 @@ def hydro_position_interpolate(photons, hydro_obj, key):
     photonpoints[:,0]=ph_r0
     photonpoints[:,1]=ph_r1
 
-    data_points=griddata(gridpoints,data,photonpoints,method='nearest')
-    data_points *= data.unit
-    distances=griddata(gridpoints,gridpoints,photonpoints,method='nearest')
+    data_points=griddata(gridpoints,data,photonpoints,method='nearest', rescale=True)
+    if 'gamma' not in key:
+        data_points *= data.unit
+    distances=griddata(gridpoints,gridpoints,photonpoints,method='nearest', rescale=True)
     distances *= hydro_obj.length_scale.unit
 
     #print(key, hydro_obj.get_data('x1')[0], ph_r0[0], gridpoints[0,0], photonpoints[0,0], data_points[0], distances[0])
@@ -76,6 +77,7 @@ def calculate_photon_vs_fluid_quantities(mcratload_obj, mcrat_obs_list, lc_dict_
     photon_temp=np.zeros((max_t_steps, len(mcrat_obs_list), len(range(hydro_frame_min_max[1], hydro_frame_min_max[0]-1,-1))))
 
     folder = tempfile.mkdtemp()
+
     data_name = os.path.join(folder, 'Temp_photon')
     data_name_1 = os.path.join(folder, 'Temp_flash')
     data_name_2 = os.path.join(folder, 'Avg_R')
@@ -91,34 +93,34 @@ def calculate_photon_vs_fluid_quantities(mcratload_obj, mcrat_obs_list, lc_dict_
     data_name_12 = os.path.join(folder, 'V')
 
     #create memmaps for parallel processing of data
-    Temp_photon = np.memmap(data_name, dtype=photon_temp.dtype, shape=photon_temp.shape, mode='w+')* np.nan
-    Temp_flash = np.memmap(data_name_1, dtype=Temp_photon.dtype, shape=photon_temp.shape, mode='w+')* np.nan
-    Avg_R = np.memmap(data_name_2, dtype=Temp_photon.dtype, shape=Temp_photon.shape, mode='w+')* np.nan
-    dist_nearest_photon = np.memmap(data_name_3, dtype=Temp_photon.dtype, shape=Temp_photon.shape, mode='w+')* np.nan
-    ph_num = np.memmap(data_name_4, dtype=Temp_photon.dtype, shape=Temp_photon.shape, mode='w+')* np.nan
-    avg_scatt = np.memmap(data_name_5, dtype=Temp_photon.dtype, shape=Temp_photon.shape, mode='w+')* np.nan
-    avg_gamma = np.memmap(data_name_6, dtype=Temp_photon.dtype, shape=Temp_photon.shape, mode='w+')* np.nan
-    avg_pres = np.memmap(data_name_7, dtype=Temp_photon.dtype, shape=Temp_photon.shape, mode='w+')* np.nan
-    avg_dens = np.memmap(data_name_8, dtype=Temp_photon.dtype, shape=Temp_photon.shape, mode='w+')* np.nan
-    P = np.memmap(data_name_9, dtype=Temp_photon.dtype, shape=Temp_photon.shape, mode='w+')* np.nan
-    Q = np.memmap(data_name_10, dtype=Temp_photon.dtype, shape=Temp_photon.shape, mode='w+')* np.nan
-    U = np.memmap(data_name_11, dtype=Temp_photon.dtype, shape=Temp_photon.shape, mode='w+')* np.nan
-    V = np.memmap(data_name_12, dtype=Temp_photon.dtype, shape=Temp_photon.shape, mode='w+')* np.nan
+    Temp_photon = np.memmap(data_name, dtype=photon_temp.dtype, shape=photon_temp.shape, mode='w+')#* np.nan
+    Temp_flash = np.memmap(data_name_1, dtype=Temp_photon.dtype, shape=photon_temp.shape, mode='w+')#* np.nan
+    Avg_R = np.memmap(data_name_2, dtype=Temp_photon.dtype, shape=Temp_photon.shape, mode='w+')#* np.nan
+    dist_nearest_photon = np.memmap(data_name_3, dtype=Temp_photon.dtype, shape=Temp_photon.shape, mode='w+')#* np.nan
+    ph_num = np.memmap(data_name_4, dtype=Temp_photon.dtype, shape=Temp_photon.shape, mode='w+')#* np.nan
+    avg_scatt = np.memmap(data_name_5, dtype=Temp_photon.dtype, shape=Temp_photon.shape, mode='w+')#* np.nan
+    avg_gamma = np.memmap(data_name_6, dtype=Temp_photon.dtype, shape=Temp_photon.shape, mode='w+')#* np.nan
+    avg_pres = np.memmap(data_name_7, dtype=Temp_photon.dtype, shape=Temp_photon.shape, mode='w+')#* np.nan
+    avg_dens = np.memmap(data_name_8, dtype=Temp_photon.dtype, shape=Temp_photon.shape, mode='w+')#* np.nan
+    P = np.memmap(data_name_9, dtype=Temp_photon.dtype, shape=Temp_photon.shape, mode='w+')#* np.nan
+    Q = np.memmap(data_name_10, dtype=Temp_photon.dtype, shape=Temp_photon.shape, mode='w+')#* np.nan
+    U = np.memmap(data_name_11, dtype=Temp_photon.dtype, shape=Temp_photon.shape, mode='w+')#* np.nan
+    V = np.memmap(data_name_12, dtype=Temp_photon.dtype, shape=Temp_photon.shape, mode='w+')#* np.nan
+
 
     #actually call the function to calculate photon and fluid properties as functions of radius
-    Parallel(n_jobs=1)(
-        delayed(calculate_photon_vs_fluid)(file_num=i, file_num_max=hydro_frame_min_max[1],
-                                           file_directory=mcratload_obj.file_directory,
-                                           mcrat_obs_list=mcrat_obs_list, lc_dict_list=lc_dict_list,
-                                           fileroot_name=hydrosim_obj.fileroot_name, hydro_file_directory=hydrosim_obj.file_directory,
-                                           hydrosim_type=hydrosim_obj.hydrosim_type, coordinate_sys=hydrosim_obj.coordinate_sys,
-                                           density_scale=hydrosim_obj.density_scale, length_scale=hydrosim_obj.length_scale, velocity_scale=hydrosim_obj.velocity_scale,
-                                            spherical_simulation=spherical_simulation, Temp_photon=Temp_photon, Temp_flash=Temp_flash, Avg_R=Avg_R,
-                                        dist_nearest_photon=dist_nearest_photon, ph_num=ph_num,
-                                        avg_scatt=avg_scatt, avg_gamma=avg_gamma, avg_pres=avg_pres, avg_dens=avg_dens,
-                                         P=P, Q=Q, U=U, V=V) for i in
+    Parallel(n_jobs=-2, max_nbytes='1G')(
+        delayed(calculate_photon_vs_fluid)(i, hydro_frame_min_max[1],
+                                           mcratload_obj.file_directory,
+                                           mcrat_obs_list, lc_dict_list,
+                                           hydrosim_obj.fileroot_name, hydrosim_obj.file_directory,
+                                           hydrosim_obj.hydrosim_type, hydrosim_obj.coordinate_sys,
+                                           hydrosim_obj.density_scale, hydrosim_obj.length_scale, hydrosim_obj.velocity_scale,
+                                            spherical_simulation, Temp_photon, Temp_flash, Avg_R,
+                                        dist_nearest_photon, ph_num,
+                                        avg_scatt,avg_gamma, avg_pres,avg_dens,
+                                         P, Q, U, V) for i in
                    range(hydro_frame_min_max[1], hydro_frame_min_max[0] - 1, -1))
-
 
     dump(Temp_photon, 'test_dump.dat')
     Temp_photon_2 = load('test_dump.dat')
@@ -185,22 +187,23 @@ def calculate_photon_vs_fluid_quantities(mcratload_obj, mcrat_obs_list, lc_dict_
     shutil.rmtree(folder)
 
     return_dict=dict(hydro_temp=Temp_flash_2, photon_temp=Temp_photon_2, avg_r=Avg_R_2, avg_scatt=avg_scatt_2, \
-                     avg_gamma=avg_gamma_2, avg_pres=avg_pres_2, avg_pol=P_2, avg_stokes=dict(Q=Q_2, U=U_2, V=V_2))
+                     avg_gamma=avg_gamma_2, avg_pres=avg_pres_2, avg_pol=P_2, avg_stokes=dict(Q=Q_2, U=U_2, V=V_2), \
+                     photon_num=ph_num_2)
 
     return return_dict
 
 
 def calculate_photon_vs_fluid(file_num, file_num_max, file_directory, mcrat_obs_list, lc_dict_list, fileroot_name, \
                               hydro_file_directory, hydrosim_type, coordinate_sys, \
-                              density_scale, length_scale, velocity_scale, \
+                              density_scale, length_scale, velocity_scale, spherical_simulation, \
                             Temp_photon, Temp_flash, Avg_R, dist_nearest_photon, \
-                              ph_num, avg_scatt, avg_gamma, avg_pres, avg_dens, P, Q, U, V, spherical_simulation=None):
+                              ph_num, avg_scatt, avg_gamma, avg_pres, avg_dens, P, Q, U, V):
 
     print('Working on File Number: ' + np.str_(file_num))
 
     #load in the frame data
     mcrat_sim = McratSimLoad(file_directory)
-    mcrat_sim.load_frame(file_num)
+    mcrat_sim.load_frame(file_num, read_comv=True)
 
     hydrosim_obj=HydroSim(fileroot_name, file_directory=hydro_file_directory, hydrosim_type=hydrosim_type, \
                           coordinate_sys=coordinate_sys, density_scale=density_scale,\
@@ -214,8 +217,13 @@ def calculate_photon_vs_fluid(file_num, file_num_max, file_directory, mcrat_obs_
     #get photon r and theta
     r, theta=mcrat_sim.loaded_photons.get_spherical_coordinates(mcrat_obs_list[0].hydrosim_dim)
 
-
     ph_x,ph_y=mcrat_sim.loaded_photons.get_cartesian_coordinates(mcrat_obs_list[0].hydrosim_dim)
+
+    #also look at lab frame 4 momentum's theta angle
+    photon_velocity = np.array(
+        [np.sqrt(mcrat_sim.loaded_photons.p1 ** 2 + mcrat_sim.loaded_photons.p2 ** 2), mcrat_sim.loaded_photons.p3]) \
+                      * const.c.cgs.value / mcrat_sim.loaded_photons.p0
+    photon_theta_velocity = np.rad2deg(np.arctan2(photon_velocity[0], photon_velocity[1]))
 
     #get each photons closest hydro value of velocity etc
     hydro_v0=hydro_position_interpolate(mcrat_sim.loaded_photons, hydrosim_obj, 'v0')[0]
@@ -232,19 +240,30 @@ def calculate_photon_vs_fluid(file_num, file_num_max, file_directory, mcrat_obs_
 
         #for each time bin in the LC up to np.size(lc['times'])-1
         for t_idx in range(np.size(lc['times'])-1):
-            print(i,t_idx)
-            #print(lc['times'][t_idx], lc['times'][t_idx+1], mcrat_sim.loaded_photons.r0)
+            #print(file_num, i,t_idx)
+            #print(obs.theta_observer, lc['times'][t_idx], lc['times'][t_idx+1], mcrat_sim.loaded_photons.r0)
             x, y_t_min = calc_equal_arrival_time_surface(obs.theta_observer, file_num, obs.fps, None, None, lc['times'][t_idx].value, ph_x)
             x, y_t_max = calc_equal_arrival_time_surface(obs.theta_observer, file_num, obs.fps, None, None, lc['times'][t_idx+1].value, ph_x)
 
-            idx=np.where((ph_y<y_t_min) & (ph_y>=y_t_max))[0]
 
-            w=mcrat_sim.loaded_photons.weight[idx]
+            #this may work for any type photon
+            #idx=np.where((ph_y<y_t_min) & (ph_y>=y_t_max)& (photon_theta_velocity<obs.theta_observer+0.5*obs.acceptancetheta_observer) \
+            #               & (photon_theta_velocity>obs.theta_observer-0.5*obs.acceptancetheta_observer))[0]
 
-            print(w.size, y_t_min[0], y_t_max[0], ph_y[0], mcrat_sim.loaded_photons.comv_p0.sum())
-            #stop
+            #this works for just 'i' type potons
+            index=np.where((obs.detected_photons.detection_time>lc['times'][t_idx].value) & (obs.detected_photons.detection_time<=lc['times'][t_idx+1].value))[0]
+            if np.size(index)>0:
+                index2=np.where(obs.detected_photons.file_index[index]<ph_x.size)[0]
+                idx=obs.detected_photons.file_index[index][index2]
+            else:
+                idx=[]
+
+            #print(file_num, i,t_idx, w.size, y_t_min[0], y_t_max[0], ph_y[0], mcrat_sim.loaded_photons.comv_p0.sum(), idx)
+            #if i==1 and file_num==259:
+            #    stop
 
             if np.size(idx) > 0:
+                w = mcrat_sim.loaded_photons.weight[idx]
 
                 #get the phootn averaged values
                 R_photon_avg=np.average(r[idx], weights=w)
@@ -271,12 +290,13 @@ def calculate_photon_vs_fluid(file_num, file_num_max, file_directory, mcrat_obs_
 
                     # calculate average photon temp
                     #NEED TO PAY ATTENTION HERE IF I ADD UNITS TO PHOTON 4 MOMENTUM
-                    photon_temp = np.average(calc_photon_temp(deboosted_photon_4_p[0, :] * const.c.cgs.value), \
+                    photon_temp = np.average(calc_photon_temp(deboosted_photon_4_p[0, :] * const.c.cgs.value * u.erg), \
                                              weights=w)
-
 
                 else:
                     photon_temp=mcrat_sim.loaded_photons.get_comv_energies( u.erg )[idx]*u.erg
+                    #print(photon_temp)
+                    #stop
                     photon_temp = np.average(calc_photon_temp(photon_temp), weights=w)
 
 
@@ -300,7 +320,7 @@ def calculate_photon_vs_fluid(file_num, file_num_max, file_directory, mcrat_obs_
                     stokes_I = np.nan
                     pol = np.nan
 
-
+                #print(photon_temp, fluid_temp)
                 Temp_photon[t_idx, i, file_num_max - file_num] = photon_temp.value
                 Temp_flash[t_idx, i, file_num_max - file_num] = fluid_temp.value
                 Avg_R[t_idx, i, file_num_max - file_num] = R_photon_avg
@@ -314,3 +334,35 @@ def calculate_photon_vs_fluid(file_num, file_num_max, file_directory, mcrat_obs_
                 Q[t_idx, i, file_num_max - file_num] = stokes_q
                 U[t_idx, i, file_num_max - file_num] = stokes_u
                 V[t_idx, i, file_num_max - file_num] = stokes_v
+
+                #print(Temp_photon[t_idx, i, file_num_max - file_num], avg_gamma[t_idx, i, file_num_max - file_num])
+
+            else:
+                Temp_photon[t_idx, i, file_num_max - file_num] = np.nan
+                Temp_flash[t_idx, i, file_num_max - file_num] = np.nan
+                Avg_R[t_idx, i, file_num_max - file_num] = np.nan
+                ph_num[t_idx, i, file_num_max - file_num] = np.nan
+                avg_scatt[t_idx, i, file_num_max - file_num] = np.nan
+                avg_gamma[t_idx, i, file_num_max - file_num] = np.nan
+                avg_pres[t_idx, i, file_num_max - file_num] = np.nan
+                avg_dens[t_idx, i, file_num_max - file_num] = np.nan
+                dist_nearest_photon[t_idx, i, file_num_max - file_num] = np.nan
+                P[t_idx, i, file_num_max - file_num] = np.nan
+                Q[t_idx, i, file_num_max - file_num] = np.nan
+                U[t_idx, i, file_num_max - file_num] = np.nan
+                V[t_idx, i, file_num_max - file_num] = np.nan
+
+        if t_idx<Temp_photon.shape[0]:
+            Temp_photon[t_idx:, i, file_num_max - file_num]=np.nan
+            Temp_flash[t_idx:, i, file_num_max - file_num] = np.nan
+            Avg_R[t_idx:, i, file_num_max - file_num] = np.nan
+            ph_num[t_idx:, i, file_num_max - file_num] = np.nan
+            avg_scatt[t_idx:, i, file_num_max - file_num] = np.nan
+            avg_gamma[t_idx:, i, file_num_max - file_num] = np.nan
+            avg_pres[t_idx:, i, file_num_max - file_num] = np.nan
+            avg_dens[t_idx:, i, file_num_max - file_num] = np.nan
+            dist_nearest_photon[t_idx:, i, file_num_max - file_num] = np.nan
+            P[t_idx:, i, file_num_max - file_num] = np.nan
+            Q[t_idx:, i, file_num_max - file_num] = np.nan
+            U[t_idx:, i, file_num_max - file_num] = np.nan
+            V[t_idx:, i, file_num_max - file_num] = np.nan

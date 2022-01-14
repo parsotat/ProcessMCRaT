@@ -185,9 +185,12 @@ class HydroSim(object):
 
     def make_spherical_outflow(self, luminosity, gamma_infinity, r_0):
         if isinstance(luminosity, u.Quantity) and isinstance(r_0, u.Quantity):
+            luminosity=luminosity.decompose(bases=u.cgs.bases)
+            r_0=r_0.decompose(bases=u.cgs.bases)
+
             r, theta=self.coordinate_to_spherical()
             gg=np.zeros(r.size)
-            pp=np.zeros(r.size)
+            pp=np.zeros(r.size)*self.pressure_scale
 
             jj = np.where(r < (r_0 * gamma_infinity))
             kk = np.where(r >= (r_0 * gamma_infinity))
@@ -202,9 +205,9 @@ class HydroSim(object):
             dd = luminosity / 4 / np.pi / r ** 2 / const.c.cgs ** 3 / gg / gamma_infinity
 
             if jj[0].size > 0:
-                pp[jj] = luminosity / 12 / np.pi / const.c.cgs * r_0 ** 2 / r[jj] ** 4 / const.c.cgs ** 2
+                pp[jj] = luminosity / 12 / np.pi / const.c.cgs * r_0 ** 2 / r[jj] ** 4 #/ const.c.cgs ** 2
             pp[kk] = luminosity / 12. / np.pi / const.c.cgs * r_0 ** (2. / 3.) / gamma_infinity ** (4. / 3.) * r[kk] ** (
-                        -8. / 3.) / const.c.cgs ** 2
+                        -8. / 3.) #/ const.c.cgs ** 2
 
             self.hydro_data['v0']=vx
             self.hydro_data['v1'] = vy

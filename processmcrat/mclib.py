@@ -491,3 +491,9 @@ def zero_norm(P):
 
 	return P
 
+def calc_optical_depth(scatt_vs_r):
+	# reverse because the frame data is saved from largest frame value to smallest (from smallest radius to largest)
+	scatt = np.ediff1d(scatt_vs_r[::-1])
+	tau = np.cumsum(scatt[::-1])[::-1]
+
+	return tau
