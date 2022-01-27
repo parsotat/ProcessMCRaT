@@ -93,19 +93,19 @@ def calculate_photon_vs_fluid_quantities(mcratload_obj, mcrat_obs_list, lc_dict_
     data_name_12 = os.path.join(folder, 'V')
 
     #create memmaps for parallel processing of data
-    Temp_photon = np.memmap(data_name, dtype=photon_temp.dtype, shape=photon_temp.shape, mode='w+')#* np.nan
-    Temp_flash = np.memmap(data_name_1, dtype=Temp_photon.dtype, shape=photon_temp.shape, mode='w+')#* np.nan
-    Avg_R = np.memmap(data_name_2, dtype=Temp_photon.dtype, shape=Temp_photon.shape, mode='w+')#* np.nan
-    dist_nearest_photon = np.memmap(data_name_3, dtype=Temp_photon.dtype, shape=Temp_photon.shape, mode='w+')#* np.nan
-    ph_num = np.memmap(data_name_4, dtype=Temp_photon.dtype, shape=Temp_photon.shape, mode='w+')#* np.nan
-    avg_scatt = np.memmap(data_name_5, dtype=Temp_photon.dtype, shape=Temp_photon.shape, mode='w+')#* np.nan
-    avg_gamma = np.memmap(data_name_6, dtype=Temp_photon.dtype, shape=Temp_photon.shape, mode='w+')#* np.nan
-    avg_pres = np.memmap(data_name_7, dtype=Temp_photon.dtype, shape=Temp_photon.shape, mode='w+')#* np.nan
-    avg_dens = np.memmap(data_name_8, dtype=Temp_photon.dtype, shape=Temp_photon.shape, mode='w+')#* np.nan
-    P = np.memmap(data_name_9, dtype=Temp_photon.dtype, shape=Temp_photon.shape, mode='w+')#* np.nan
-    Q = np.memmap(data_name_10, dtype=Temp_photon.dtype, shape=Temp_photon.shape, mode='w+')#* np.nan
-    U = np.memmap(data_name_11, dtype=Temp_photon.dtype, shape=Temp_photon.shape, mode='w+')#* np.nan
-    V = np.memmap(data_name_12, dtype=Temp_photon.dtype, shape=Temp_photon.shape, mode='w+')#* np.nan
+    Temp_photon = np.memmap(data_name, dtype=photon_temp.dtype, shape=photon_temp.shape, mode='w+')
+    Temp_flash = np.memmap(data_name_1, dtype=Temp_photon.dtype, shape=photon_temp.shape, mode='w+')
+    Avg_R = np.memmap(data_name_2, dtype=Temp_photon.dtype, shape=Temp_photon.shape, mode='w+')
+    dist_nearest_photon = np.memmap(data_name_3, dtype=Temp_photon.dtype, shape=Temp_photon.shape, mode='w+')
+    ph_num = np.memmap(data_name_4, dtype=Temp_photon.dtype, shape=Temp_photon.shape, mode='w+')
+    avg_scatt = np.memmap(data_name_5, dtype=Temp_photon.dtype, shape=Temp_photon.shape, mode='w+')
+    avg_gamma = np.memmap(data_name_6, dtype=Temp_photon.dtype, shape=Temp_photon.shape, mode='w+')
+    avg_pres = np.memmap(data_name_7, dtype=Temp_photon.dtype, shape=Temp_photon.shape, mode='w+')
+    avg_dens = np.memmap(data_name_8, dtype=Temp_photon.dtype, shape=Temp_photon.shape, mode='w+')
+    P = np.memmap(data_name_9, dtype=Temp_photon.dtype, shape=Temp_photon.shape, mode='w+')
+    Q = np.memmap(data_name_10, dtype=Temp_photon.dtype, shape=Temp_photon.shape, mode='w+')
+    U = np.memmap(data_name_11, dtype=Temp_photon.dtype, shape=Temp_photon.shape, mode='w+')
+    V = np.memmap(data_name_12, dtype=Temp_photon.dtype, shape=Temp_photon.shape, mode='w+')
 
 
     #actually call the function to calculate photon and fluid properties as functions of radius
@@ -174,8 +174,8 @@ def calculate_photon_vs_fluid_quantities(mcratload_obj, mcrat_obs_list, lc_dict_
     V_2 = load('test_dump.dat')
     os.remove('test_dump.dat')
 
-    print(np.array([Temp_photon_2, Temp_flash_2, Avg_R_2, ph_num_2, avg_scatt_2, avg_gamma_2, avg_pres_2, avg_dens_2, P_2, Q_2, U_2,
-         V_2]).shape, Temp_photon_2.shape)
+    #print(np.array([Temp_photon_2, Temp_flash_2, Avg_R_2, ph_num_2, avg_scatt_2, avg_gamma_2, avg_pres_2, avg_dens_2, P_2, Q_2, U_2,
+    #     V_2]).shape, Temp_photon_2.shape)
 
     # save file as pickle file
     f = open(savefile + '.pickle', 'wb')

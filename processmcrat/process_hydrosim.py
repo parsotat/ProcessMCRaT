@@ -14,6 +14,7 @@ from astropy import constants as const
 from astropy.units import UnitConversionError
 from processmcrat import curdir
 import tables as tb
+import os
 
 radiation_dens_const=(4*const.sigma_sb/const.c)
 
@@ -22,11 +23,21 @@ def calc_temperature(pres):
 
 class HydroSim(object):
     def __init__(self, fileroot_name, file_directory=None, hydrosim_type='flash', coordinate_sys='cartesian', density_scale=1*u.g/u.cm**3,\
-                 length_scale=1*u.cm, velocity_scale=const.c.cgs, hydrosim_dim=2):
+                 length_scale=1*u.cm, velocity_scale=const.c.cgs, hydrosim_dim=2, datatype=None, amr_level=3):
         """
         Initalized the hydrosimload class with the directory that the hydro files are located in, the
         :param file_directory:
         """
+
+        if 'pluto' in hydrosim_type or 'PLUTO' in hydrosim_type:
+            self.amr_level=amr_level
+            if datatype is None:
+                raise ValueError('There is no datatype specified for the PLUTO simulation files.')
+            else:
+                self.datatype=datatype
+        else:
+            self.datatype='hdf5'
+
 
         if isinstance(density_scale, u.Quantity) and isinstance(length_scale, u.Quantity) and isinstance(velocity_scale, u.Quantity):
             if file_directory is not None:
@@ -46,7 +57,7 @@ class HydroSim(object):
             self.spatial_limit_idx=None
             self.dimensions=hydrosim_dim
         else:
-            print('Make sure that the density, length and velocity scales have units associated with them.')
+            raise ValueError('Make sure that the density, length and velocity scales have units associated with them.')
 
     def load_frame(self, frame_num):
 
@@ -60,7 +71,7 @@ class HydroSim(object):
             hydro_dict=self._read_flash_file(sfrm)
         elif 'pluto' in self.hydrosim_type or 'PLUTO' in self.hydrosim_type:
             print("Pluto and Pluto-chombo are not yet supported.")
-            #hydro_dict=self.read_pluto_file(sfrm)
+            #hydro_dict=self._read_pluto_file(sfrm)
         else:
             print(self.hydrosim_type+" is not supported as this time.")
 
@@ -133,6 +144,56 @@ class HydroSim(object):
             temp=temp.flatten()
 
         hydro_dict=dict(x0=xx, x1=yy, dx0=szxx, dx1=szyy, temp=temp, pres=pres, dens=dens, v0=vx, v1=vy, gamma=gg)
+
+        return hydro_dict
+
+    def _read_pluto_file(self, frame_num, make_1d=True):
+
+        #user needs to do eg: pip install git+https://gitlab.mpcdf.mpg.de/sdoetsch/pypluto.git or other git with most up-to-date version
+        #see if its installed
+        try:
+            import pyPLUTO as pp
+        except ModuleNotFoundError as err:
+            print('Need pyPLUTO installed to read in PLUTO files.')
+            print(err)
+
+        print('Reading Pluto file %s positional, density, pressure, and velocity information at level.' % (frame_num))
+
+        if 'hdf5' in self.datatype:
+            D = pp.pload(frame_num, w_dir=self.file_directory, datatype=self.datatype, level=self.amr_level)
+        else:
+            D = pp.pload(frame_num, w_dir=self.file_directory, datatype=self.datatype)
+
+        x0=D.x1 * self.length_scale
+        if D.geometry in ['CARTESIAN', 'CYLINDRICAL']:
+            x1=D.x2 * self.length_scale
+        else:
+            x1 = D.x2
+        szx0=D.dx1 * self.length_scale
+        if D.geometry in ['CARTESIAN', 'CYLINDRICAL']:
+            szx1 = D.dx2 * self.length_scale
+        else:
+            szx1 = D.dx2
+        pres=D.prs * self.pressure_scale
+        dens=D.rho * self.density_scale
+        v0=D.v1 * self.velocity_scale
+        v1=D.v2 * self.velocity_scale
+        gg = 1. / np.sqrt(1. - ((v0.cgs / const.c.cgs) ** 2 + (v1.cgs / const.c.cgs) ** 2))
+        temp = calc_temperature(pres)
+
+        if make_1d:
+            x0=x0.flatten()
+            x1=x1.flatten()
+            szx0=szx0.flatten()
+            szx1=szx1.flatten()
+            v0=v0.flatten()
+            v1=v1.flatten()
+            dens=dens.flatten()
+            pres=pres.flatten()
+            gg=gg.flatten()
+            temp=temp.flatten()
+
+        hydro_dict = dict(x0=x0, x1=x1, dx0=szx0, dx1=szx1, temp=temp, pres=pres, dens=dens, v0=v0, v1=v1, gamma=gg)
 
         return hydro_dict
 
