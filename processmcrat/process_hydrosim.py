@@ -71,7 +71,7 @@ class HydroSim(object):
             hydro_dict=self._read_flash_file(sfrm)
         elif 'pluto' in self.hydrosim_type or 'PLUTO' in self.hydrosim_type:
             print("Pluto and Pluto-chombo are not yet supported.")
-            #hydro_dict=self._read_pluto_file(sfrm)
+            hydro_dict=self._read_pluto_file(sfrm)
         else:
             print(self.hydrosim_type+" is not supported as this time.")
 
@@ -147,7 +147,10 @@ class HydroSim(object):
 
         return hydro_dict
 
-    def _read_pluto_file(self, frame_num, make_1d=True):
+    def _read_pluto_file(self, frame_num, amr_lvl=None, make_1d=True):
+
+        if amr_lvl is None:
+            amr_lvl=self.amr_level
 
         #user needs to do eg: pip install git+https://gitlab.mpcdf.mpg.de/sdoetsch/pypluto.git or other git with most up-to-date version
         #see if its installed
@@ -157,7 +160,7 @@ class HydroSim(object):
             print('Need pyPLUTO installed to read in PLUTO files.')
             print(err)
 
-        print('Reading Pluto file %s positional, density, pressure, and velocity information at level.' % (frame_num))
+        print('Reading Pluto file %s positional, density, pressure, and velocity information at level %d.' % (frame_num, amr_lvl))
 
         if 'hdf5' in self.datatype:
             D = pp.pload(frame_num, w_dir=self.file_directory, datatype=self.datatype, level=self.amr_level)
@@ -174,12 +177,17 @@ class HydroSim(object):
             szx1 = D.dx2 * self.length_scale
         else:
             szx1 = D.dx2
+
         pres=D.prs * self.pressure_scale
         dens=D.rho * self.density_scale
-        v0=D.v1 * self.velocity_scale
-        v1=D.v2 * self.velocity_scale
+        v0=D.vx1 * self.velocity_scale
+        v1=D.vx2 * self.velocity_scale
         gg = 1. / np.sqrt(1. - ((v0.cgs / const.c.cgs) ** 2 + (v1.cgs / const.c.cgs) ** 2))
         temp = calc_temperature(pres)
+
+        #broadcast x0 and x1 arrays to be the proper size for the cell centered values
+        x0=x0[:,np.newaxis]*np.ones(pres.shape)
+        x1=x1[np.newaxis,:]*np.ones(pres.shape)
 
         if make_1d:
             x0=x0.flatten()
@@ -195,7 +203,7 @@ class HydroSim(object):
 
         hydro_dict = dict(x0=x0, x1=x1, dx0=szx0, dx1=szx1, temp=temp, pres=pres, dens=dens, v0=v0, v1=v1, gamma=gg)
 
-        self.geometry=D.geometry
+        self.coordinate_sys=D.geometry
 
         return hydro_dict
 
@@ -232,11 +240,11 @@ class HydroSim(object):
             x=self.get_data('x0')
             y=self.get_data('x1')
         else:
-            if 'SPHERICAL' in self.geometry:
+            if 'SPHERICAL' in self.coordinate_sys:
                 #theta measured from y axis
                 x=self.get_data('x0')*np.sin(self.get_data('x1'))
                 y=self.get_data('x0')*np.cos(self.get_data('x1'))
-            elif self.geometry in ['CARTESIAN', 'CYLINDRICAL']:
+            elif self.coordinate_sys in ['CARTESIAN', 'CYLINDRICAL']:
                 x = self.get_data('x0')
                 y = self.get_data('x1')
             else:
@@ -249,11 +257,11 @@ class HydroSim(object):
             r=np.sqrt(self.get_data('x0') ** 2 + self.get_data('x1') ** 2)
             theta=np.arctan2(self.get_data('x0'), self.get_data('x1'))
         else:
-            if 'SPHERICAL' in self.geometry:
+            if 'SPHERICAL' in self.coordinate_sys:
                 #theta measured from y axis
                 r=self.get_data('x0')
                 theta=self.get_data('x1')
-            elif self.geometry in ['CARTESIAN', 'CYLINDRICAL']:
+            elif self.coordinate_sys in ['CARTESIAN', 'CYLINDRICAL']:
                 r = np.sqrt(self.get_data('x0') ** 2 + self.get_data('x1') ** 2)
                 theta = np.arctan2(self.get_data('x0'), self.get_data('x1'))
             else:

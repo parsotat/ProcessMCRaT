@@ -72,7 +72,7 @@ def calculate_photon_vs_fluid_quantities(mcratload_obj, mcrat_obs_list, lc_dict_
             max_t_steps=i['times'].size
 
     if hydro_frame_min_max[1]<hydro_frame_min_max[0]:
-        print("The list passed in denoting the minimum and maximum frames to conduct the analysis for is not oredered correctly.")
+        print("The list passed in denoting the minimum and maximum frames to conduct the analysis for is not ordered correctly.")
 
     photon_temp=np.zeros((max_t_steps, len(mcrat_obs_list), len(range(hydro_frame_min_max[1], hydro_frame_min_max[0]-1,-1))))
 
