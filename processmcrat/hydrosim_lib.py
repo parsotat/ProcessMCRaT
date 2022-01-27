@@ -62,6 +62,20 @@ def hydro_position_interpolate(photons, hydro_obj, key):
 
     return data_points, max_diff
 
+def load_photon_vs_fluid_quantities(savefile):
+    with open(savefile + '.pickle', 'rb') as f:
+        u = pickle._Unpickler(f)
+        u.encoding = 'latin1'
+        Temp_photon_2, Temp_flash_2, Avg_R_2, ph_num_2, avg_scatt_2, avg_gamma_2, avg_pres_2, avg_dens_2, P_2, Q_2, U_2, V_2 = u.load()
+
+        return_dict = dict(hydro_temp=Temp_flash_2, photon_temp=Temp_photon_2, avg_r=Avg_R_2, avg_scatt=avg_scatt_2, \
+                           avg_gamma=avg_gamma_2, avg_pres=avg_pres_2, avg_pol=P_2,
+                           avg_stokes=dict(Q=Q_2, U=U_2, V=V_2), \
+                           photon_num=ph_num_2)
+
+        return return_dict
+
+
 def calculate_photon_vs_fluid_quantities(mcratload_obj, mcrat_obs_list, lc_dict_list, hydrosim_obj, savefile,\
                                          hydro_frame_min_max, hydrosim_dim=2, spherical_simulation=None):
 
