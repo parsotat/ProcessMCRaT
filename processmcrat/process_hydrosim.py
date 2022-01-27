@@ -195,6 +195,8 @@ class HydroSim(object):
 
         hydro_dict = dict(x0=x0, x1=x1, dx0=szx0, dx1=szx1, temp=temp, pres=pres, dens=dens, v0=v0, v1=v1, gamma=gg)
 
+        self.geometry=D.geometry
+
         return hydro_dict
 
     def apply_spatial_limits(self, x0_min, x0_max, x1_min, x1_max, x2_min=None, x2_max=None):
@@ -230,7 +232,15 @@ class HydroSim(object):
             x=self.get_data('x0')
             y=self.get_data('x1')
         else:
-            print("Converting the hydro coordinate system to cartesian coordinates is only possible with Flash 2D simulations at this time.")
+            if 'SPHERICAL' in self.geometry:
+                #theta measured from y axis
+                x=self.get_data('x0')*np.sin(self.get_data('x1'))
+                y=self.get_data('x0')*np.cos(self.get_data('x1'))
+            elif self.geometry in ['CARTESIAN', 'CYLINDRICAL']:
+                x = self.get_data('x0')
+                y = self.get_data('x1')
+            else:
+                print("Converting the hydro coordinate system %s to cartesian coordinates is not supported at this time."%(self.geometry))
 
         return x,y
 
@@ -239,7 +249,15 @@ class HydroSim(object):
             r=np.sqrt(self.get_data('x0') ** 2 + self.get_data('x1') ** 2)
             theta=np.arctan2(self.get_data('x0'), self.get_data('x1'))
         else:
-            print("Converting the hydro coordinate system to spherical coordinates is only possible with Flash 2D simulations at this time.")
+            if 'SPHERICAL' in self.geometry:
+                #theta measured from y axis
+                r=self.get_data('x0')
+                theta=self.get_data('x1')
+            elif self.geometry in ['CARTESIAN', 'CYLINDRICAL']:
+                r = np.sqrt(self.get_data('x0') ** 2 + self.get_data('x1') ** 2)
+                theta = np.arctan2(self.get_data('x0'), self.get_data('x1'))
+            else:
+                print("Converting the hydro coordinate system %s to spherical coordinates is not supported at this time."%(self.geometry))
 
         return r, theta
 
