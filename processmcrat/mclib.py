@@ -347,7 +347,7 @@ def get_golenetskii_relationship(value='o'):
 	elif value=='-':
 		y=(-29.854-0.178)+(0.621-0.003)*x
 	else:
-		print('This isnt a correct option for value\n')
+		raise ValueError(value, 'isnt a correct option for value')
 
 	return 10**x, 10**y
 
@@ -370,7 +370,7 @@ def get_amati_relationship(value='o'):
 	elif value=='-':
 		y=(1/(2.01))*(x+(3.87-0.33))
 	else:
-		print('This isnt a correct option for value\n')
+		raise ValueError(value, ' isnt a correct option for value')
 
 	return 1e52*10**x,10**y
 

@@ -72,7 +72,7 @@ class HydroSim(object):
         elif 'pluto' in self.hydrosim_type or 'PLUTO' in self.hydrosim_type:
             hydro_dict=self._read_pluto_file(sfrm)
         else:
-            print(self.hydrosim_type+" is not supported as this time.")
+            raise ValueError(self.hydrosim_type+" is not supported as this time.")
 
         self.hydro_data = hydro_dict
 

@@ -40,16 +40,16 @@ class Instrument(object):
     calculate
     """
 
-    def __init__(self, name='default instrument', spectral_energy_range=None, spectral_energy_unit=None, \
-                 lightcurve_energy_range=None, lightcurve_energy_unit=None, \
-                 polarization_energy_range=None, polarization_energy_unit=None):
+    @unit.quantity_input(spectral_energy_range=['energy','length'], lightcurve_energy_range=['energy','length'], polarization_energy_range=['energy','length'])
+    def __init__(self, name='default instrument', spectral_energy_range=None, lightcurve_energy_range=None,\
+                 polarization_energy_range=None):
         self.name = name
         self.spectral_energy_range = spectral_energy_range
-        self.spectral_energy_unit = spectral_energy_unit
+        #self.spectral_energy_unit = spectral_energy_unit
         self.lightcurve_energy_range = lightcurve_energy_range
-        self.lightcurve_energy_unit = lightcurve_energy_unit
+        #self.lightcurve_energy_unit = lightcurve_energy_unit
         self.polarization_energy_range = polarization_energy_range
-        self.polarization_energy_unit = polarization_energy_unit
+        #self.polarization_energy_unit = polarization_energy_unit
 
 
 class MockObservation(object):
@@ -209,11 +209,16 @@ class MockObservation(object):
         """
         self.loaded_instrument_name = instrument_object.name
         self.instrument_spectral_energy_range = instrument_object.spectral_energy_range
-        self.instrument_spectral_energy_unit = instrument_object.spectral_energy_unit
+        #self.instrument_spectral_energy_unit = instrument_object.spectral_energy_unit
+        self.instrument_spectral_energy_unit = instrument_object.spectral_energy_range.unit
+
         self.instrument_lightcurve_energy_range = instrument_object.lightcurve_energy_range
-        self.instrument_lightcurve_energy_unit = instrument_object.lightcurve_energy_unit
+        #self.instrument_lightcurve_energy_unit = instrument_object.lightcurve_energy_unit
+        self.instrument_lightcurve_energy_unit = instrument_object.lightcurve_energy_range.unit
+
         self.instrument_polarization_energy_range = instrument_object.polarization_energy_range
-        self.instrument_polarization_energy_unit = instrument_object.polarization_energy_unit
+        #self.instrument_polarization_energy_unit = instrument_object.polarization_energy_unit
+        self.instrument_polarization_energy_unit = instrument_object.polarization_energy_range.unit
         self.is_instrument_loaded = True
 
     def unload_instrument(self):
@@ -483,8 +488,9 @@ class MockObservation(object):
 
         return lc, lc_err, ph_num, num_scatt, pol_deg, stokes_i, stokes_q, stokes_u, stokes_v, pol_angle, pol_err, fit, fit_errors, model_use
 
+    @unit.quantity_input(energy_range=['energy', 'length'])
     def lightcurve(self, time_start=0, time_end=0, dt=0, time_array=None, lc_unit=unit.erg / unit.s, photon_type=None, \
-                   energy_range=None, energy_unit=unit.keV, variable_t_bins=False, fit_spectrum=False,
+                   energy_range=None, variable_t_bins=False, fit_spectrum=False,
                    spectral_sample_num=1e4):
         """
         Calculates the light curve and other time resolved parameters such as polarization and time resolved spectral fits.
@@ -639,8 +645,9 @@ class MockObservation(object):
 
         return spectrum, spectrum_error, ph_num, num_scatt, pol_deg, stokes_i, stokes_q, stokes_u, stokes_v, pol_angle, pol_err
 
-    def spectrum(self, time_start, time_end, spectrum_unit=unit.erg / unit.s / unit.keV, log_energy_range=[-7, 5], \
-                 delta_log_energy=0.1, energy_unit=unit.keV, photon_type=None, fit_spectrum=False, sample_num=1e4, calc_comv=False):
+    @unit.quantity_input(energy_range=['energy', 'length'], delta_energy=['energy', 'length'])
+    def spectrum(self, time_start, time_end, spectrum_unit=unit.erg / unit.s / unit.keV, energy_range=[10**-7, 10**5]*unit.keV, \
+                 delta_energy=0.1*unit.keV, photon_type=None, fit_spectrum=False, sample_num=1e4, calc_comv=False):
         """
         Function that calculates the mock observed spectrum and also fit the function with a Comp or Band function.
 
@@ -659,16 +666,24 @@ class MockObservation(object):
             raise UnitsError(
                 'The spectrum unit can only be set as erg/s/energy_unit or counts/s/energy_unit currently.')
 
+        if energy_range.unit != delta_energy.unit:
+            raise UnitsError('The units of the energy range and the energy bin sizes have to match.')
+
         if (np.sum(self.detected_photons.comv_p0) == 0) and calc_comv:
             raise InputParameterError('The comoving photon data has not been loaded to produce a comoving spectrum.')
 
         # see if an instrument has been loaded and if the energy range parameter is none, if energy_range!=None then
         # we use the explicitly defined energy_range
         if self.is_instrument_loaded and (
-                np.equal([-7, 5], log_energy_range).sum() == 2) and self.instrument_spectral_energy_range is not None:
+                np.equal([10**-7, 10**5], energy_range).sum() == 2) and self.instrument_spectral_energy_range is not None:
             # load the instrumental constraints
             log_energy_range = np.log10(self.instrument_spectral_energy_range)
             energy_unit = self.instrument_spectral_energy_unit
+        else:
+            log_energy_range = np.log10(energy_range.value)
+            energy_unit = energy_range.unit
+
+        delta_log_energy=np.log10(delta_energy.value)
 
         energy_min = 10 ** np.arange(log_energy_range[0], log_energy_range[1], delta_log_energy)
         energy_max = energy_min * 10 ** delta_log_energy
@@ -681,8 +696,8 @@ class MockObservation(object):
         fit, fit_errors, model_use = np.zeros(4) * np.nan, np.zeros(3) * np.nan, ''
         if fit_spectrum and ('ct' in spectrum_unit.to_string()):
             # break energy in fit always has same units as the energy bins
-            fit, fit_errors, model_use = self.spectral_fit(spectrum, spectrum_error, ph_num, energy_bin_center,
-                                                           energy_unit=energy_unit, sample_num=sample_num)
+            fit, fit_errors, model_use = self.spectral_fit(spectrum, spectrum_error, ph_num, energy_bin_center*energy_unit,
+                                                            sample_num=sample_num)
         else:
             if fit_spectrum:
                 print('The units of the spectrum needs to be counts/s/energy_unit to fit the spectrum.')
@@ -774,7 +789,8 @@ class MockObservation(object):
 
         return i, q, u, v, p, chi, sigma_pr / mu_factor, np.rad2deg(sigma_chi)
 
-    def polarization(self, time_start, time_end, photon_type=None, energy_range=None, energy_unit=None):
+    @unit.quantity_input(energy_range=['energy', 'length'])
+    def polarization(self, time_start, time_end, photon_type=None, energy_range=None):
         """
         Function that sets up and calculates the polarization for the time and energy range that is provided as input.
         :param time_start:
@@ -791,6 +807,8 @@ class MockObservation(object):
                 # load the instrumental constraints
                 energy_range = self.instrument_polarization_energy_range
                 energy_unit = self.instrument_polarization_energy_unit
+            else:
+                energy_unit=energy_range.unit
 
             idx = self._select_photons([time_start, time_end], photon_type=photon_type, energy_range=energy_range, \
                                        energy_unit=energy_unit)
@@ -837,7 +855,8 @@ class MockObservation(object):
         self.approx_gaussian_error_num = 10
         self.is_set_spectral_fit_parameters = False
 
-    def spectral_fit(self, spectrum, spectrum_error, ph_num, energy_bin_center, energy_unit=unit.keV, sample_num=1e4):
+    @unit.quantity_input(energy_bin_center=['energy', 'length'])
+    def spectral_fit(self, spectrum, spectrum_error, ph_num, energy_bin_center, sample_num=1e4):
         """
         The function that takes a spectrum and fits it with either a Comp or Band function in the energy range specified
         by the user through the set_spectral_fit_parameters method.
@@ -854,7 +873,7 @@ class MockObservation(object):
             raise InputParameterError(
                 'The set_spectral_fit_parameters method needs to be called before spectral fitting can be done.')
 
-        energy_bin_center = energy_bin_center * energy_unit.to(self.spectral_fit_energy_unit)
+        energy_bin_center = energy_bin_center.to(self.spectral_fit_energy_unit)
 
         idx = np.where((energy_bin_center > self.spectral_fit_energy_range[0]) & \
                        (energy_bin_center <= self.spectral_fit_energy_range[1]) & (
