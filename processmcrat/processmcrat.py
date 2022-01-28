@@ -84,9 +84,9 @@ class PhotonList(object):
             # get angle position of all photons in radians
             Theta_photon = np.arctan2(mc_x_eff, self.r2)
         else:
-            print("Calculating the photons spherical coordinate in 3D is not yet supported.")
+            raise ValueError("Calculating the photons spherical coordinate in 3D is not yet supported.")
 
-        return R_photon, Theta_photon
+        return R_photon, Theta_photon*u.rad
 
     def get_cartesian_coordinates(self, dimensions):
         if dimensions==2:
@@ -94,7 +94,7 @@ class PhotonList(object):
             # get radial positions of all photons
             y= self.r2
         else:
-            print("Calculating the photons cartesian coordinate in 3D is not yet supported.")
+            raise ValueError("Calculating the photons cartesian coordinate in 3D is not yet supported.")
 
         return mc_x_eff, y
 

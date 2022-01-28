@@ -19,8 +19,12 @@ def hydro_position_interpolate(photons, hydro_obj, key):
 
     #try to identify where the observed photon coordinates are encompassed by the hydrogrid
     i=2
-    #for flash, in cartesian coordinates therefore convert MCRaT 3D coord to 2D cartesian coord
-    ph_r0, ph_r1=photons.get_cartesian_coordinates(hydro_obj.dimensions)*hydro_obj.length_scale.unit
+    #convert MCRaT 3D coord to coord system of hydro simulation
+    if hydro_obj.coordinate_sys in ['CARTESIAN', 'cartesian', 'CYLINDRICAL']:
+        ph_r0, ph_r1=photons.get_cartesian_coordinates(hydro_obj.dimensions)*hydro_obj.length_scale.unit
+    else:
+         ph_r0, ph_r1=photons.get_spherical_coordinates(hydro_obj.dimensions)
+         ph_r0=ph_r0*hydro_obj.length_scale.unit
 
     #apply spatial limits in hydro coordinate system
     hydro_obj.apply_spatial_limits(ph_r0.min()*(1-(.05*i)), ph_r0.max()*(1+(.05*i)),\
@@ -32,19 +36,19 @@ def hydro_position_interpolate(photons, hydro_obj, key):
         hydro_obj.apply_spatial_limits(ph_r0.min() * (1 - (.05 * i)), ph_r0.max() * (1 + (.05 * i)),
                                        ph_r1.min() * (1 - (.05 * i)), ph_r1.max() * (1 + (.05 * i)))
 
+    #want to do things in cartesian here
     gridpoints=np.zeros((hydro_obj.spatial_limit_idx.size,2))
-    gridpoints[:,0]=hydro_obj.get_data('x0')
-    gridpoints[:,1]=hydro_obj.get_data('x1')
+    hydro_x, hydro_y=hydro_obj.coordinate_to_cartesian()
+    gridpoints[:,0]=hydro_x
+    gridpoints[:,1]=hydro_y
 
-    if key in hydro_obj.hydro_data:
-        data=hydro_obj.get_data(key)
-    else:
-        print(key+" is not a key in the HydroSim object")
+    data=hydro_obj.get_data(key)
 
 
     photonpoints=np.zeros((np.size(ph_r0),2))
-    photonpoints[:,0]=ph_r0
-    photonpoints[:,1]=ph_r1
+    ph_x, ph_y=photons.get_cartesian_coordinates(hydro_obj.dimensions)*hydro_obj.length_scale.unit
+    photonpoints[:,0]=ph_x
+    photonpoints[:,1]=ph_y
 
     data_points=griddata(gridpoints,data,photonpoints,method='nearest', rescale=True)
     if 'gamma' not in key:
@@ -54,7 +58,7 @@ def hydro_position_interpolate(photons, hydro_obj, key):
 
     #print(key, hydro_obj.get_data('x1')[0], ph_r0[0], gridpoints[0,0], photonpoints[0,0], data_points[0], distances[0])
 
-    differences=np.hypot((ph_r0 - distances[:,0]), (ph_r1 - distances[:,1]))
+    differences=np.hypot((ph_x - distances[:,0]), (ph_y - distances[:,1]))
 
     max_diff=differences.max()
 
@@ -129,7 +133,7 @@ def calculate_photon_vs_fluid_quantities(mcratload_obj, mcrat_obs_list, lc_dict_
                                            mcrat_obs_list, lc_dict_list,
                                            hydrosim_obj.fileroot_name, hydrosim_obj.file_directory,
                                            hydrosim_obj.hydrosim_type, hydrosim_obj.coordinate_sys,
-                                           hydrosim_obj.density_scale, hydrosim_obj.length_scale, hydrosim_obj.velocity_scale,
+                                           hydrosim_obj.density_scale, hydrosim_obj.length_scale, hydrosim_obj.velocity_scale, hydrosim_obj.datatype,
                                             spherical_simulation, Temp_photon, Temp_flash, Avg_R,
                                         dist_nearest_photon, ph_num,
                                         avg_scatt,avg_gamma, avg_pres,avg_dens,
@@ -209,7 +213,7 @@ def calculate_photon_vs_fluid_quantities(mcratload_obj, mcrat_obs_list, lc_dict_
 
 def calculate_photon_vs_fluid(file_num, file_num_max, file_directory, mcrat_obs_list, lc_dict_list, fileroot_name, \
                               hydro_file_directory, hydrosim_type, coordinate_sys, \
-                              density_scale, length_scale, velocity_scale, spherical_simulation, \
+                              density_scale, length_scale, velocity_scale, datatype, spherical_simulation, \
                             Temp_photon, Temp_flash, Avg_R, dist_nearest_photon, \
                               ph_num, avg_scatt, avg_gamma, avg_pres, avg_dens, P, Q, U, V):
 
@@ -219,7 +223,7 @@ def calculate_photon_vs_fluid(file_num, file_num_max, file_directory, mcrat_obs_
     mcrat_sim = McratSimLoad(file_directory)
     mcrat_sim.load_frame(file_num, read_comv=True)
 
-    hydrosim_obj=HydroSim(fileroot_name, file_directory=hydro_file_directory, hydrosim_type=hydrosim_type, \
+    hydrosim_obj=HydroSim(fileroot_name, file_directory=hydro_file_directory, hydrosim_type=hydrosim_type, datatype=datatype, \
                           coordinate_sys=coordinate_sys, density_scale=density_scale,\
                  length_scale=length_scale, velocity_scale=velocity_scale, hydrosim_dim=mcrat_obs_list[0].hydrosim_dim)
 

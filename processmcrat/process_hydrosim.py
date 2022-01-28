@@ -70,7 +70,6 @@ class HydroSim(object):
         if 'flash' in self.hydrosim_type or 'Flash' in self.hydrosim_type:
             hydro_dict=self._read_flash_file(sfrm)
         elif 'pluto' in self.hydrosim_type or 'PLUTO' in self.hydrosim_type:
-            print("Pluto and Pluto-chombo are not yet supported.")
             hydro_dict=self._read_pluto_file(sfrm)
         else:
             print(self.hydrosim_type+" is not supported as this time.")
@@ -171,12 +170,12 @@ class HydroSim(object):
         if D.geometry in ['CARTESIAN', 'CYLINDRICAL']:
             x1=D.x2 * self.length_scale
         else:
-            x1 = D.x2
+            x1 = D.x2*u.radian
         szx0=D.dx1 * self.length_scale
         if D.geometry in ['CARTESIAN', 'CYLINDRICAL']:
             szx1 = D.dx2 * self.length_scale
         else:
-            szx1 = D.dx2
+            szx1 = D.dx2 *u.radian
 
         pres=D.prs * self.pressure_scale
         dens=D.rho * self.density_scale
@@ -188,7 +187,7 @@ class HydroSim(object):
         #broadcast x0 and x1 arrays to be the proper size for the cell centered values
         x0=x0[:,np.newaxis]*np.ones(pres.shape)
         x1=x1[np.newaxis,:]*np.ones(pres.shape)
-
+        
         if make_1d:
             x0=x0.flatten()
             x1=x1.flatten()
@@ -200,6 +199,7 @@ class HydroSim(object):
             pres=pres.flatten()
             gg=gg.flatten()
             temp=temp.flatten()
+            
 
         hydro_dict = dict(x0=x0, x1=x1, dx0=szx0, dx1=szx1, temp=temp, pres=pres, dens=dens, v0=v0, v1=v1, gamma=gg)
 
@@ -223,17 +223,20 @@ class HydroSim(object):
 
             self.spatial_limit_idx=idx
         else:
-            print('Make sure that each minimum and maximum coordinate value has astropy units associated with it.')
+            raise ValueError('Make sure that each minimum and maximum coordinate value has astropy units associated with it.')
 
     def reset_spatial_limits(self):
         self.spatial_limit_idx=None
 
     def get_data(self, key):
-        if self.spatial_limit_idx is not None:
-            data=self.hydro_data[key][self.spatial_limit_idx]
+        if key in self.hydro_data:
+            if self.spatial_limit_idx is not None:
+                data=self.hydro_data[key][self.spatial_limit_idx]
+            else:
+                data=self.hydro_data[key]
+            return data
         else:
-            data=self.hydro_data[key]
-        return data
+            raise ValueError(key+" is not a key in the HydroSim object")
 
     def coordinate_to_cartesian(self):
         if ('flash' in self.hydrosim_type or 'Flash' in self.hydrosim_type) and self.dimensions==2:
@@ -248,7 +251,7 @@ class HydroSim(object):
                 x = self.get_data('x0')
                 y = self.get_data('x1')
             else:
-                print("Converting the hydro coordinate system %s to cartesian coordinates is not supported at this time."%(self.geometry))
+                raise ValueError("Converting the hydro coordinate system %s to cartesian coordinates is not supported at this time."%(self.geometry))
 
         return x,y
 
@@ -265,9 +268,9 @@ class HydroSim(object):
                 r = np.sqrt(self.get_data('x0') ** 2 + self.get_data('x1') ** 2)
                 theta = np.arctan2(self.get_data('x0'), self.get_data('x1'))
             else:
-                print("Converting the hydro coordinate system %s to spherical coordinates is not supported at this time."%(self.geometry))
+                raise ValueError("Converting the hydro coordinate system %s to spherical coordinates is not supported at this time."%(self.geometry))
 
-        return r, theta
+        return r, theta*u.rad
 
 
     def make_spherical_outflow(self, luminosity, gamma_infinity, r_0):
@@ -303,5 +306,5 @@ class HydroSim(object):
             self.hydro_data['gamma'] = gg
             self.hydro_data['temp'] = calc_temperature(pp)
         else:
-            print('Make sure that luminosity and saturation radius have units associated with them.')
+            raise ValueError('Make sure that luminosity and saturation radius have units associated with them.')
 

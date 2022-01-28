@@ -10,10 +10,8 @@ from .mclib import lc_time_to_radius
 def create_image(hydro_obj, key, logscale=True):
     x0 = np.linspace((hydro_obj.get_data('x0').min()), (hydro_obj.get_data('x0').max()), num=1000)
     x1 = np.linspace((hydro_obj.get_data('x1').min()), (hydro_obj.get_data('x1').max()), num=1000)
-    if key in hydro_obj:
-        data=hydro_obj.get_data(key)
-    else:
-        print(key+" is not a key in the HydroSim object")
+    data=hydro_obj.get_data(key)
+
 
     points = np.empty([x0.size, 2])
     points[:, 0] = x0
