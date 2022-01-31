@@ -117,7 +117,7 @@ class McratSimLoad(object):
         if file_directory is not None:
             self.file_directory=file_directory
         else:
-            self.file_directory=os.curdir()
+            self.file_directory=curdir()
 
     def load_frame(self, frame_num, read_comv=False, read_stokes=False, read_type=False):
         """
