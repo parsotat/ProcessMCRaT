@@ -70,12 +70,12 @@ def load_photon_vs_fluid_quantities(savefile):
     with open(savefile + '.pickle', 'rb') as f:
         u = pickle._Unpickler(f)
         u.encoding = 'latin1'
-        Temp_photon_2, Temp_flash_2, Avg_R_2, ph_num_2, avg_scatt_2, avg_gamma_2, avg_pres_2, avg_dens_2, P_2, Q_2, U_2, V_2 = u.load()
+        Temp_photon_2, Temp_flash_2, Avg_R_2, ph_num_2, avg_scatt_2, avg_gamma_2, avg_pres_2, avg_dens_2, P_2, Q_2, U_2, V_2, obs_theta = u.load()
 
         return_dict = dict(hydro_temp=Temp_flash_2, photon_temp=Temp_photon_2, avg_r=Avg_R_2, avg_scatt=avg_scatt_2, \
                            avg_gamma=avg_gamma_2, avg_pres=avg_pres_2, avg_pol=P_2,
                            avg_stokes=dict(Q=Q_2, U=U_2, V=V_2), \
-                           photon_num=ph_num_2)
+                           photon_num=ph_num_2, obs_theta=obs_theta, avg_dens=avg_dens_2)
 
         return return_dict
 
@@ -195,18 +195,20 @@ def calculate_photon_vs_fluid_quantities(mcratload_obj, mcrat_obs_list, lc_dict_
     #print(np.array([Temp_photon_2, Temp_flash_2, Avg_R_2, ph_num_2, avg_scatt_2, avg_gamma_2, avg_pres_2, avg_dens_2, P_2, Q_2, U_2,
     #     V_2]).shape, Temp_photon_2.shape)
 
+    obs_theta=np.array([i.theta_observer for i in mcrat_obs_list])
+
     # save file as pickle file
     f = open(savefile + '.pickle', 'wb')
     pickle.dump(
         [Temp_photon_2, Temp_flash_2, Avg_R_2, ph_num_2, avg_scatt_2, avg_gamma_2, avg_pres_2, avg_dens_2, P_2, Q_2, U_2,
-         V_2], f)
+         V_2, obs_theta], f)
     f.close()
 
     shutil.rmtree(folder)
 
     return_dict=dict(hydro_temp=Temp_flash_2, photon_temp=Temp_photon_2, avg_r=Avg_R_2, avg_scatt=avg_scatt_2, \
                      avg_gamma=avg_gamma_2, avg_pres=avg_pres_2, avg_pol=P_2, avg_stokes=dict(Q=Q_2, U=U_2, V=V_2), \
-                     photon_num=ph_num_2)
+                     photon_num=ph_num_2, obs_theta=obs_theta, avg_dens=avg_dens_2)
 
     return return_dict
 
@@ -255,6 +257,7 @@ def calculate_photon_vs_fluid(file_num, file_num_max, file_directory, mcrat_obs_
     for i in range(len(mcrat_obs_list)):
         obs=mcrat_obs_list[i]
         lc =lc_dict_list[i]
+
 
         #for each time bin in the LC up to np.size(lc['times'])-1
         for t_idx in range(np.size(lc['times'])-1):
