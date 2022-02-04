@@ -2,7 +2,7 @@ import numpy as np
 from scipy import interpolate
 from astropy.visualization import quantity_support
 quantity_support()
-from hydrosim_lib import load_photon_vs_fluid_quantities
+from .hydrosim_lib import load_photon_vs_fluid_quantities
 from .mclib import calc_optical_depth
 import matplotlib.pyplot as plt
 import os
@@ -65,8 +65,10 @@ def plot_photon_vs_fluid_quantities(savefile, hydro_keys, lc_dict_list, theta=No
         lc=lc_dict_list[i]
         #if the user specified a certain theta to plot
         if theta is not None:
+            if type(theta) is not list:
+                theta=[theta]
             #see if the ith lc_dict has this theta
-            if lc['theta_observer'] in theta:
+            if lc['theta_observer'].value in theta:
                 plot_angle_switch=True
             else:
                 plot_angle_switch=False
@@ -74,11 +76,12 @@ def plot_photon_vs_fluid_quantities(savefile, hydro_keys, lc_dict_list, theta=No
             plot_angle_switch=True
 
         #make sure that the theta of the passed lc dict is included in the output of the phoot_fluid analysis
-        if lc['theta_observer'] not in data_dict['obs_theta']:
+        if lc['theta_observer'].value not in data_dict['obs_theta']:
             plot_angle_switch = False
         else:
             #get the index in which the angle specific data is saved in teh large array
-            theta_idx=np.where(lc['theta_observer']==data_dict['obs_theta'])[0]
+            theta_idx=np.where(lc['theta_observer'].value==data_dict['obs_theta'])[0][0]
+        
 
         if plot_angle_switch:
             for t_idx in range(np.size(lc['times'])-1):
@@ -93,7 +96,7 @@ def plot_photon_vs_fluid_quantities(savefile, hydro_keys, lc_dict_list, theta=No
                     if tmax is None:
                         tmax=1e12 #if the user didnt set tmin, set to a very large value
 
-                    if (lc['times'][t_idx].value >= tmin) & (lc['times'][t_idx+1].value<tmax):
+                    if (lc['times'][t_idx].value >= tmin) & (lc['times'][t_idx+1].value<=tmax):
                         plot_time_switch=True
                     else:
                         plot_time_switch=False
@@ -108,109 +111,99 @@ def plot_photon_vs_fluid_quantities(savefile, hydro_keys, lc_dict_list, theta=No
 
                     #can go ahead and plot things
                     fig, axes = plt.subplots(num_plots,sharex=True)
+                    fig.set_size_inches(17, 10)
+                    plt.subplots_adjust(hspace=0, wspace=0)
                     axes_queue=[i for i in range(num_plots)]
 
                     ax_temp=None
-
+                    
                     count=0
                     for i in hydro_keys:
+                    
+                        if num_plots>1:
+                            ax = axes[axes_queue[0]]
+                            if 'temp' in i and ax_temp is None:
+                                ax_temp=ax
+                                axes_queue.pop(0)
+                            elif 'temp' in i and ax_temp is not None:
+                                ax=ax_temp
+                            else:
+                                axes_queue.pop(0)
+                        else:
+                            ax = axes
 
                         r=data_dict['avg_r'][t_idx,theta_idx, :]
+                        
+                        if "optical_depth" in i:
+                            data=calc_optical_depth(data_dict['avg_scatt'][t_idx,theta_idx, :][::-1])#order the data from smallest radii to largest, therefore reverse it
+                            data=data[::-1]#revert it to how it was for plotting with r
+                            #print(data)
+                            #r=r[:-1]
+                        else:
+                            data=data_dict[i][t_idx,theta_idx, :]
+                        
+                        #print(i, data.shape, r.shape)
+                        
+                        ls='-'
+                        string=None
+                        
 
                         #plot the photon and hydro temp
                         if 'temp' in i:
-                            if ax_temp is None:
-                                ax_temp=axes[axes_queue[0]]
-                                axes_queue.pop(0)
                             if 'hydro' in i:
-                                data=data_dict['hydro_temp'][t_idx,theta_idx, :]
                                 ls='-'
                                 string = r'$T_\mathrm{fl}$'
                             else:
-                                data = data_dict['photon_temp'][t_idx,theta_idx, :]
-                                ls='.-'
+                                ls='-.'
                                 string=r'$T_\mathrm{ph}$'
 
-                            ax_temp.loglog(r, data, ls=ls, label=string)
-                            ax_temp.ylabel('Temperature' + ' ('+data.unit.to_string('latex_inline')+')')
-                            ax_temp.legend(loc='best')
+                            ylab='Temperature' + ' (K)'
 
                         if 'avg_scatt' in i:
-                            ax = axes[axes_queue[0]]
-                            axes_queue.pop(0)
-
-                            data=data_dict[i][t_idx,theta_idx, :]
-
-                            ax.loglog(r, data, ls='-')
-                            ax.ylabel(r'$<N_\mathrm{scatt}>$')
+                            ylab=r'$<N_\mathrm{scatt}>$'
 
                         if 'optical_depth' in i:
-                            ax = axes[axes_queue[0]]
-                            axes_queue.pop(0)
-
-                            data=calc_optical_depth(data_dict['avg_scatt'][t_idx,theta_idx, :])
-
-                            ax.loglog(r, data, ls='-')
-                            ax.ylabel(r'$\tau$')
+                            ylab=r'$\tau$'
 
                         if 'avg_pres' in i:
-                            ax = axes[axes_queue[0]]
-                            axes_queue.pop(0)
-
-                            data=data_dict[i][t_idx,theta_idx, :]
-
-                            ax.loglog(r, data, ls='-')
-                            ax.ylabel(r'$<P>$'+ ' ('+data.unit.to_string('latex_inline')+')')
+                            ylab=r'$<P>$'+ r' (g cm$^{-1}$ s$^{-2}$)'
 
                         if 'avg_dens' in i:
-                            ax = axes[axes_queue[0]]
-                            axes_queue.pop(0)
-
-                            data=data_dict[i][t_idx,theta_idx, :]
-
-                            ax.loglog(r, data, ls='-')
-                            ax.ylabel(r'$<\rho>$'+ ' ('+data.unit.to_string('latex_inline')+')')
+                            ylab=r'$<\rho>$'+ r' (g cm$^{-3}$)'
 
                         if 'avg_gamma' in i:
-                            ax = axes[axes_queue[0]]
-                            axes_queue.pop(0)
-
-                            data=data_dict[i][t_idx,theta_idx, :]
-
-                            ax.loglog(r, data, ls='-')
-                            ax.ylabel(r'$<\Gamma>$'+ ' ('+data.unit.to_string('latex_inline')+')')
+                            ylab=r'$<\Gamma>$'
 
 
                         if 'avg_pol' in i:
-                            ax = axes[axes_queue[0]]
-                            axes_queue.pop(0)
-
-                            data=data_dict[i][t_idx,theta_idx, :]
-
-                            ax.loglog(r, data, ls='-')
-                            ax.ylabel(r'$<\Pi>$'+ ' (%)')
+                            ylab=r'$<\Pi>$'+ ' (%)'
 
 
                         if 'photon_num' in i:
-                            ax = axes[axes_queue[0]]
-                            axes_queue.pop(0)
-
-                            data=data_dict[i][t_idx,theta_idx, :]
-
-                            ax.loglog(r, data, ls='-')
-                            ax.ylabel(r'$N$')
-
-                        axes[-1].set_xlabel(r'$<R>$'+ ' ('+r.unit.to_string('latex_inline')+')')
-
+                            ylab=r'$N_\mathrm{ph}$'
+                            
+                        ax.loglog(r, data, ls=ls, label=string)
+                        ax.set_ylabel(ylab)
+                        
+                        if 'temp' in i:
+                            ax.legend(loc='best')
+                    
+                    if num_plots>1:
                         #put x axis ticks on top to see radius ticks easily
                         for ax in axes[1:]:
                             ax.xaxis.tick_top()
-
+                        
                         axes[-1].tick_params(labelbottom=True, labeltop=False, bottom=True)
+                        
+                        ax=axes[-1]
+                    else:
+                        ax=axes
+                    ax.set_xlabel(r'$<R>$'+ ' (cm)')
 
-                        if savedir is not None:
-                            filename='photon_fluid_params_theta_%d_time_'+\
-                                        np.str_(np.round(lc['times'][t_idx].value, decimals=1))+'-'+\
-                                        np.str_(np.round(lc['times'][t_idx+1].value, decimals=1))+'.pdf'
-                            fig.savefig(os.path.join(savedir,filename), bbox_inches='tight')
+
+                    if savedir is not None:
+                        filename='photon_fluid_params_theta_%d_time_'%(lc['theta_observer'].value)+\
+                                    np.str_(np.round(lc['times'][t_idx].value, decimals=1))+'-'+\
+                                    np.str_(np.round(lc['times'][t_idx+1].value, decimals=1))+'.pdf'
+                        fig.savefig(os.path.join(savedir,filename), bbox_inches='tight')
 
