@@ -12,8 +12,11 @@ from .mclib import lc_time_to_radius
 
 
 def create_image(hydro_obj, key, logscale=True):
-    x0 = np.linspace((hydro_obj.get_data('x0').min()), (hydro_obj.get_data('x0').max()), num=1000)
-    x1 = np.linspace((hydro_obj.get_data('x1').min()), (hydro_obj.get_data('x1').max()), num=1000)
+    
+    x,y=hydro_obj.coordinate_to_cartesian()
+
+    x0 = np.linspace((x.min()), (x.max()), num=1000)
+    x1 = np.linspace((y.min()), (y.max()), num=1000)
     data=hydro_obj.get_data(key)
 
 
