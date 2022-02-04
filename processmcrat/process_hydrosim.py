@@ -30,6 +30,8 @@ class HydroSim(object):
         """
 
         if 'pluto' in hydrosim_type or 'PLUTO' in hydrosim_type:
+            if ['CHOMBO', 'chombo', 'Chombo'] in hydrosim_type:
+                datatype='hdf5'
             self.amr_level=amr_level
             if datatype is None:
                 raise ValueError('There is no datatype specified for the PLUTO simulation files.')
@@ -216,10 +218,12 @@ class HydroSim(object):
             if x2_max is None and x2_min is None:
                 idx = np.where((self.hydro_data['x0']  >= x0_min) & (self.hydro_data['x0'] < x0_max) \
                                & (self.hydro_data['x1'] >= x1_min) & (self.hydro_data['x1'] < x1_max))[0]
+                self.spatial_limit = dict(x0_lim=[x0_min, x0_max], x1_lim=[x1_min, x1_max])
             else:
                 idx = np.where((self.hydro_data['x0'] >= x0_min) & (self.hydro_data['x0'] < x0_max) \
                                & (self.hydro_data['x1'] >= x1_min) & (self.hydro_data['x1'] < x1_max)\
                                & (self.hydro_data['x2'] >= x2_min) & (self.hydro_data['x2'] < x2_max))[0]
+                self.spatial_limit = dict(x0_lim=[x0_min, x0_max], x1_lim=[x1_min, x1_max], x2_lim=[x2_min, x2_max])
 
             self.spatial_limit_idx=idx
         else:
@@ -227,6 +231,7 @@ class HydroSim(object):
 
     def reset_spatial_limits(self):
         self.spatial_limit_idx=None
+        self.spatial_limit = None
 
     def get_data(self, key):
         if key in self.hydro_data:

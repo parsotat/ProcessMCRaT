@@ -12,19 +12,18 @@ from .mclib import lc_time_to_radius
 
 
 def create_image(hydro_obj, key, logscale=True):
-    
+
     x,y=hydro_obj.coordinate_to_cartesian()
+    data=hydro_obj.get_data(key)
 
     x0 = np.linspace((x.min()), (x.max()), num=1000)
     x1 = np.linspace((y.min()), (y.max()), num=1000)
-    data=hydro_obj.get_data(key)
-
-
-    points = np.empty([x0.size, 2])
-    points[:, 0] = x0
-    points[:, 1] = x1
 
     X, Y = np.meshgrid(x0, x1)
+
+    points = np.empty([x.size, 2])
+    points[:, 0] = x.flatten()
+    points[:, 1] = y.flatten()
 
     Z = interpolate.griddata(points, data, (X, Y), method='nearest', rescale=True)
 
