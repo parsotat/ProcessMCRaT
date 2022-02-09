@@ -223,6 +223,9 @@ def plot_photon_fluid_EATS(tmin, tmax, ph_obs, hydro_obj, x0lim=None, x1lim=None
             raise ValueError("Make sure that the number of photon types that are requested to be plotted are the same as the number of "+\
                              "elements in the lists passed to  photon_markers, photon_zorder, and photon_alpha.")
 
+        if ph_obs.detected_photons.photon_type[0] is None:
+            raise ValueError('The MCRaT simulation object does not contain information on the type of photons. Make sure that read_type=True when loading a frame.')
+
     #get the photons that fall within tmin and tmax
     index=np.where((ph_obs.detected_photons.detection_time>tmin) & (ph_obs.detected_photons.detection_time<=tmax))[0]
 
