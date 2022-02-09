@@ -279,6 +279,7 @@ def plot_photon_fluid_EATS(tmin, tmax, ph_obs, hydro_obj, x0lim=None, x1lim=None
     ax.plot(x_LOS, y_LOS, 'r-', label=r'$\theta_\mathrm{v}=$%d$^\circ$'%(ph_obs.theta_observer))
     ax.plot(x_t_min, y_t_min, 'k--', label='t=%0.1f s' % (tmin))
     ax.plot(x_t_max, y_t_max, 'k--', label='t=%0.1f s' % (tmax))
+    ax.legend(loc='best')
 
     #plot photons
     phx, phy=ph_obs.detected_photons.get_cartesian_coordinates(hydro_obj.dimensions)
@@ -307,7 +308,6 @@ def plot_photon_fluid_EATS(tmin, tmax, ph_obs, hydro_obj, x0lim=None, x1lim=None
                 sizes = None
 
             ax.scatter(phx[idx], phy[idx], color=photon_colors[i], marker=photon_markers[i], ls='None',
-                       zorder=photon_zorder[i], \
-                       alpha=photon_alpha[i], s=sizes)
+                       zorder=photon_zorder[i], alpha=photon_alpha[i], s=sizes)
 
-
+    return fig, ax 
