@@ -212,7 +212,7 @@ def calculate_photon_vs_fluid_quantities(mcratload_obj, mcrat_obs_list, lc_dict_
 
     return return_dict
 
-
+@unit.quantity_input(density_scale=['mass density'], length_scale=['length'], velocity_scale=['speed'])
 def calculate_photon_vs_fluid(file_num, file_num_max, file_directory, mcrat_obs_list, lc_dict_list, fileroot_name, \
                               hydro_file_directory, hydrosim_type, coordinate_sys, \
                               density_scale, length_scale, velocity_scale, datatype, spherical_simulation, \

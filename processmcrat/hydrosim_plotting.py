@@ -3,12 +3,14 @@ from scipy import interpolate
 from astropy.visualization import quantity_support
 quantity_support()
 from .hydrosim_lib import load_photon_vs_fluid_quantities
-from .mclib import calc_optical_depth
+from .mclib import calc_optical_depth, calc_equal_arrival_time_surface, calc_line_of_sight
 import matplotlib.pyplot as plt
 import os
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 from .plotting import random_photon_index
 from .mclib import lc_time_to_radius
+
 
 
 def create_image(hydro_obj, key, logscale=True):
@@ -208,4 +210,104 @@ def plot_photon_vs_fluid_quantities(savefile, hydro_keys, lc_dict_list, theta=No
                                     np.str_(np.round(lc['times'][t_idx].value, decimals=1))+'-'+\
                                     np.str_(np.round(lc['times'][t_idx+1].value, decimals=1))+'.pdf'
                         fig.savefig(os.path.join(savedir,filename), bbox_inches='tight')
+
+def scale_photon_weights(weights, scale, power=2):
+    return scale*(1+np.log10(weights/weights.min()))**power
+
+def plot_photon_fluid_EATS(tmin, tmax, ph_obs, hydro_obj, x0lim=None, x1lim=None, hydro_key="dens", photon_type=None,\
+                           photon_colors=["b","r"],photon_markers=['o', 'P'], photon_zorder=[5,4], photon_alpha=[0.1, 0.5], plot_weight=False):
+
+    if photon_type is not None:
+        if len(photon_type) > len(photon_markers) or len(photon_type) > len(photon_zorder) \
+                or len(photon_type) > len(photon_alpha) or len(photon_type) > len(photon_colors):
+            raise ValueError("Make sure that the number of photon types that are requested to be plotted are the same as the number of "+\
+                             "elements in the lists passed to  photon_markers, photon_zorder, and photon_alpha.")
+
+    #get the photons that fall within tmin and tmax
+    index=np.where((ph_obs.detected_photons.detection_time>tmin) & (ph_obs.detected_photons.detection_time<=tmax))[0]
+
+    if x0lim is None and x1lim is None:
+        #use the hydro limits
+        x0=hydro_obj.get_data("x0")
+        x1=hydro_obj.get_data("x1")
+        x0lim=[x0.min(), x0.max()]
+        x1lim = [x1.min(), x1.max()]
+    else:
+        #get the values of the hydro frame around the specified limits
+        hydro_obj.apply_spatial_limits(x0lim[0], x0lim[1], x1lim[0], x1lim[1])
+
+    #get the image
+    img = create_image(hydro_obj, hydro_key)
+
+    #only look at half
+    img=img[:, int(0.5*img.shape[1]):]
+
+    #get the EATS
+    x,y=hydro_obj.coordinate_to_cartesian()
+    x_t_min, y_t_min = calc_equal_arrival_time_surface(ph_obs.theta_observer, int(hydro_obj.frame_num), ph_obs.fps, x.min().value, x.max().value,
+                                                 tmin)
+    x_t_max, y_t_max = calc_equal_arrival_time_surface(ph_obs.theta_observer, int(hydro_obj.frame_num), ph_obs.fps, x.min().value, x.max().value,
+                                              tmax)
+    #get the LOS
+    x_LOS, y_LOS=calc_line_of_sight(ph_obs.theta_observer, x.min().value, x.max().value, y.min().value, y.max().value)
+
+    #plot the image
+    fig, ax = plt.subplots(figsize=(10, 10))
+    e = [x.min().value, x.max().value, y.min().value, y.max().value]
+    im = ax.imshow(img, origin='lower', extent=e, cmap=plt.get_cmap('BuPu'))
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="5%", pad=0.00)
+    cbar = plt.colorbar(im, cax=cax, ticklocation='right')
+
+
+    if "dens" in hydro_key:
+        color_label=r'Log($\frac{\rho}{\mathrm{g/cm}^3}$)'
+    elif "gamma" in hydro_key:
+        color_label=r'Log($\Gamma$)'
+    elif "pres" in hydro_key:
+        color_label = r'Log($\frac{P}{\mathrm{dyne/cm}^2}$)'
+    elif "temp" in hydro_key:
+        color_label = r'Log($\frac{T}{\mathrm{K}}$)'
+
+    cbar.set_label(color_label, fontsize=14)
+    ax.ticklabel_format(style='scientific', useMathText=True)
+    ax.yaxis.offsetText.set_fontsize(14)
+    ax.xaxis.offsetText.set_fontsize(14)
+    ax.set_xlabel('x (cm)', fontsize=14)
+    ax.set_ylabel('y (cm)', fontsize=14)
+
+    ax.plot(x_LOS, y_LOS, 'r-', label=r'$\theta_\mathrm{v}=$%d$^\circ$'%(ph_obs.theta_observer))
+    ax.plot(x_t_min, y_t_min, 'k--', label='t=%0.1f s' % (tmin))
+    ax.plot(x_t_max, y_t_max, 'k--', label='t=%0.1f s' % (tmax))
+
+    #plot photons
+    phx, phy=ph_obs.detected_photons.get_cartesian_coordinates(hydro_obj.dimensions)
+    if photon_type is None:
+        # need to determine if we need to plot the photons' weights
+        if plot_weight:
+            sizes = scale_photon_weights(ph_obs.detected_photons.weight, 1)[index]
+        else:
+            sizes=None
+
+        ax.scatter(phx[index], phy[index], color=photon_colors[0], marker=photon_markers[0], ls='None', zorder=photon_zorder[0], \
+                   alpha=photon_alpha[0], s=sizes)
+    else:
+        for i, type in enumerate(photon_type):
+
+            #get the indexes of the photon types
+            type_idx=np.where(type==ph_obs.detected_photons.photon_type)
+
+            #identfy which indexes are the same based on time constraint and type constraint
+            idx=np.intersect1d(type_idx, index)
+
+            # need to determine if we need to plot the photons' weights
+            if plot_weight:
+                sizes = scale_photon_weights(ph_obs.detected_photons.weight, 1)[idx]
+            else:
+                sizes = None
+
+            ax.scatter(phx[idx], phy[idx], color=photon_colors[i], marker=photon_markers[i], ls='None',
+                       zorder=photon_zorder[i], \
+                       alpha=photon_alpha[i], s=sizes)
+
 

@@ -30,7 +30,7 @@ class HydroSim(object):
         """
 
         if 'pluto' in hydrosim_type or 'PLUTO' in hydrosim_type:
-            if ['CHOMBO', 'chombo', 'Chombo'] in hydrosim_type:
+            if hydrosim_type in ['CHOMBO', 'chombo', 'Chombo']:
                 datatype='hdf5'
             self.amr_level=amr_level
             if datatype is None:
