@@ -268,16 +268,16 @@ def calculate_photon_vs_fluid(file_num, file_num_max, file_directory, mcrat_obs_
 
 
             #this may work for any type photon
-            #idx=np.where((ph_y<y_t_min) & (ph_y>=y_t_max)& (photon_theta_velocity<obs.theta_observer+0.5*obs.acceptancetheta_observer) \
-            #               & (photon_theta_velocity>obs.theta_observer-0.5*obs.acceptancetheta_observer))[0]
+            idx=np.where((ph_y<y_t_min) & (ph_y>=y_t_max)& (photon_theta_velocity<obs.theta_observer+0.5*obs.acceptancetheta_observer) \
+                           & (photon_theta_velocity>obs.theta_observer-0.5*obs.acceptancetheta_observer))[0]
 
             #this works for just 'i' type potons
-            index=np.where((obs.detected_photons.detection_time>lc['times'][t_idx].value) & (obs.detected_photons.detection_time<=lc['times'][t_idx+1].value))[0]
-            if np.size(index)>0:
-                index2=np.where(obs.detected_photons.file_index[index]<ph_x.size)[0]
-                idx=obs.detected_photons.file_index[index][index2]
-            else:
-                idx=[]
+            #index=np.where((obs.detected_photons.detection_time>lc['times'][t_idx].value) & (obs.detected_photons.detection_time<=lc['times'][t_idx+1].value))[0]
+            #if np.size(index)>0:
+            #    index2=np.where(obs.detected_photons.file_index[index]<ph_x.size)[0]
+            #    idx=obs.detected_photons.file_index[index][index2]
+            #else:
+            #    idx=[]
 
             #print(file_num, i,t_idx, w.size, y_t_min[0], y_t_max[0], ph_y[0], mcrat_sim.loaded_photons.comv_p0.sum(), idx)
             #if i==1 and file_num==259:

@@ -317,7 +317,7 @@ def plot_lightcurve(lightcurve_dict_list, plot_polarization=False, plot_spectral
         for i in lightcurve_dict_list:
             lc_panel.plot(i['times'], i['lightcurve']/i['lightcurve'].max(), ds='steps-post', lw=2)
 
-        lc_panel.set_ylabel(r'L/L$_\mathrm{max}$' +' ('+main_lightcurve_dict['lightcurve'].unit.to_string('latex_inline')+')')
+        lc_panel.set_ylabel(r'L$_\mathrm{iso}$/L$_\mathrm{iso,max}$' +' ('+main_lightcurve_dict['lightcurve'].unit.to_string('latex_inline')+')')
 
     if num_panels==1:
         lc_panel.set_xlabel('Time since Jet Launch (s)')
