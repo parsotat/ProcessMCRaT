@@ -97,7 +97,7 @@ class PhotonList(object):
         else:
             coords=(self.r0, self.r1, self.r2)
 
-        return
+        return coords
 
 
 
