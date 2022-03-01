@@ -93,10 +93,11 @@ class PhotonList(object):
             mc_x_eff = np.sqrt(self.r0 ** 2 + self.r1 ** 2)  # effective x axis for MCRaT simulation to compare to
             # get radial positions of all photons
             y= self.r2
+            coords=(mc_x_eff, y)
         else:
-            raise ValueError("Calculating the photons cartesian coordinate in 3D is not yet supported.")
+            coords=(self.r0, self.r1, self.r2)
 
-        return mc_x_eff, y
+        return
 
 
 
