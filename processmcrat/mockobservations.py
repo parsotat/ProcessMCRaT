@@ -68,6 +68,7 @@ class MockObservation(object):
         :param directory:
         """
 
+
         self.theta_observer = theta_observer
         self.acceptancetheta_observer = acceptancetheta_observer
         if (phi_observer<0.0 or phi_observer>360.0):
@@ -88,6 +89,13 @@ class MockObservation(object):
             self.frame_num = mcratsimload_obj.frame_num
 
             loaded_photons = mcratsimload_obj.loaded_photons
+
+            # test if the photon with the maximum radius is at a larger distance than the observer distance
+            r_max=np.hypot(loaded_photons.r0, loaded_photons.r1, loaded_photons.r2).max()
+            if r_max>r_observer:
+                raise ValueError('The observer needs to be located further than the location of the furthest photon in \
+                the simulation which has a radius of %e.'%(r_max))
+
 
             """ old way of calculating detection times
             # calculate projection of photons position vector onto vector in the observer's direction
@@ -168,6 +176,7 @@ class MockObservation(object):
 
             #apply condition
             detection_times=detection_times[jj]
+
 
             self.total_observed_photons = jj.size
 
