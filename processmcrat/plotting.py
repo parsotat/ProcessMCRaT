@@ -396,7 +396,11 @@ def plot_lightcurve(lightcurve_dict_list, plot_polarization=False, plot_spectral
 
     if plot_polarization:
         #plot the polarization in its own separate panel
-        index = np.where((main_lightcurve_dict['model_use'] == 'c') | (main_lightcurve_dict['model_use'] == 'b'))[0]
+        if plot_spectral_params:
+            #if there are spectral parameters fitted
+            index = np.where((main_lightcurve_dict['model_use'] == 'c') | (main_lightcurve_dict['model_use'] == 'b'))[0]
+        else:
+            index = np.where((t_cen>=t_cen.min()) | (t_cen<=t_cen.max())) #this selects everything
         pol_panel.errorbar(t_cen[index],main_lightcurve_dict['pol_deg'][index]*100,\
                            yerr=np.abs(main_lightcurve_dict['pol_deg_errors'][index]*100),xerr=x_err[index],color='k',\
                            marker='.', ls='None')

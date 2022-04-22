@@ -91,7 +91,8 @@ class MockObservation(object):
             loaded_photons = mcratsimload_obj.loaded_photons
 
             # test if the photon with the maximum radius is at a larger distance than the observer distance
-            r_max=np.hypot(loaded_photons.r0, loaded_photons.r1, loaded_photons.r2).max()
+            r_max=loaded_photons.get_spherical_coordinates(hydrosim_dim)[0].max()
+
             if r_max>r_observer:
                 raise ValueError('The observer needs to be located further than the location of the furthest photon in \
                 the simulation which has a radius of %e.'%(r_max))
@@ -176,7 +177,6 @@ class MockObservation(object):
 
             #apply condition
             detection_times=detection_times[jj]
-
 
             self.total_observed_photons = jj.size
 
@@ -882,8 +882,13 @@ class MockObservation(object):
         :param approx_gaussian_error_num:
         :return:
         """
-        self.spectral_fit_energy_range = spectral_fit_energy_range.value
-        self.spectral_fit_energy_unit = spectral_fit_energy_range.unit
+        #see if an instrument is loaded with spectral parameters set use them
+        if self.is_instrument_loaded and self.instrument_spectral_energy_range is not None:
+            self.spectral_fit_energy_range = self.instrument_spectral_energy_range
+            self.spectral_fit_energy_unit = self.instrument_spectral_energy_unit
+        else:
+            self.spectral_fit_energy_range = spectral_fit_energy_range.value
+            self.spectral_fit_energy_unit = spectral_fit_energy_range.unit
         self.approx_gaussian_error_num = approx_gaussian_error_num
         self.is_set_spectral_fit_parameters = True
 
