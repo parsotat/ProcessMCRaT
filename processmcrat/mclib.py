@@ -13,13 +13,15 @@ from scipy.optimize import curve_fit
 
 def band_function(energies, alpha, beta, break_energy, normalization, energy_unit=unit.keV):
 	"""
+	Calculates the Band model for a range of energies using specified alpha, break energy, and normalization parameters
 
-	:param energies:
-	:param alpha:
-	:param beta:
-	:param break_energy:
-	:param normalization:
-	:return:
+	:param energies: Array of energies at which the Band spectrum should be calculated
+	:param alpha: number which denotes the low energy slope of the Band function
+	:param beta: number which denotes the high energy slope of the Band function
+	:param break_energy: number which dentoes the energy where the powerlaw changes slopes
+	:param normalization: Number which represents the total normalization of the returned spectrum
+	:param energy_unit: Default of keV or astropy unit that denotes the units of the
+	:return: array of the returned Band model values at the specified energies
 	"""
 	try:
 		energies=energies.value
@@ -50,12 +52,13 @@ def band_function(energies, alpha, beta, break_energy, normalization, energy_uni
 
 def wien_function(energies, temp, normalization, energy_unit=unit.keV):
 	"""
+	Calculates the Wien model for a range of energies using specified temperature and normalization parameters
 
-	:param energies:
-	:param temp:
-	:param normalization:
-	:param energy_unit:
-	:return:
+	:param energies: Array of energies at which the Wien spectrum should be calculated
+	:param temp: Number which dentoes the temperature of the Wien distribution
+	:param normalization: number that denotes the normalization of the returned spectrum
+	:param energy_unit: Default of keV or astropy unit that denotes the units of the
+	:return: array of the returned Wien model values at the specified energies
 	"""
 
 	energies=energies*energy_unit.to(unit.erg)
@@ -85,12 +88,13 @@ def wien_function(energies, temp, normalization, energy_unit=unit.keV):
  
 def blackbody_function(energies, temp, normalization, energy_unit=unit.keV):
 	"""
+	Calculates the blackbody model for a range of energies using specified temperature and normalization parameters
 
-	:param energies:
-	:param temp:
-	:param normalization:
-	:param energy_unit:
-	:return:
+	:param energies: Array of energies at which the blackbody spectrum should be calculated
+	:param temp: Number which dentoes the temperature of the blackbody distribution
+	:param normalization: number that denotes the normalization of the returned spectrum
+	:param energy_unit: Default of keV or astropy unit that denotes the units of the
+	:return: array of the returned blackbody model values at the specified energies
 	"""
 
 	energies=energies*energy_unit.to(unit.erg)
@@ -119,13 +123,14 @@ def blackbody_function(energies, temp, normalization, energy_unit=unit.keV):
 
 def comptonized_function(energies, alpha, break_energy, normalization, energy_unit=unit.keV):
 	"""
+	Calculates the comptonized (COMP) model for a range of energies using specified alpha, break energy, and normalization parameters
 
-	:param energies:
-	:param alpha:
-	:param break_energy:
-	:param normalization:
-	:param energy_unit:
-	:return:
+	:param energies: Array of energies at which the COMP spectrum should be calculated
+	:param alpha: number which denotes the low energy slope of the COMP function
+	:param break_energy: number which dentoes the energy here the powerlaw changed to an exponential function
+	:param normalization: Number which represents the total normalization of the returned spectrum
+	:param energy_unit: Default of keV or astropy unit that denotes the units of the
+	:return: array of the returned COMP model values at the specified energies
 	"""
 	try:
 		energies=energies.value
@@ -151,13 +156,13 @@ def comptonized_function(energies, alpha, break_energy, normalization, energy_un
 
 def goodman_function(energy_maximum, spectrum_maximum):
 	"""
-	Function that returns Goodman's scalable spherical explosion spectra to compare against a spectra acquired by a
+	Returns Goodman's scalable spherical explosion spectra to compare against a spectra acquired by a
 	spherical explosion run in MCRAT. To compare this to simulation data, the simulation spectrum needs to be in units
 	of erg/s/energy_unit.
 
-	:param energy_maximum:
-	:param spectrum_maximum:
-	:return:
+	:param energy_maximum: Number which denotes the energy at which the peak of the spectrum should be rescaled to in x axis
+	:param spectrum_maximum: Number which denotes the new maximum of the goodman spectrum (rescaled in y axis)
+	:return: The rescaled Goodman spectrum energy and spectral value
 	"""
 
 	goodman_energy=10**np.array([-3,-2.8,-2.6,-2.4,-2.2,-2,-1.8,-1.6,-1.4,-1.2,-1,-.8,-.6,-.4,-.2,0,.2,.4,.6,.8,1.,1.2,1.4])
@@ -173,15 +178,16 @@ def goodman_function(energy_maximum, spectrum_maximum):
 
 def bootstrap_parameters(x, y, yerr, function, best_fit, sample_num=1e4):
 	"""
-	Function that conducts the bootstrapping of the spectral fit to a given spectrum in order to get the errors on the
+	Conducts the bootstrapping of the spectral fit to a given spectrum in order to get the errors on the
 	parameters of the fitting function.
-	:param x:
-	:param y:
-	:param yerr:
-	:param function:
-	:param best_fit:
-	:param sample_num:
-	:return:
+
+	:param x: array of x values of the spectral dataset
+	:param y: array of y values of the spectral dataset
+	:param yerr: array of y errors of the spectral dataset
+	:param function: the function that will be fit to the data
+	:param best_fit: The prior best fit parameters
+	:param sample_num: The number of bootstrap parameters to take to calculate errors
+	:return: The best fit values of the bootstrap and their 1 sigma error
 	"""
 	#can potentially speed up with lmfit package need to require it in setup.py and install with pip install lmfit
 	#double checked that this method gives a change in reduced chi squared of 1 which is ~1 sigma
@@ -197,12 +203,13 @@ def bootstrap_parameters(x, y, yerr, function, best_fit, sample_num=1e4):
 
 def calc_epk_error(alpha, break_energy, alpha_error=None, break_energy_error=None):
 	"""
-	Function that calculates the spectral Epk from a spectral fit and the errors on Epk if the errors ar not set to None
-	:param alpha:
-	:param break_energy:
-	:param alpha_error:
-	:param break_energy_error:
-	:return:
+	Function that calculates the spectral Epk from a spectral fit and the errors on Epk if the errors are not set to None
+
+	:param alpha: array of spectral fitted alphas
+	:param break_energy: array of spectral fitted break energies in keV
+	:param alpha_error: Default None or an array or the errors in alpha values
+	:param break_energy_error: Default None or an array or the errors in break energy values
+	:return: arrays of the spectral peak energy and the errors, if applicable.
 	"""
 	epk=break_energy*(2+alpha)
 
@@ -215,8 +222,8 @@ def calc_epk_error(alpha, break_energy, alpha_error=None, break_energy_error=Non
 
 def get_FERMI_best_data():
 	"""
-	A function to acquire data about the FERMI Best GRB sample, as is saved in the file named FERMI_BEST_GRB.dat.
-	The data is from Yu et al. (2016).
+	A function to acquire data about the FERMI Best GRB sample, as is saved in the file named FERMI_BEST_GRB.dat included
+	with the ProcessMCRaT python package. The data is from Yu et al. (2016).
 
 	:return: returns arrays of the Band or COMP function fitted GRB spectral parameters
 	"""
@@ -238,17 +245,19 @@ def get_FERMI_best_data():
 
 def get_yonetoku_relationship(energies):
 	"""
-	Returns the Yonetoku relationship for a given set of energies. The original paper scaled L_iso by 10^52 so undo that
-	here
-	:param energies:
-	:return:
+	Returns the Yonetoku relationship for a given set of energies. The original paper scaled L_iso by 10^52 and we undo that
+	here.
+
+	:param energies: array of spectral peak energies in keV
+	:return: the yonetoku relation for the array of energies passed in
 	"""
 	return 1e52*(2.34e-5)*energies**2
 
 def get_yonetoku_data():
 	"""
 	Gets the list of observed GRBs taken from Nava et al. (2012) and gets their values and errors on the Yonetoku plane
-	:return:
+
+	:return: numpy arrays of luminosity, spectral peak energies, and their errors
 	"""
 	# need to get the file name off to get the dir mclib is located in
 	dir=__file__[::-1].partition('/')[-1][::-1]
@@ -276,11 +285,14 @@ def get_yonetoku_data():
 def calc_yonetoku_values(spectra_list, lightcurve_list, polarization_list=None):
 	"""
 	Function that takes a list of spectra and lightcurve dictionaries and calculated the appropriate values for
-	where the mock observations would lie on the Yonetoku relationship
-	:param spectra_list:
-	:param lightcurve_list:
-	:param polarization_list:
-	:return:
+	where the mock observations would lie on the Yonetoku relationship. The lists are typically observations that correspond to
+	different observer viewing angles.
+
+	:param spectra_list: list of MockObservation calculated spectrum dictionaries
+	:param lightcurve_list: list of MockObservation calculated lightcurve dictionaries in the same order as the spectra_list
+	:param polarization_list: list of MockObservation calculated polarization dictionaries in the same order as the spectra_list
+	:return: numpy arrays of the luminosities, spectral peak energies, and optionally polarization, and the observer
+		viewing angles for the dictionaries that are passed in
 	"""
 	num_angles = len(spectra_list)
 	# collect data and unscale lightcurve and its error
@@ -326,11 +338,11 @@ def calc_yonetoku_values(spectra_list, lightcurve_list, polarization_list=None):
 
 def get_golenetskii_relationship(value='o'):
 	"""
-	Return the golenetskii relationship and it's 2 sigma dispersion as given by Lu et al. (2012).
+	Return the golenetskii relationship or it's 2 sigma dispersion as given by Lu et al. (2012).
 
 	:param value: a string that can be 'o', '+', or '-'. The default is set to 'o' for the actual golenetskii relationship.
 		'+' gives the upper bound of uncertainty and '-' gives the lower bound of uncertainty.
-	:return: returns arrays of the a and y values of the relation/ error in the relation
+	:return: returns arrays of the x and y values of the relation/ error in the relation
 	"""
 	#plot the golenetskii relation given in:
 	# Lu R.-J.,  Wei J.-J.,  Liang E.-W.,  Zhang B.-B.,  Lu H.-J.,  Lu L.-Z.,  Lei W.-H.,  Zhang B.. , ApJ , 2012, vol. 756 pg. 112
@@ -353,11 +365,11 @@ def get_golenetskii_relationship(value='o'):
 
 def get_amati_relationship(value='o'):
 	"""
-	Return the Amati relationship and it's 1 sigma dispersion as given by Tsutsui et al. (2009).
+	Return the Amati relationship or it's 1 sigma dispersion as given by Tsutsui et al. (2009).
 
 	:param value: a string that can be 'o', '+', or '-'. The default is set to 'o' for the actual Amati relationship.
 		'+' gives the upper bound of uncertainty and '-' gives the lower bound of uncertainty.
-	:return: returns arrays of the a and y values of the amati relation/ error in the relation
+	:return: returns arrays of the x and y values of the amati relation/ error in the relation
 	"""
 	#plot the amati relation given by:
 	#http://iopscience.iop.org/article/10.1088/1475-7516/2009/08/015/pdf
@@ -377,10 +389,12 @@ def get_amati_relationship(value='o'):
 def calc_amati_values(spectra_list, lightcurve_list):
 	"""
 	Calculates the mock observed Amati values: isotropic energies and time integrated spectral peak energy for a list of
-	mock observed spectra and lightcurves
-	:param spectra_list:
-	:param lightcurve_list:
-	:return:
+	mock observed spectra and lightcurves.
+
+	:param spectra_list: list of MockObservation calculated spectrum dictionaries
+	:param lightcurve_list: list of MockObservation calculated lightcurve dictionaries in the same order as the spectra_list
+	:return: numpy arrays of the isotropic energy, spectral peak energy, their errors, and the observer angles for the
+		dictionaries that were passed in
 	"""
 	num_angles = len(spectra_list)
 	# collect data and unscale lightcurve and its error
@@ -411,9 +425,32 @@ def calc_amati_values(spectra_list, lightcurve_list):
 	return E_iso_sim, E_iso_err_sim, E_p_sim, E_p_err_sim, angles
 
 def lc_time_to_radius(frame, fps, time):
+	"""
+	Converts from a time of interest to the radius in the outflow that would be producing the emission at that point in
+	time. This isn't the full equal arrival time surface since it doesnt take the location of the observer into account.
+
+	:param frame: number that denotes the frame number of the hydrodyanmic simulation that is being analyzed. Does not
+		have to be identical to the simulation frame that is used to calculate a MockObservation object
+	:param fps: number that denotes the frames per second for the hydrodynamic simulation that is being analyzed.
+		This should be identical to the value used to create a MockObservation.
+	:param time: number that denotes the time of interest in any of the mock observable quantities
+	:return: number that is the radius where the emission is originating from along the observer's line of sight.
+	"""
 	return ((frame/fps)-time)*const.c.cgs.value
 
 def calc_line_of_sight(theta_observer, x0_min, x0_max, x1_min, x1_max):
+	"""
+	Calculates the x and y values for the line of sight of a specified observer from where they would be located (at infinity)
+	to the central engine.
+
+	:param theta_observer: number that denotes the polar angle from the jet axis to where the observer is located in degrees.
+		This should be identical to the MockObservation that the user had calculated.
+	:param x0_min: number that denotes the minimum x coordinate of the line that will be calculated
+	:param x0_max: number that denotes the maximum x coordinate of the line that will be calculated
+	:param x1_min: number that denotes the minimum y coordinate of the line that will be calculated
+	:param x1_max: number that denotes the maximum y coordinate of the line that will be calculated
+	:return: returns the x and y coordinates of the line of sight
+	"""
 	x_range = np.linspace(x0_min, x0_max, 100000)
 	y_angle = np.tan(np.deg2rad(theta_observer)) ** -1 * x_range
 	idx = np.where((y_angle > x1_min) & (y_angle < x1_max))
@@ -421,6 +458,25 @@ def calc_line_of_sight(theta_observer, x0_min, x0_max, x1_min, x1_max):
 	return x_range[idx], y_angle[idx]
 
 def calc_equal_arrival_time_surface(theta_observer, frame, fps, x0_min, x0_max, time, individual_point=None):
+	"""
+	Calculate the equal arrival time surface for a given time in the light curve. This function works for either
+	determining the full line that denotes the surface for a given time, from a specified xmin to xmax, or it can be
+	used to understand if a given photon lies on an equal arrival time surface.
+
+	:param theta_observer: number that denotes the polar angle from the jet axis to where the observer is located in degrees.
+		This should be identical to the MockObservation that the user had calculated.
+	:param frame: number that denotes the frame number of the hydrodyanmic simulation that is being analyzed. Does not
+		have to be identical to the simulation frame that is used to calculate a MockObservation object.
+	:param fps: number that denotes the frames per second for the hydrodynamic simulation that is being analyzed.
+		This should be identical to the value used to create a MockObservation.
+	:param x0_min: number that denotes the minimum x coordinate of the surface that will be calculated
+	:param x0_max: number that denotes the maximum x coordinate of the surface that will be calculated
+	:param time: number that denotes the time of interest in any of the mock observable quantities
+	:param individual_point: optional number, default None. A single x value with which to obtain the corresponding y
+		value of the equal arrival time surface
+	:return: An array or a number of the x value(s) of the surface (or point) and the array (or point) of the corresponding
+		y value(s) of the equal arival time surface
+	"""
 	r=lc_time_to_radius(frame, fps, time)
 	if individual_point is None:
 		x_range = np.linspace(x0_min, x0_max, 100000)
@@ -431,10 +487,25 @@ def calc_equal_arrival_time_surface(theta_observer, frame, fps, x0_min, x0_max, 
 	return x_range, y_range
 
 def calc_photon_temp(comov_energy):
+	"""
+	Assuming thermal equilibrium, calculate the effective photon temperature based off of the comoving energy.
+
+	:param comov_energy: double or astropy quantity array of the comoving energy value that is being converted to temperature
+	:return: the comoving temperature with the same shape as the input vector.
+	"""
+
 	return comov_energy/(3*const.k_B.cgs)
 
 
 def lorentzBoostVectorized(boost, P_ph):
+	"""
+	Vectorized way to get the lorentz boosted photon four momenta.
+	:param boost: (3,n)  numpy array where the first dimension correponds to the fluid velocity components (always 3)
+		and n is the number of photons that we are calculating their boosted four momenta for.
+	:param P_ph: numpy array that is formatted as (4,n) where n is the number of photons that we want the lorentz boosted
+		for momenta of.
+	:return: (4,n) numpy array of the lorentz boosted photon four momentum
+	"""
 	save_result=np.zeros_like(P_ph)*np.nan
 	indexes = np.where((boost ** 2).sum(axis=0) > 0)[0]
 	zero_beta_idx = np.where((boost ** 2).sum(axis=0) == 0)[0]
@@ -476,6 +547,14 @@ def lorentzBoostVectorized(boost, P_ph):
 	return save_result
 
 def zero_norm(P):
+	"""
+	Ensures that photon four momenta are zero normed. This assumes that the photon energy is correct and adjusts the
+	directional cosines to make the coordinate 4 momenta be zero norned with the energy.
+
+	:param P: numpy array that is formatted as (4,n) where n is the number of photons that the corrections should be
+		applied to. The photon's four momentum that should be modified to ensure that it is zero-normed.
+	:return:returns the photon four momenta with the corrections applied.
+	"""
 	#test zero norm condition of 4 momenta, if its violated correct the 4 momenta assuming that the energy is correct
 
 	if P.ndim >1:
@@ -492,6 +571,14 @@ def zero_norm(P):
 	return P
 
 def calc_optical_depth(scatt_vs_r):
+	"""
+	Calculates the optical depth traversed by a set of photons.
+
+	:param scatt_vs_r: A umpy array of the average number of scatterings that the set of photons experienced as a
+		function of average photon radius. This is a single array that has the scatterings in each frame ordered from
+		smallest radius to largest radius.
+	:return: numpy array of the optical depth from the smallest frame to the largest frame
+	"""
 	# the input data should be from smallest radius to largest radius
  
 	values=np.zeros_like(scatt_vs_r)*np.nan

@@ -19,26 +19,30 @@ class PhotonList(object):
     def __init__(self, r0, r1, r2, p0, p1, p2, p3, weight, scatterings, file_index, comv_p0=None, comv_p1=None, comv_p2=None,\
                  comv_p3=None, s0=None, s1=None, s2=None, s3=None, photon_type=None):
         """
-        Iniitalizes the 4 momenta (lab and comoving), position, stokes parameters, weight, number of scatterings, and the photon type of each
-        photon in the MCRaT file. units are cgs units
-        :param r0:
-        :param r1:
-        :param r2:
-        :param s0:
-        :param s1:
-        :param s2:
-        :param s3:
-        :param p0:
-        :param p1:
-        :param p2:
-        :param p3:
-        :param comv_p0:
-        :param comv_p1:
-        :param comv_p2:
-        :param comv_p3:
-        :param weight:
-        :param scatterings:
+        Iniitalizes the 4 momenta (lab and comoving), position, stokes parameters, weight, number of scatterings,
+        and the photon type of each photon in the MCRaT file. Units are cgs units by default.
+
+        :param r0: numpy/astropy quantity array of the photons' x position (in cartestian coordinates)
+        :param r1: numpy/astropy quantity array of the photons' y position (in cartestian coordinates)
+        :param r2: numpy/astropy quantity array of the photons' z position (in cartestian coordinates)
+        :param p0: numpy/astropy quantity array of the photons' four momentum p0
+        :param p1: numpy/astropy quantity array of the photons' four momentum p1
+        :param p2: numpy/astropy quantity array of the photons' four momentum p2
+        :param p3: numpy/astropy quantity array of the photons' four momentum p3
+        :param weight: numpy/astropy quantity array of the photons' weights
+        :param scatterings: numpy/astropy quantity array of the photons' scatterings that they have undergone
+        :param file_index: numpy/astropy quantity of the index of the photons in the mcdata file
+        :param comv_p0: Default None or numpy/astropy quantity array of the photons' comoving four momentum p0
+        :param comv_p1: Default None or numpy/astropy quantity array of the photons' comoving four momentum p1
+        :param comv_p2: Default None or numpy/astropy quantity array of the photons' comoving four momentum p2
+        :param comv_p3: Default None or numpy/astropy quantity array of the photons' comoving four momentum p3
+        :param s0: Default None or numpy/astropy quantity array of the photons' stokes s0 parameter.
+        :param s1: Default None or numpy/astropy quantity array of the photons' stokes s1 parameter.
+        :param s2: Default None or numpy/astropy quantity array of the photons' stokes s2 parameter.
+        :param s3: Default None or numpy/astropy quantity array of the photons' stokes s3 parameter.
+        :param photon_type: Default None or numpy/astropy quantity array of the photons' type (see MCRaT documentation for each photon type)
         """
+
         self.p0=p0
         self.p1=p1
         self.p2=p2
@@ -60,6 +64,12 @@ class PhotonList(object):
         self.file_index=file_index
 
     def get_energies(self, unit=u.keV):
+        """
+        Gets the energies of the photons
+
+        :param unit: Default is keV can pass in any astropy unit
+        :return: array of astropy quantities with the photon energies in the specified unit
+        """
         try:
             return self.p0 * (const.c.cgs.value * u.erg).to(unit).value
         except UnitConversionError:
@@ -68,6 +78,13 @@ class PhotonList(object):
             return x.to(unit, equivalencies=u.spectral()).value
 
     def get_comv_energies(self, unit=u.keV):
+        """
+        Gets the comoving energies of the photons. Only works if there was comving photon energy loaded from the mcdata
+        file.
+
+        :param unit: Default is keV can pass in any astropy unit
+        :return: array of astropy quantities with the photon energies in the specified unit
+        """
         try:
             return self.comv_p0*(const.c.cgs.value*u.erg).to(unit).value
         except UnitConversionError:
@@ -76,6 +93,15 @@ class PhotonList(object):
             return x.to(unit, equivalencies=u.spectral()).value
 
     def get_spherical_coordinates(self, dimensions):
+        """
+        Converts the photons' cartesian coordinates to either 2D spherical coordinates (by projecting the photons onto a
+        x,y grid) or in 3D spherical coordinates.
+
+        :param dimensions: integer that denotes the number of dimensions that the resulting spherical coordinates should
+            be calculated with respect to
+        :return: numpy/astropy quantity array with photons' r coordinates in same units as r0/r1/r2, and
+            numpy/astropy quantity array with photons' theta position in units of radians
+        """
         if dimensions==2:
             mc_x_eff = np.sqrt(self.r0 ** 2 + self.r1 ** 2)  # effective x axis for MCRaT simulation to compare to
             # get radial positions of all photons
@@ -89,6 +115,13 @@ class PhotonList(object):
         return R_photon, Theta_photon*u.rad
 
     def get_cartesian_coordinates(self, dimensions):
+        """
+        This method returns either the full 3D cartesian coordinate of each photon or it projects the 3D cartesian
+        coordinates onto a 2D cartesian grid and returns the (x,y) coordinates
+
+        :param dimensions: number of dimensions that the cartesian coordinates should be calculated for
+        :return: tuple of (x,y) or (x,y,z), tuple elements are numpy/astropy quantity arrays with the same units as r0/r1/r2
+        """
         if dimensions==2:
             mc_x_eff = np.sqrt(self.r0 ** 2 + self.r1 ** 2)  # effective x axis for MCRaT simulation to compare to
             # get radial positions of all photons
@@ -111,10 +144,12 @@ def curdir():
 class McratSimLoad(object):
     def __init__(self, file_directory=None):
         """
-        Initalized the mload class with the directory that the MCRaT files are located in
-        :param file_directory:
-        :param frames_per_second:
+        Initalized the mload class with the directory that the MCRaT files are located in. By default it uses the current
+        working directory
+
+        :param file_directory: Default is None or string to the direcotry with the mcdata files of interest
         """
+
         if file_directory is not None:
             self.file_directory=file_directory
         else:
@@ -123,13 +158,15 @@ class McratSimLoad(object):
     def load_frame(self, frame_num, read_comv=False, read_stokes=False, read_type=False):
         """
         Reads in MCRaT data for current version of MCRaT that outputs data in hdf5 files. Also has support for various
-        MCRaT switches that can be turned on by the user.
-        :param frame_num:
-        :param read_comv:
-        :param read_stokes:
-        :param read_type:
-        :return:
+        MCRaT switches that can be turned on by the user. If these switches arent on in the MCRaT simulation that is being
+        loaded the stokes/comving four momentum/photon type datasets wont exist.
+
+        :param frame_num: Integer for the mcdata frame that the user wants to read in
+        :param read_comv: Default False, set to True if the MCRaT simulation was run with comoving parameters saved
+        :param read_stokes: Default False, set to True if the MCRaT simulation was run with stokes parameters saved
+        :param read_type: Default False, set to True if the MCRaT simulation was run with photon types saved
         """
+
 
         with h5.File(self.file_directory+"mcdata_" + np.str_(frame_num) + '.h5', 'r') as f:
             pw = f['PW'][:]

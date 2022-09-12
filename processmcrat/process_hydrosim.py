@@ -1,6 +1,6 @@
 """
 This file contains classes to take hydro simulation data that was analyzed with MCRaT and process it to be used in
-analyzing and understanding the MCRaT results
+analyzing and understanding the MCRaT mock observation results
 
 Written by: Tyler Parsotan
 
@@ -19,14 +19,34 @@ import os
 radiation_dens_const=(4*const.sigma_sb/const.c)
 
 def calc_temperature(pres):
+    """
+    Calculate the temperature based on the pressure.
+
+    :param pres: Astropy quantity object or list of objects that will be used to calculate the temperature
+    :return: an astropy quantity object or list of quantity objects
+    """
     return (3 * (pres  / radiation_dens_const.decompose(bases=u.cgs.bases))) ** (1.0 / 4.0)
 
 class HydroSim(object):
+
     def __init__(self, fileroot_name, file_directory=None, hydrosim_type='flash', coordinate_sys='cartesian', density_scale=1*u.g/u.cm**3,\
                  length_scale=1*u.cm, velocity_scale=const.c.cgs, hydrosim_dim=2, datatype=None, amr_level=3):
         """
-        Initalized the hydrosimload class with the directory that the hydro files are located in, the
-        :param file_directory:
+        Initalizer for a Hydrosim class
+
+        :param fileroot_name: string that denotes the file root of the hydrodynamic simulation file (eg see MCRaT documentation.)
+        :param file_directory:  string that denotes the directory that has all the hydro simulation files
+        :param hydrosim_type: string that denotes the type of hydrodynamic simulation this is:
+            pluto, pluto-chombo, or flash
+        :param coordinate_sys: string that denotes the coordinate system used in the hydrodynamic simulation
+        :param density_scale: astropy quantity object that denotes the density scale of the hydrodynamic simulation
+        :param length_scale: astropy quantity object that denotes the length scale of the hydrodynamic simulation
+        :param velocity_scale: astropy quantity object that denotes the velocity scale of the hydrodynamic simulation
+        :param hydrosim_dim: number that denotes the dimensions of the hydrodynamic simulation
+        :param datatype: string to determine if the file types are hdf5 or another save file type. None defaults to hdf5
+            hydrodynamic simulation files
+        :param amr_level: If reading in a Pluto-CHOMBO simulation denote what level the grid should be read in and
+            interpolated at.
         """
 
         if 'pluto' in hydrosim_type or 'PLUTO' in hydrosim_type:
@@ -62,6 +82,11 @@ class HydroSim(object):
             raise ValueError('Make sure that the density, length and velocity scales have units associated with them.')
 
     def load_frame(self, frame_num):
+        """
+        Loads a frame of the hydrodynamic simulation
+
+        :param frame_num: number that denotes the simulation frame that should be read in
+        """
 
         sfrm = str(frame_num)
         if frame_num < 1000: sfrm = '0' + str(frame_num)
@@ -79,6 +104,14 @@ class HydroSim(object):
         self.hydro_data = hydro_dict
 
     def _read_flash_file(self, frame_num, make_1d=True):
+        """
+        Reads in a flash simulation file.
+
+        :param frame_num: number that denotes the simulation frame that should be read in
+        :param make_1d: boolean (default True) to denote if the returned arrays should be 1D in shape or not.
+        :return: a dictionary containing all the coordinate values of the flash grid, the sizes of each grid, the temperature,
+            pressure, velocity component, and lorentz factor for each grid point.
+        """
 
         file = tb.open_file(self.file_directory+"/"+self.fileroot_name+frame_num)
         print('Reading Flash frame %s positional, density, pressure, and velocity information.'%(frame_num))
@@ -149,6 +182,17 @@ class HydroSim(object):
         return hydro_dict
 
     def _read_pluto_file(self, frame_num, amr_lvl=None, make_1d=True):
+        """
+        Read in a pluto simulation file using the pyPLUTO python module. If this is not installed, this function will not
+        work.
+
+        :param frame_num: number that denotes the simulation frame that should be read in
+        :param amr_lvl: None or if reading in a Pluto-CHOMBO simulation denote what level the grid should be read in and
+            interpolated at. None defaults to the value set in the initalization of the object.
+        :param make_1d: boolean (default True) to denote if the returned arrays should be 1D in shape or not.
+        :return: a dictionary containing all the coordinate values of the flash grid, the sizes of each grid, the temperature,
+            pressure, velocity component, and lorentz factor for each grid point.
+        """
 
         if amr_lvl is None:
             amr_lvl=self.amr_level
@@ -210,6 +254,17 @@ class HydroSim(object):
         return hydro_dict
 
     def apply_spatial_limits(self, x0_min, x0_max, x1_min, x1_max, x2_min=None, x2_max=None):
+        """
+        Apply spatial limits to the grid. All quantities should have units associated with them.
+        This automatically get applies to getting data from the grid.
+
+        :param x0_min: min x0 to consider
+        :param x0_max: max x0 to consider
+        :param x1_min: min x1 to consider
+        :param x1_max: max x1 to consider
+        :param x2_min: None or min x2 to consider (if the hydrodynamic simulation is in 3 dimensions)
+        :param x2_max: None or max x2 to consider (if the hydrodynamic simulation is in 3 dimensions)
+        """
 
         #make sure that all limits have units associated with them
         if isinstance(x0_min, u.Quantity) and isinstance(x0_max, u.Quantity) and isinstance(x1_min,u.Quantity) and \
@@ -230,10 +285,22 @@ class HydroSim(object):
             raise ValueError('Make sure that each minimum and maximum coordinate value has astropy units associated with it.')
 
     def reset_spatial_limits(self):
+        """
+        Resets any spatial limits that were set.
+
+        """
         self.spatial_limit_idx=None
         self.spatial_limit = None
 
     def get_data(self, key):
+        """
+        Get grid data for the key of interest. By default any spatial limits that was specified with the apply_spatial_limits()
+        method will be applied.
+
+        :param key: string that denotes the grid data that the user wants to collect. This can be:
+            x0, x1, dx0, dx1, temp, pres, dens, gamma, v0, v1
+        :return: array of the grid data of interest
+        """
         if key in self.hydro_data:
             if self.spatial_limit_idx is not None:
                 data=self.hydro_data[key][self.spatial_limit_idx]
@@ -244,6 +311,15 @@ class HydroSim(object):
             raise ValueError(key+" is not a key in the HydroSim object")
 
     def coordinate_to_cartesian(self):
+        """
+        Coordinate conversion between the coordinate system of the hydrodynamic simulation to cartesian coordinates.
+
+        If the hydro simulation is in 2D it does the conversion. If the hydro simulation is in 3D spherical coordinates,
+        the conversion will produce the x,y coordinates. If the hydro simulation is in 3D and uses cartesian or
+        cylindrical coordinates then  it returns (x,y) or (r,z) respectively.
+
+        :return: arrays of x, y coordinates with astropy units
+        """
         if ('flash' in self.hydrosim_type or 'Flash' in self.hydrosim_type) and self.dimensions==2:
             x=self.get_data('x0')
             y=self.get_data('x1')
@@ -261,6 +337,18 @@ class HydroSim(object):
         return x,y
 
     def coordinate_to_spherical(self):
+        """
+        Coordinate conversion between the coordinate system of the hydrodynamic simulation to 2D spherical coordinates.
+
+        If the hydro simulation is in 2D it does the conversion. If the hydro simulation is in 3D spherical coordinates,
+        the conversion will produce the r, theta coordinates. If the hydro simulation is in 3D and uses cartesian or
+        cylindrical coordinates then  it uses (x,y) or (r,z) respectively, in the conversion to spherical and returns the
+        spherical (r, theta) coordinates.
+
+
+        :return: arrays of r, theta coordinates with astropy units
+        """
+
         if ('flash' in self.hydrosim_type or 'Flash' in self.hydrosim_type) and self.dimensions==2:
             r=np.sqrt(self.get_data('x0') ** 2 + self.get_data('x1') ** 2)
             theta=np.arctan2(self.get_data('x0'), self.get_data('x1'))
@@ -279,6 +367,14 @@ class HydroSim(object):
 
 
     def make_spherical_outflow(self, luminosity, gamma_infinity, r_0):
+        """
+        Convience method to overwrite the loaded hydrodynamic grid with values corresponding to a spherical outflow.
+        This function overwrites the hydrodata attribute of the object.
+
+        :param luminosity: astropy quantity value of the luminosity of the sphericla outflow
+        :param gamma_infinity: asymptotic bulk lorentz factor of the outflow
+        :param r_0: saturation radius of the outflow
+        """
         if isinstance(luminosity, u.Quantity) and isinstance(r_0, u.Quantity):
             luminosity=luminosity.decompose(bases=u.cgs.bases)
             r_0=r_0.decompose(bases=u.cgs.bases)

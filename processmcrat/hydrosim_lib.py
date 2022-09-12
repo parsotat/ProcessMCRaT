@@ -16,6 +16,15 @@ from .mclib import calc_equal_arrival_time_surface, lorentzBoostVectorized, calc
 
 
 def hydro_position_interpolate(photons, hydro_obj, key):
+    """
+    Interpolates the values of the hydrodynamic grid at the locations of a set of MCRaT photons.
+
+    :param photons: a PhotonLlist object of photons that will be used to interpolate the grid values near
+    :param hydro_obj: a HydroSim object with a loaded frame that will be used to interpolate values within
+    :param key: String of the hydrodynamic value of interest (eg. gamma, v0, etc)
+    :return: array of the interpolated hydro data vaues for each photon, the max distance from a grid location between
+        the location of a photon and the grid value (can be used for confidence checking)
+    """
 
     #try to identify where the observed photon coordinates are encompassed by the hydrogrid
     i=2
@@ -67,6 +76,12 @@ def hydro_position_interpolate(photons, hydro_obj, key):
     return data_points, max_diff
 
 def load_photon_vs_fluid_quantities(savefile):
+    """
+    Loads a saved pickle file with hydrodynamic grid values as a function of photon position in the simulation.
+
+    :param savefile: string of the pickle file that should be loaded without the .pickle ending.
+    :return: dictionary with hydrodyanmic values as a function of photons' locations within the outflow
+    """
     with open(savefile + '.pickle', 'rb') as f:
         u = pickle._Unpickler(f)
         u.encoding = 'latin1'
@@ -82,6 +97,24 @@ def load_photon_vs_fluid_quantities(savefile):
 
 def calculate_photon_vs_fluid_quantities(mcratload_obj, mcrat_obs_list, lc_dict_list, hydrosim_obj, savefile,\
                                          hydro_frame_min_max, hydrosim_dim=2, spherical_simulation=None):
+    """
+    Calculates, in parallel, the location of photons of interest in each hydrodynamic frame and the values of the outflow
+    near these photons of interest. Thus, we can follow the evolution of the outflow as photons detected in different
+    mock observable time bins interact with the specific regions of the outflow.
+
+    :param mcratload_obj: The McratLoad object that was used to produce the MockObservation objects
+    :param mcrat_obs_list: list of MockObservation objects
+    :param lc_dict_list: list of the  MockObservation calculated light curves to specify the time bins of interest.
+        In the same order as the mcrat_obs_list
+    :param hydrosim_obj: A HydroSim object that contains all the information to access the hydrosimulation frames
+    :param savefile: string of the file that will be saved with the calculated results without the .pickle ending
+    :param hydro_frame_min_max: an array of the min/max hydro frames from which the analysis should be done to the frame
+        at which the analysis will end
+    :param hydrosim_dim: This is not necessary
+    :param spherical_simulation: None or array of [lumnosity, gamma_infinity, saturation radius] to use for overwriting
+        the hydro grid values with values of a spherical outflow with the specified parameters
+    :return: dictionary with hydrodyanmic values as a function of photons' locations within the outflow
+    """
 
     #find the maximum number of time bins in mcrat_obs_list that we need to account for
     max_t_steps=-1
@@ -218,6 +251,39 @@ def calculate_photon_vs_fluid(file_num, file_num_max, file_directory, mcrat_obs_
                               density_scale, length_scale, velocity_scale, datatype, spherical_simulation, \
                             Temp_photon, Temp_flash, Avg_R, dist_nearest_photon, \
                               ph_num, avg_scatt, avg_gamma, avg_pres, avg_dens, P, Q, U, V):
+    """
+    Function that actually calculates the location of the photons of interest in a given hydro frame. It interpolates
+    the properties of the outflow near the photons.
+
+    :param file_num: frame number
+    :param file_num_max: max frame number of the hydro simulation
+    :param file_directory: the directory of the MCRaT simulation results
+    :param mcrat_obs_list: list of MockObservation objects
+    :param lc_dict_list: list of the  MockObservation calculated light curves to specify the time bins of interest
+    :param fileroot_name: name of the save file of the produced pickle file
+    :param hydro_file_directory: the directory of the hydro simulation files
+    :param hydrosim_type: the type of the hydro simulation that is being analyzed
+    :param coordinate_sys: the coordinate system of the hydro simulation that is being analyzed
+    :param density_scale: the density scale of the hydro simulation that is being analyzed
+    :param length_scale: the length scale of the hydro simulation that is being analyzed
+    :param velocity_scale: the velocity scale of the hydro simulation that is being analyzed
+    :param datatype: the hydro simulation frames' datatype
+    :param spherical_simulation: None or array of [lumnosity, gamma_infinity, saturation radius] to use for overwriting
+        the hydro grid values with values of a spherical outflow with the specified parameters
+    :param Temp_photon: an empty array that will hold the calculated values
+    :param Temp_flash: an empty array that will hold the calculated values
+    :param Avg_R: an empty array that will hold the calculated values
+    :param dist_nearest_photon: an empty array that will hold the calculated values
+    :param ph_num: an empty array that will hold the calculated values
+    :param avg_scatt: an empty array that will hold the calculated values
+    :param avg_gamma: an empty array that will hold the calculated values
+    :param avg_pres: an empty array that will hold the calculated values
+    :param avg_dens: an empty array that will hold the calculated values
+    :param P: an empty array that will hold the calculated values
+    :param Q: an empty array that will hold the calculated values
+    :param U: an empty array that will hold the calculated values
+    :param V: an empty array that will hold the calculated values
+    """
 
     print('Working on File Number: ' + np.str_(file_num))
 

@@ -29,6 +29,30 @@ class ObservedPhotonList(PhotonList):
     def __init__(self, r0, r1, r2, p0, p1, p2, p3, weight, scatterings, file_index, t_detect, comv_p0=None,
                  comv_p1=None, comv_p2=None, \
                  comv_p3=None, s0=None, s1=None, s2=None, s3=None, photon_type=None):
+        """
+        Creates a list of photons that have been mock detected by a specified observer.
+
+        :param r0: numpy/astropy quantity array of the photons' x position (in cartestian coordinates)
+        :param r1: numpy/astropy quantity array of the photons' y position (in cartestian coordinates)
+        :param r2: numpy/astropy quantity array of the photons' z position (in cartestian coordinates)
+        :param p0: numpy/astropy quantity array of the photons' four momentum p0
+        :param p1: numpy/astropy quantity array of the photons' four momentum p1
+        :param p2: numpy/astropy quantity array of the photons' four momentum p2
+        :param p3: numpy/astropy quantity array of the photons' four momentum p3
+        :param weight: numpy/astropy quantity array of the photons' weights
+        :param scatterings: numpy/astropy quantity array of the photons' scatterings that they have undergone
+        :param file_index: numpy/astropy quantity of the index of the photons in the mcdata file
+        :param t_detect: numpy/astropy quantity of the times when each photon would be detected by the observer
+        :param comv_p0: Default None or numpy/astropy quantity array of the photons' comoving four momentum p0
+        :param comv_p1: Default None or numpy/astropy quantity array of the photons' comoving four momentum p1
+        :param comv_p2: Default None or numpy/astropy quantity array of the photons' comoving four momentum p2
+        :param comv_p3: Default None or numpy/astropy quantity array of the photons' comoving four momentum p3
+        :param s0: Default None or numpy/astropy quantity array of the photons' stokes s0 parameter.
+        :param s1: Default None or numpy/astropy quantity array of the photons' stokes s1 parameter.
+        :param s2: Default None or numpy/astropy quantity array of the photons' stokes s2 parameter.
+        :param s3: Default None or numpy/astropy quantity array of the photons' stokes s3 parameter.
+        :param photon_type: Default None or numpy/astropy quantity array of the photons' type (see MCRaT documentation for each photon type)
+        """
         super().__init__(r0, r1, r2, p0, p1, p2, p3, weight, scatterings, file_index, comv_p0=comv_p0, comv_p1=comv_p1, \
                          comv_p2=comv_p2, comv_p3=comv_p3, s0=s0, s1=s1, s2=s2, s3=s3, photon_type=photon_type)
         self.detection_time = t_detect
@@ -43,6 +67,19 @@ class Instrument(object):
     @unit.quantity_input(spectral_energy_range=['energy','length'], lightcurve_energy_range=['energy','length'], polarization_energy_range=['energy','length'])
     def __init__(self, name='default instrument', spectral_energy_range=None, lightcurve_energy_range=None,\
                  polarization_energy_range=None):
+        """
+        Create an instrument that 'observes'/fit GRB spectra within an energy range. A separate energy range can be specified
+        for the LC measurement and the polarization measurement. Creating an instrument and loading it in a mock observation
+        automatically applies all the specified energy limits for the various mock observed quantities.
+
+        :param name: string that denotes the name of the user created instrument
+        :param spectral_energy_range: Default None or astropy auantity array with format [min,max]. None means that the
+            default values are taken from the mockobservation methods to calculate/fit spectra
+        :param lightcurve_energy_range: Default None astropy auantity array with format [min,max]. None means that the
+            default values are taken from the mockobservation methods to calculate light curves
+        :param polarization_energy_range: Default None astropy auantity array with format [min,max]. None means that the
+            default values are taken from the mockobservation methods to calculate polarization degree and angle
+        """
         self.name = name
         self.spectral_energy_range = spectral_energy_range
         #self.spectral_energy_unit = spectral_energy_unit
@@ -56,17 +93,37 @@ class MockObservation(object):
     def __init__(self, theta_observer, acceptancetheta_observer, r_observer, frames_per_sec, hydrosim_dim=2, \
                  phi_observer=0, acceptancephi_observer=0, mcratsimload_obj=None, id=None, directory=None):
         """
-        Sets up the MockObservation object that allows the user to create mock observations. There are two ways to
-        initialize this: 1) using a McratSimLoad object or 2) reading in a previously created event file
+        Creates a mock observation for a loaded MCRaT data frame where the user specified information related to the
+        location of the observer with respect to the jet axis, the size of the angle bin in which the observer will
+        collect photons, the radial location of the observer. The user also needs to specify the hydrodynamic simulation
+        parameter of frames per second. This should be identical to what was passed to MCRaT in the mc.par file for the
+        MCRaT simulation that is being analyzed.
 
-        :param theta_observer: observer theta in degrees
-        :param acceptancetheta_observer:
-        :param r_observer:
-        :param frames_per_sec:
-        :param mcratsimload_obj:
-        :param id:
-        :param directory:
+        The user can use a McratSimLoad object with all the loaded data from a given MCRaT data frame as the starting point
+        to conduct a mock observation. It is also possible to load a created event file. This can be done by ignoring
+        mcratsimload_obj and just passing in the unique id that was used in a prior call to the save_event_file method
+        and also passing in the directory where the event file is located.
+
+        :param theta_observer: observer location with respect to the jet axis, value needs to be in degrees
+        :param acceptancetheta_observer: The width of the angle bin for which the observer will collect photons. ie for
+            theta_observer=3 degrees and  acceptancetheta_observer=3 degrees, photons will be collected if they are moving
+            towards the observer within the angle range of 1.5-4.5 degrees.
+        :param r_observer: The radius that the detector is located. Units should be cm.
+        :param frames_per_sec: The hydrodynamic simulation's frames per second. Should be identical to what is specified
+            in the mc.par file of the MCRaT simulation that is being analyzed.
+        :param hydrosim_dim: The number of dimensions of the hydrodynamic simulation that was analyzed with MCRaT. Should be
+            identical to what is specified in the mcrat_input.h file of the MCRaT simulation that is being analyzed.
+        :param phi_observer: Default 0 degrees. For 3D simulations, this is the azimuthal angle location of the observer
+            in degrees
+        :param acceptancephi_observer: Default 0 degrees. For 3D simulations, this is the azimuthal angle width of the
+            angle bin for which the observer will collect photons
+        :param mcratsimload_obj: Default None. The McratSimLoad object that contains the loaded Mcrat data frame that the
+            user wants to utilize to conduct a mock observation
+        :param id: Default None or string denoting the unique identifier for the simulation that is being analyzed. This
+            should be identical to the id passed to a prior call to the save_event_file method.
+        :param directory: The location of the event file that the user would like to load
         """
+
 
 
         self.theta_observer = theta_observer
@@ -203,8 +260,10 @@ class MockObservation(object):
         """
         A convenience function to create the observation id which is used to specify the id that the user provides for
         the MCRaT simulation that is being observed, the observer viewing angle, and the detector location
-        :param id:
-        :return:
+
+        :param id: string to denote a unique identifier that is used with the location of the observer to create a unique
+            event file name
+        :return: string of the created event file name
         """
         if self.hydrosim_dim == 2:
             return np.str(id) + '_' + "%.2e" % self.r_observer + '_' + np.str(self.theta_observer)
@@ -215,8 +274,9 @@ class MockObservation(object):
     def load_instrument(self, instrument_object):
         """
         Function that loads in an Instrument object that defines spectral, light curve, and polarization energy ranges
-        :param instrument_object:
-        :return:
+
+        :param instrument_object: An Instrument object that has been created with the user specified energy ranges
+        :return: None
         """
         self.loaded_instrument_name = instrument_object.name
         if instrument_object.spectral_energy_range is not None:
@@ -251,7 +311,7 @@ class MockObservation(object):
         Function that unloads a previously loaded instrument and prevents its energy ranges from being used.
         The class then goes back to defaulting to calculating energy integrated quantities, unless energy range is passed
         to each method of the class.
-        :return:
+        :return: None
         """
         self.is_instrument_loaded = False
         self.loaded_instrument_name = ''
@@ -264,11 +324,16 @@ class MockObservation(object):
 
     def save_event_file(self, id, save_directory=None, appendfile=False):
         """
-        function to save observed photons into text file
-        :param id:
-        :param save_directory:
-        :param appendfile:
-        :return:
+        Save observed photons into text file. this allows the user to simply read this file in the future by providing
+        the unique id and the directory where the event file is located.
+
+        :param id: string which is the unique identifier that is combined with the observer location to create a unique
+            event filename
+        :param save_directory: None or string to denote the directory where the event file should be saved. The default
+            of None means that the file will be saved in the current working directory
+        :param appendfile: Future development! Boolean to denote if the code should append data to this file if it
+            already exists.
+        :return: None
         """
         obs_id = self.create_obs_id(id)
         file_name = obs_id + '.evt'
@@ -324,9 +389,11 @@ class MockObservation(object):
     def read_event_file(self, obs_id, directory=None):
         """
         function to read in an event file
-        :param obs_id:
-        :param directory:
-        :return:
+
+        :param obs_id: string unique event file name for the event file that should be loaded. Should exclude the '.evt' ending.
+        :param directory: None or string that denotes the directory that contains the event file of interest. None denotes that the
+            file exists in the current working directory.
+        :return: None
         """
         if directory is None:
             dir = curdir()
@@ -361,12 +428,16 @@ class MockObservation(object):
 
     def _select_photons(self, times, photon_type=None, energy_range=None, energy_unit=unit.keV, calc_comv=False):
         """
+        Applies time cuts to a set of observed photons. Can also apply photon type and energy range cuts. The energy
+        range cuts can be based on the lab frame or the comoving frame energies.
 
-        :param times:
-        :param photon_type:
-        :param energy_range:
-        :param energy_unit:
-        :return:
+        :param times: list or array in the form of [min, max] that denote the time bin edges of interest
+        :param photon_type: None or a string denoting the photon type of interest. (See MCRaT documentation for each photon type)
+        :param energy_range: list or array in the form of [min, max] that denote the energy bin edges of interest
+        :param energy_unit: Default keV or any astropy unit that specified the energy range units.
+        :param calc_comv: Default False. Boolean to denote if the energy range cuts should be determined from the lab
+            frame energy of the photons or the comoving frame energy of the photons
+        :return: array of the indexes of photons that meet the time/type/energy restriction
         """
 
         if energy_range is not None:
@@ -405,18 +476,25 @@ class MockObservation(object):
                        fit_spectrum=False, spectrum_energy_range=[10**-7, 10**5], \
                        spectrum_delta_energy=1.25, spectrum_energy_unit=unit.keV, spectral_sample_num=1e3):
         """
-        Function to iterate over time bin edges to calculate various parameters of interest as a function of time
-        :param times:
-        :param lc_unit:
-        :param photon_type:
-        :param energy_range:
-        :param energy_unit:
-        :param fit_spectrum:
-        :param spectrum_energy_range:
-        :param spectrum_delta_energy:
-        :param spectrum_energy_unit:
-        :param spectral_sample_num:
-        :return:
+        Function to iterate over time bin edges to calculate various parameters of interest as a function of time. The
+        time resolved polarization are based on the same cuts used to calculate the light curve.
+
+        :param times: array of time bin edges
+        :param lc_unit: astropy unit of the calculated light curve. Can only be erg/s or counts/s.
+        :param photon_type: Default None or a string denoting a photon type of interest. (See MCRaT documentation for each photon type)
+        :param energy_range: None or array of energy bin edges for the energy range of interest. None means that there
+            will be no energy cuts made
+        :param energy_unit: Default keV or any astropy units that denote the unit of the energy range that is specified
+        :param fit_spectrum: Default False. Boolean to denote if the spectra collected in each energy bin should be fit
+            with the Band and cutoff power law (COMP) functions. There can be no photon type cuts made for the spectral fits
+        :param spectrum_energy_range: None or array of energy bin edges for the energy range where the fitting will be done.
+            None means that there will be no energy cuts made. If there is an instrument loaded then the spectral energy limits
+            specified in the instrument will automatically be used.
+        :param spectrum_delta_energy: The energy bin width
+        :param spectrum_energy_unit: The astropy unit denoting the units of the energy range bin edges
+        :param spectral_sample_num: The number of bootstrap samples that should be taken to determine errors on the
+            fitted spectral parameters
+        :return: numpy arrays for the various mock observable quantities of interest.
         """
 
         pol_deg = np.empty(times.size) * np.nan
@@ -477,6 +555,11 @@ class MockObservation(object):
         return lc, lc_err, ph_num, num_scatt, pol_deg, stokes_i, stokes_q, stokes_u, stokes_v, pol_angle, pol_err, fit, fit_error, model_use
 
     def _solid_angle(self):
+        """
+        Calculate the solid angle geometric factor to make the observations isotropic equivalent quantities.
+
+        :return: None
+        """
         if self.hydrosim_dim == 2:  # include this factor in the spectra
             factor = 2 * np.pi * (
                     np.cos(np.deg2rad(self.theta_observer - self.acceptancetheta_observer / 2.)) \
@@ -492,16 +575,26 @@ class MockObservation(object):
     def _lightcurve_calc(self, times, lc_unit, photon_type=None, energy_range=None, energy_unit=unit.keV,
                          fit_spectrum=False, spectral_sample_num=1e4):
         """
-        Function that allows for the calculation of the light curve including geometrical factors
-        :param times:
-        :param lc_unit:
-        :param photon_type:
-        :param energy_range:
-        :param energy_unit:
-        :param fit_spectrum:
-        :param spectral_sample_num:
-        :return:
+        Calculates the light curve mock observation including the geometric factor that makes it an isotropic equvalent
+        quantity. The associated time-resolved polarization is also calculated in the same energy range specified. While
+        the spectral fitting energy range can be separately specified.
+
+        :param times:  array of time bin edges
+        :param lc_unit: astropy unit of the calculated light curve. Can only be erg/s or counts/s.
+        :param photon_type: Default None or a string denoting a photon type of interest. (See MCRaT documentation for each photon type)
+        :param energy_range: None or array of energy bin edges for the energy range of interest. None means that there
+            will be no energy cuts made.
+        :param energy_unit: Default keV or any astropy units that denote the unit of the energy range that is specified
+        :param fit_spectrum: Default False. Boolean to denote if the spectra collected in each energy bin should be fit
+            with the Band and cutoff power law (COMP) functions. There can be no photon type cuts made for the spectral fits.
+            If set to True, the default energy range for spectral fitting is from 8-40e3 keV (see
+            set_spectral_fit_parameters() method), otherwise an instrument needs to be loaded to change these defaults.
+        :param spectrum_energy_range: None or array of energy bin edges for the energy range where the fitting will be done.
+        :param spectral_sample_num: The number of bootstrap samples that should be taken to determine errors on the
+            fitted spectral parameters
+        :return: numpy arrays for the various mock observable quantities of interest.
         """
+
         lc, lc_err, ph_num, num_scatt, pol_deg, stokes_i, stokes_q, stokes_u, stokes_v, pol_angle, pol_err, fit, fit_errors, model_use = \
             self._time_iterator(times, lc_unit, photon_type=photon_type, energy_range=energy_range,
                                 energy_unit=energy_unit, fit_spectrum=fit_spectrum,
@@ -519,20 +612,39 @@ class MockObservation(object):
                    spectral_sample_num=1e4):
         """
         Calculates the light curve and other time resolved parameters such as polarization and time resolved spectral fits.
-        Can conduct these calculations for uniform or variable time bins, where a bayesian binning algorithm is used to
-        determine the variable time bins.
-        :param time_start:
-        :param time_end:
-        :param dt:
-        :param time_array:
-        :param lc_unit:
-        :param photon_type:
-        :param energy_range:
-        :param energy_unit:
-        :param variable_t_bins:
-        :param fit_spectrum:
-        :param spectral_sample_num:
-        :return:
+        The energy range used to calculate the light curve is also used to calculate the time-resolved polarization degrees
+        and angles.
+
+        Before conducting time-resolved spectral fitting the user needs to use the set_spectral_fit_parameters() method
+        to set the spectral fitting ranges. If an instrument is loaded with spectral fitting vlaues specified then those
+        values will be used by default.
+
+        The time-resolved quantities can be calculated using uniform or variable time bins, where a bayesian blocks
+        algorithm is used to determine the variable time bin sizes.
+
+        This method can be called by passing in a start time, end time, and dt otherwise the use can pass in an array with
+        time bin edges which will be used instead.
+
+        :param time_start: start time of the light curve in seconds
+        :param time_end: end time of the light curve in seconds
+        :param dt: uniform time bin sizes to be used for the light curve
+        :param time_array: numpy array of time bin edges
+        :param lc_unit: astropy unit of the calculated light curve. Can only be erg/s (default) or counts/s.
+        :param photon_type: Default None or a string denoting a photon type of interest. (See MCRaT documentation for each photon type)
+            None denotes that there will be no selection for calculating quantities based on photon type
+        :param energy_range: None or astropy quantity array of energy bin edges for the energy range of interest. None means that there
+            will be no energy cuts made. If passing in an array the format should be [min, max]
+        :param variable_t_bins: Boolean to denote if the bayesian blocks alogithm should be used to determine light curve
+            time bin widths
+        :param fit_spectrum: Default False. Boolean to denote if the spectra collected in each energy bin should be fit
+            with the Band and cutoff power law (COMP) functions. There can be no photon type cuts made for the spectral fits.
+            If set to True, the default energy range for spectral fitting is from 8-40e3 keV (see
+            set_spectral_fit_parameters() method), otherwise an instrument needs to be loaded to change these defaults.
+        :param spectral_sample_num: The number of bootstrap samples that should be taken to determine errors on the
+            fitted spectral parameters
+        :return: a lightcurve dictionary denoting all the quantities that were able to be calculated. If stokes parameters
+            are loaded the dictionary will include polarization quantities automatically. If the user requested that the
+            time resolved spectra be fitted then the time-resolved spectra parameters will be included as well.
         """
 
         if (lc_unit != unit.erg / unit.s) & (lc_unit != unit.count / unit.s):
@@ -614,15 +726,21 @@ class MockObservation(object):
     def _energy_iterator(self, time_min, time_max, spectrum_unit, energy_min, energy_max, energy_unit=unit.keV,
                          photon_type=None, calc_comv=False):
         """
-        Function that iterates over a range of energies to calculate spectra and energy dependent polarization.
-        :param time_min:
-        :param time_max:
-        :param spectrum_unit:
-        :param energy_min:
-        :param energy_max:
-        :param energy_unit:
-        :param photon_type:
-        :return:
+        Iterates over a range of energies to calculate spectra and energy dependent polarization.
+        Normalizes spectrum by the solid angle subtended by the detector to get isotropic equivalent values.
+
+        :param time_min: min time in seconds to get the spectrum for
+        :param time_max: max time in seconds to get the spectrum for
+        :param spectrum_unit: astropy unit of the constructed spectrum. the units can only be erg/s/energy_unit or
+            counts/s/energy_unit as of now.
+        :param energy_min: min energy of the constructed spectrum
+        :param energy_max: max energy of the constructed spectrum
+        :param energy_unit: astropy unit of the energy_min and energy_max parameters
+        :param photon_type: Default None or a string denoting a photon type of interest. (See MCRaT documentation for each photon type)
+            The spectrum will be constructed for only photons of this type.
+        :param calc_comv: Default False. Boolean to denote if the energy range cuts should be determined from the lab
+            frame energy of the photons or the comoving frame energy of the photons
+        :return: numpy arrays for the various mock observable quantities of interest.
         """
         delta_energy = energy_max - energy_min
         delta_t = time_max - time_min
@@ -681,18 +799,32 @@ class MockObservation(object):
     def spectrum(self, time_start, time_end, spectrum_unit=unit.erg / unit.s / unit.keV, energy_range=[10**-7, 10**5]*unit.keV, \
                  delta_energy=10**(0.1)*unit.keV, photon_type=None, fit_spectrum=False, sample_num=1e4, calc_comv=False):
         """
-        Function that calculates the mock observed spectrum and also fit the function with a Comp or Band function.
+        Calculates the spectrum and other energy-resolved parameters such as polarization for a set time interval.
 
-        :param time_start:
-        :param time_end:
-        :param spectrum_unit:
-        :param log_energy_range:
-        :param delta_log_energy:
-        :param energy_unit:
-        :param photon_type:
-        :param fit_spectrum:
-        :param sample_num:
-        :return:
+        This method can also fit the specrum but the details of the spectral fit need to be set before the fitting can
+        be done in this function. This is accomplished by calling the set_spectral_fit_parameters() method. See the
+        docstring for this method to see what the default values are.
+
+        :param time_start: start time in seconds to start accumulating photons to calculate the spectrum
+        :param time_end: end time in seconds to stop accumulating photons to calculate the spectrum
+        :param spectrum_unit: Default unit.erg / unit.s / unit.keV or astropy unit of the constructed spectrum.
+            The units can only be erg/s/energy_unit or counts/s/energy_unit as of now.
+        :param energy_range: Default [10**-7, 10**5]*unit.keV or astropy quantity array of energy bin edges for the
+            energy range of interest. The format of the array should be [min, max]. This will be the min energy range of the spectrum
+            and the max energy of the spectrum. Photons with energies outside of this range will be ignored.
+        :param delta_energy: Default 10**(0.1)*unit.keV or astropy quantity object. The width of the spectral energy bins for the spectra. Needs to be
+            the same units as the energy_range values.
+        :param photon_type: Default None or a string denoting a photon type of interest. (See MCRaT documentation for each photon type)
+            The spectrum will be constructed for only photons of this type.
+        :param fit_spectrum: Default False. Boolean to denote if the spectra collected in each energy bin should be fit
+            with the Band and cutoff power law (COMP) functions. There can be no photon type cuts made for the spectral fits.
+            If set to True, the default energy range for spectral fitting is from 8-40e3 keV (see
+            set_spectral_fit_parameters() method), otherwise an instrument needs to be loaded to change these defaults.
+        :param sample_num: Default 1e4. The number of bootstrap samples that should be taken to determine errors on the
+            fitted spectral parameters
+        :param calc_comv: Default False. Boolean to denote if the energy range cuts should be determined from the lab
+            frame energy of the photons or the comoving frame energy of the photons
+        :return: A dicgionary that holds all the energy dependednt quantities that were calculated for the spectrum
         """
         if ('erg' not in spectrum_unit.to_string()) & ('ct' not in spectrum_unit.to_string()):
             raise UnitsError(
@@ -764,14 +896,16 @@ class MockObservation(object):
         """
         function used to calculate the polarization and its error for a given set of mock observed photons following:
         	Kislat, F., Clark, B., Beilicke, M., & Krawczynski, H. 2015, Astroparticle Physics, 68, 45
-    	In particular we follow their appendix where photons have differing weights
-        :param s0:
-        :param s1:
-        :param s2:
-        :param s3:
-        :param weights:
-        :param mu:
-        :return:
+    	In particular, we follow their appendix where photons have differing weights.
+
+        :param s0: array of photons' s0
+        :param s1: array of photons' s1
+        :param s2: array of photons' s2
+        :param s3: array of photons' s3
+        :param weights: array of photons' weights
+        :param mu: Default 1, this is indicative of how perfectly a detector can detect no polarization in sources where
+            1 i perfect.
+        :return: arrays of multiple polarization quantities
         """
 
         # calc the q and u normalized by I
@@ -824,13 +958,17 @@ class MockObservation(object):
     @unit.quantity_input(energy_range=['energy', 'length'])
     def polarization(self, time_start, time_end, photon_type=None, energy_range=None):
         """
-        Function that sets up and calculates the polarization for the time and energy range that is provided as input.
-        :param time_start:
-        :param time_end:
-        :param photon_type:
-        :param energy_range:
-        :param energy_unit:
-        :return:
+        Calculates the polarization degree, angle, summed stokes parameters and the errors of a set of photons detected
+        in some time interval from time_start to time_end. The set of photons can be further selected by photon type
+        and/or energy range.
+
+        :param time_start: start time in seconds to start accumulating photons to calculate the polarization quantities
+        :param time_end: end time in seconds to stop accumulating photons to calculate the polarization quantities
+        :param photon_type: Default None or a string denoting a photon type of interest. (See MCRaT documentation for each photon type)
+            The spectrum will be constructed for only photons of this type.
+        :param energy_range: None or astropy quantity array of energy bin edges for the energy range of interest. None means that there
+            will be no energy cuts made. If passing in an array the format should be [min, max].
+        :return: A dictionary that contains all the relevant polarization parameters and errors
         """
         if self.read_stokes:
             # see if an instrument has been loaded and if the energy range parameter is none, if energy_range!=None then
@@ -875,12 +1013,18 @@ class MockObservation(object):
     def set_spectral_fit_parameters(self, spectral_fit_energy_range=[8, 40e3]*unit.keV, \
                                     approx_gaussian_error_num=10):
         """
-        Function that sets the spectral parameters for energy ranges that should be fitted with the spectral_fit method.
-        Needs to be set before attempting to do any spectral fits for the class.
-        :param spectral_fit_energy_range:
-        :param spectral_fit_energy_unit:
-        :param approx_gaussian_error_num:
-        :return:
+        Sets the spectral parameters for energy ranges that should be fitted with the spectral_fit method.
+        This needs to be set before attempting to do any spectral fits for the class, either in the lightcurve method
+        or the spectrum method.
+
+        If an instrument is loaded, calling this method with no arguments will make the instrument spectral fit parameters
+        the defualt.
+
+        :param spectral_fit_energy_range: Default [8, 40e3]*unit.keV or an array with astropy quantities. Denotes the min
+            and max energy for which the Band or cutoff powerlaw (COMP) functions should be fit to the spectrum.
+        :param approx_gaussian_error_num: Default 10. The number of photons in a spectral energy bin which allows the code to
+            approximate the errors as gaussian.
+        :return: None
         """
         #see if an instrument is loaded with spectral parameters set use them
         if self.is_instrument_loaded and self.instrument_spectral_energy_range is not None:
@@ -893,6 +1037,10 @@ class MockObservation(object):
         self.is_set_spectral_fit_parameters = True
 
     def unset_spectral_fit_parameters(self):
+        """
+        Unloads the specified spectral fit parameters, replacing them with the defaults.
+        :return: None
+        """
         self.spectral_fit_energy_range = [8, 40e3]
         self.spectral_fit_energy_unit = unit.keV
         self.approx_gaussian_error_num = 10
@@ -901,15 +1049,17 @@ class MockObservation(object):
     @unit.quantity_input(energy_bin_center=['energy', 'length'])
     def spectral_fit(self, spectrum, spectrum_error, ph_num, energy_bin_center, sample_num=1e4):
         """
-        The function that takes a spectrum and fits it with either a Comp or Band function in the energy range specified
-        by the user through the set_spectral_fit_parameters method.
-        :param spectrum:
-        :param spectrum_error:
-        :param ph_num:
-        :param energy_bin_center:
-        :param energy_unit:
-        :param sample_num:
-        :return:
+        The function that takes a spectrum and fits it with either a cutoff powerlaw (COMP) or Band function in the
+        specified energy range provided by the user through the set_spectral_fit_parameters() method.
+
+        :param spectrum: array of spectral values (should be in units of counts/s/energy_unit)
+        :param spectrum_error: The error in each spectral data point
+        :param ph_num: The number of photons in each energy bin
+        :param energy_bin_center: The center of each energy bin of the spectrum
+        :param sample_num: Default 1e4. The number of bootstrap samples that should be taken to determine errors on the
+            fitted spectral parameters
+        :return: The best fitting spectral parameters and their errors and the type of function that provided the best fit.
+            B for Band or C for Comp.
         """
 
         if not self.is_set_spectral_fit_parameters:

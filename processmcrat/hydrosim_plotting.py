@@ -11,9 +11,16 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 from .plotting import random_photon_index
 from .mclib import lc_time_to_radius
 
-
-
 def create_image(hydro_obj, key, logscale=True):
+    """
+    Convience function to obtain an image of a frame of a hydrodynamic simulation where the grid values are reflected about
+    the axis of symmetry, which is assumed to be the z axis. Can be plotted with imshow.
+
+    :param hydro_obj: A HydroSim object with a loaded frame
+    :param key: the hydrodynamic quantity that will be plotted
+    :param logscale: Boolean (default True) that denotes if a log color scale should be used in the plot
+    :return: 2D array that represents the image of the hydrodynamic outflow
+    """
 
     x,y=hydro_obj.coordinate_to_cartesian()
     data=hydro_obj.get_data(key)
@@ -42,7 +49,21 @@ def create_image(hydro_obj, key, logscale=True):
 
 def plot_photon_vs_fluid_quantities(savefile, hydro_keys, lc_dict_list, theta=None, tmin=None, tmax=None, savedir=None):
     """
+    Convience function to plot the hydrodynamic fluid quantity as a function of photon location in the outflow.
+    This is done for a set of observer viewing angles and for a set of observed photons in time bins of the light curves.
 
+    :param savefile: string of the photon_vs_fluid_quantities pickle file that should be loaded without the .pickle ending.
+    :param hydro_keys: String that denotes the hydrodynamic grid value that will be plotted
+    :param lc_dict_list: list of MockObservation calculated light curve dictionaries. Need to be identical to what was
+        passed into calculate_photon_vs_fluid_quantities function
+    :param theta: none or a value of observer viewing angle that the user would like to plot. None defaults to plotting all the
+        observer viweing angles specified in the lc_dict_list
+    :param tmin: min time in the light curve for which we want to see the evolution of the outflow values for the photons
+        within the outflow. Default None denotes that the photons from the very first light curve time bin will be plotted.
+    :param tmax: max time of the light curve for which we want to see the evolution of the outflow values for the photons
+        within the outflow. Default None denotes that the photons to the very last light curve time bin will be plotted.
+    :param savedir: strign of the directory to save the plots that are produced. Default is None which denotes that no plots should be
+        saved
     """
 
     #see if the savedir exists
@@ -212,10 +233,43 @@ def plot_photon_vs_fluid_quantities(savefile, hydro_keys, lc_dict_list, theta=No
                         fig.savefig(os.path.join(savedir,filename), bbox_inches='tight')
 
 def scale_photon_weights(weights, scale, power=2):
+    """
+    Scales the photon weights for plotting purposes. The scaling follows this function:
+    new_weight=scale*(1+np.log10(weights/weights.min()))**power
+
+    :param weights: array of weights that should be scaled.
+    :param scale: a scale that can be used as a multiplier
+    :param power: The power of raising the log weights
+    :return: array of the new rescaled weights
+    """
     return scale*(1+np.log10(weights/weights.min()))**power
 
 def plot_photon_fluid_EATS(tmin, tmax, ph_obs, hydro_obj, x0lim=None, x1lim=None, hydro_key="dens", photon_type=None,\
                            photon_colors=["b","r"],photon_markers=['o', 'P'], photon_zorder=[5,4], photon_alpha=[0.1, 0.5], plot_weight=False):
+    """
+    Convience function to plot the location of the photons in the hydrodynamic frame. The plotted photons are detected by
+    an observer at a specified time interval. This function can plot photons of different types and it can show the
+    weights of each photons.
+
+    :param tmin: min time that the user wants to plot photons detected after alongside the hydrodynamic simulation frame
+    :param tmax: max time that the user wants to plot photons detected before alongside the hydrodynamic simulation frame
+    :param ph_obs: MockObservtion object
+    :param hydro_obj: HydroSim object with the loaded frame of interest
+    :param x0lim: Default None or a quantity object that denotes the min and max x0 limits that should be used for
+        plotting the hydrosimulation frame. None automatically sets the limits to be the limits of the photons.
+    :param x1lim: Default None or a quantity object that denotes the min and max x1 limits that should be used for
+        plotting the hydrosimulation frame. None automatically sets the limits to be the limits of the photons.
+    :param hydro_key: The value of the hydrodynamic grid that will be plotted (eg dens)
+    :param photon_type: None or a list of strings denoting photon types that should be plotted. None will plot all photons of
+        all types.
+    :param photon_colors: For each photon type specified, a list of the colors that they will be plotted with
+    :param photon_markers: For each photon type specified, a list of the markers that will be used for each type
+    :param photon_zorder: For each photon type specified, a list of the zorder that will be used for each type (see matplotlib documentation)
+    :param photon_alpha: For each photon type specified, a list of the alpha values that will be used for each type (see matplotlib documentation)
+    :param plot_weight: Boolean (default True) that denotes if the photon weight should be plotted by adjusting the
+        sizes of each photon plotted
+    :return: figure object, axis object
+    """
 
     if photon_type is not None:
         if len(photon_type) > len(photon_markers) or len(photon_type) > len(photon_zorder) \

@@ -55,9 +55,11 @@ def plot_spectral_fit_hist(spect_dict_list, observational_data=None):
     A convenience function that plots the distribution of the spectral parameters specified in spect_dict_list alongside the
     Yu et al. (2016) Fermi BEST spectral parameters if observational_data=None otherwise the user can set observational_data
     to be a list with Nx3 columns where the first, second and third columns correspond to the alpha, beta and E_pk parameters.
-    :param spect_dict_list:
-    :param observational_data:
-    :return:
+
+    :param spect_dict_list: list of MockObservation calculated spectrum dictionaries with fits performed on the spectra
+    :param observational_data: None or a list of data for spectral fit parameters that the MockObservations will be
+        compared against.
+    :return: figure object, axes object, list of spectral alpha, list of spectral beta, and list of spectral E_pk
     """
     plt.rcParams.update({'font.size': 14})
     figs=[]
@@ -128,11 +130,14 @@ def plot_spectrum(spectrum_dict, photon_num_min=10, plot_polarization=False, plo
     """
     A convenience function that allows the user to plot a mock observed spectrum including energy resolved polarization
     and the best fit function.
-    :param spectrum_dict:
-    :param photon_num_min:
-    :param plot_polarization:
-    :param plot_fit:
-    :return:
+
+    :param spectrum_dict: a MockObservation calculated spectrum dictionary
+    :param photon_num_min: number that represents the minumum number of photons that has to be detected within an energy
+        bin in order to plot the data point
+    :param plot_polarization: boolean (default False) to denote is polarization degree and angle should be plotted as well
+    :param plot_fit: boolean (default False) to denote if the fitted function should also be plotted. The fit should be done
+        prior to using this function.
+    :return: figure object, list of figure axes
     """
 
     if plot_polarization and spectrum_dict.get('pol_angle') is None:
@@ -237,10 +242,14 @@ def plot_lightcurve(lightcurve_dict_list, plot_polarization=False, plot_spectral
     """
     Convenience function to plot the light curves(s) that are provided and the time resolved polarization and spectral
     fit parameters for the first light curve dictionary provided in lightcurve_dict_list
-    :param lightcurve_dict_list:
-    :param plot_polarization:
-    :param plot_spectral_params:
-    :return:
+
+    :param lightcurve_dict_list: list or single MockObservation calculated light curve dictionaries
+    :param plot_polarization: boolean (default False) to denote if polarization degree and angle should be plotted as a
+        function of time in a separate panel
+    :param plot_spectral_params: boolean (default False) to denote if the fitted spectral parameters should also be plotted
+    :return: figure object, list of figure axes in the following order: lc axis, epk axis, alpha axis, beta axis,
+        polarization degree axis, polarization angle axis
+        If axes don't exist in the figure they will be numpy nan values in the list.
     """
     plt.rcParams.update({'font.size': 14})
     #see how many panels we need for the plot and how many light curves the user wants plotted
@@ -442,14 +451,20 @@ def plot_yonetoku_relationship(spect_dict_list, lightcurve_dict_list, observatio
     data can be passed in if it is organized in a certain way (see parameters), while a function that provides the yonetoku
     relationship can also be passed in. Labels for the various simulations that will be plotted can also be provided.
 
-    :param spect_dict_list:
-    :param lightcurve_dict_list:
-    :param observational_data:
-    :param yonetoku_func:
-    :param plot_polarization:
-    :param polarization_list:
-    :param labels:
-    :return:
+    :param spect_dict_list: list of MockObservation calculated spectrum dictionaries with fits performed on the spectra.
+        Can be multidimensional to plot results for different simulations at the same time.
+    :param lightcurve_dict_list: list of MockObservation calculated light curve dictionaries. Need to be the same shape
+        as spect_dict_list
+    :param observational_data: None or a Nx4 array where the colums are ordered following this order:
+        E_pk, E_pk error, L_iso, L_iso error. None uses the get_yonetoku_data() function to obtain observational GRB data.
+    :param yonetoku_func: A python function that returns the Yonetoku relation. By default this uses the get_yonetoku_relationship() function.
+        If the user would like to use a separate function it should be formatted similar to the default function.
+    :param plot_polarization: boolean (default False) to denote if polarization degree should be plotted for each data point
+    :param polarization_list: list of MockObservation calculated polarization dictionaries that will be plotted for each
+        data point. Need to be the same shape as spect_dict_list
+    :param labels: default None or list of strings that are the labels that will be assigned to each data point. If None, the function will use default
+        labels which denote the observer viewing angle for the order of the passed in dictionaries from 1-15 degrees.
+    :return: returns figure object, axis object, line object, colorbar object (if the user would like to plot the polarization, otherwise its None)
     """
     plt.rcParams.update({'font.size': 14})
 
@@ -598,14 +613,18 @@ def plot_yonetoku_relationship(spect_dict_list, lightcurve_dict_list, observatio
 
 def plot_golenetskii_relationship(lightcurve_dict_list, golenetskii_func=get_golenetskii_relationship, labels=None, luminosity_cutoff=None):
     """
-    A convience funtion to plot MCRaT mock observations alongside the golenetskii relationship. The user can pass in a
+    A convience function to plot MCRaT mock observations alongside the golenetskii relationship. The user can pass in a
     function that provides the golenteskii relationship and its upper and lower limits. The user can also specify a cutoff
     in the plotted luminosities. They can also specify labels that will populate the legend of the figure.
-    :param lightcurve_dict_list:
-    :param golenetskii_func:
-    :param labels:
-    :param luminosity_cutoff:
-    :return:
+
+    :param lightcurve_dict_list: list of MockObservation calculated light curve dictionaries.
+    :param golenetskii_func: A python function that returns the golenetskii relation. By default this uses the get_golenetskii_relationship() function.
+        If the user would like to use a separate function it should be formatted similar to the default function.
+    :param labels: default None or list of strings that are the labels that will be assigned to each data point. If None, the function will use default
+        labels which denote the observer viewing angle for the order of the passed in dictionaries from 1-15 degrees.
+    :param luminosity_cutoff: Default None or a value corresponding to a lower limit of detected luminosities, below which
+        lujinosity values are not plotted.
+    :return: returns figure object, axis object
     """
     plt.rcParams.update({'font.size': 14})
 
@@ -681,11 +700,16 @@ def plot_amati_relationship(spect_dict_list, lightcurve_dict_list, amati_func=ge
     A convience funtion to plot MCRaT mock observations alongside the amati relationship. The user can pass in a
     function that specifies the amati relationship and its upper and lower limits. They can also specify labels that will
     populate the legend of the figure.
-    :param spect_dict_list:
-    :param lightcurve_dict_list:
-    :param amati_func:
-    :param labels:
-    :return:
+
+    :param spect_dict_list: list of MockObservation calculated spectrum dictionaries with fits performed on the spectra.
+        Can be multidimensional to plot results for different simulations at the same time.
+    :param lightcurve_dict_list: list of MockObservation calculated light curve dictionaries. Need to be the same shape
+        as spect_dict_list
+    :param amati_func: A python function that returns the amati relation. By default this uses the get_amati_relationship() function.
+        If the user would like to use a separate function it should be formatted similar to the default function.
+    :param labels: default None or list of strings that are the labels that will be assigned to each data point. If None, the function will use default
+        labels which denote the observer viewing angle for the order of the passed in dictionaries from 1-15 degrees.
+    :return: returns figure object, axis object, list of line objects that correspond to each simulation that is plotted
     """
 
     plt.rcParams.update({'font.size': 14})
@@ -786,10 +810,14 @@ def plot_polarization_observer_angle(polarization_dict_list, plot_pol_angle=Fals
     A convience function that allows MCRaT mock observed polarizations to be plotted as a function of observer viewing
     angle. The function can just plot the polarization degree or it can plot both the degree and the angle. The user can also
     pass in a list of labels that will populate the legend of the figure.
-    :param polarization_dict_list:
-    :param plot_pol_angle:
-    :param labels:
-    :return:
+
+    :param polarization_dict_list: list of MockObservation calculated polarization dictionaries that will be plotted.
+    :param plot_pol_angle: Boolean (default False) which permits the function to also plot the polarization angle in
+        a separate panel
+    :param labels: default None or list of strings that are the labels that will be assigned to each data point. If None, the function will use default
+        labels which denote the observer viewing angle for the order of the passed in dictionaries from 1-15 degrees.
+    :return: figure object, list of axes, list of angle values, list of all polarization degrees,
+        list of all polarization degree errors, list of all polarization angles, list of all polarization angle errors
     """
     plt.rcParams.update({'font.size': 14})
     num_panels = 1 + plot_pol_angle
@@ -913,6 +941,17 @@ def plot_polarization_observer_angle(polarization_dict_list, plot_pol_angle=Fals
 
 
 def plot_polarization_peak_energy(spect_dict_list, polarization_dict_list, labels=None):
+    """
+    Convenience function to plot the polarization degree as a function of spectral peak energy.
+
+    :param spect_dict_list: list of MockObservation calculated spectrum dictionaries with fits performed on the spectra.
+        Can be multidimensional to plot results for different simulations at the same time.
+    :param polarization_dict_list: list of MockObservation calculated polarization dictionaries. Need to be the same shape
+        as spect_dict_list.
+    :param labels: default None or list of strings that are the labels that will be assigned to each data point. If None, the function will use default
+        labels which denote the observer viewing angle for the order of the passed in dictionaries from 1-15 degrees.
+    :return: figure object, axis object
+    """
     plt.rcParams.update({'font.size': 14})
 
     #make sure the inputs are formatted correctly
@@ -1022,6 +1061,13 @@ def plot_polarization_peak_energy(spect_dict_list, polarization_dict_list, label
     return fig, ax
 
 def random_photon_index(mcrat_obj, num_ph):
+    """
+    Function that chooses a set of photons randomly from a large set of MCRaT photons for plotting purposes.
+
+    :param mcrat_obj: Mock Observation object that has all the detected photons for a given observer
+    :param num_ph: number that denotes the number of photons to select out of all the loaded photons
+    :return: numpy array of the indexes of the randomly chosen photons
+    """
     if num_ph>mcrat_obj.detected_photons.p0.size:
         choose_ph_num=mcrat_obj.detected_photons.p0.size
         rnd_index=range(0, mcrat_obj.detected_photons.p0.size)
