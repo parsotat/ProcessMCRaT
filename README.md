@@ -97,9 +97,19 @@ can test a the distribution locally with 'pip install -e .' from the main direct
 
 <!-- [![Product Name Screen Shot][product-screenshot]](https://example.com) -->
 
-The ProcessMCRaT package allows for the outputs of the MCRaT simulations to be processed in a number of different ways. The package allows the user to quickly analyze the MCRaT simulation by conveniently creating a number of mock observations for a variety of observer viewing angles and then use those observations to calculate spectra, light curves, and polarizations. The package also includes convenience plotting functions that allow quick, convenient plotting of these various quantities to fully explore the MCRaT results. These functions are also meant to be examples of how to work with the outputs of the ProcessMCRaT library.
+The ProcessMCRaT package allows for the outputs of the MCRaT simulations to be processed in a number of different ways. 
+The package allows the user to quickly analyze the MCRaT simulation by conveniently creating a number of mock observations 
+for a variety of observer viewing angles and then use those observations to calculate spectra, light curves, and polarizations. 
+The package also includes convenience plotting functions that allow quick, convenient plotting of these various quantities 
+to fully explore the MCRaT results. These functions are also meant to be examples of how to work with the outputs of the 
+ProcessMCRaT library. Additionally, the package also includes support for analyzing the position of photons in a given 
+hydrodynamic simulation, allowing for analysis of hydrodynamic structures and mock observables at the same time. 
 
-There is also a Jupyter notebook that is included on Github that outlines the usage of the library, and many functionalities that the library offers. This notebook can be accessed by cloning the repository or loading the notebook in Binder  (see the <a href="#usage">Usage</a> section). The detailed documentation for each function is still under development, but the Jupyter notebook covers the ways that each function can be used.
+
+There is also a Jupyter notebook that is included on Github that outlines the usage of the library, and many 
+functionalities that the library offers. This notebook can be accessed by cloning the repository or loading the notebook 
+in Binder  (see the <a href="#usage">Usage</a> section). The detailed documentation for each function is still under 
+development, but the Jupyter notebook covers the ways that each function can be used.
 
 
 ### Built With
@@ -147,7 +157,6 @@ Or
 ## Roadmap
 
 1. The code will include the means to include various instrument response functions in the creation of mock observed light curves, spectra, and polarizations.
-2. The package will also include support for analyzing the position of photons in a given hydrodynamic simulation, allowing for analysis of hydrodynamic structures and mock observables at the same time. 
 
 See the [open issues](https://github.com/parsotat/ProcessMCRaT/issues) for a list of proposed features (and known issues).
 
@@ -190,6 +199,8 @@ Project Link: [https://github.com/parsotat/ProcessMCRaT](https://github.com/pars
     * [Parsotan & Lazzati (2018)](https://doi.org/10.3847/1538-4357/aaa087)
     * [Parsotan et al. (2018)](https://doi.org/10.3847/1538-4357/aaeed1)
     * [Parsotan et. al. (2020)](https://doi.org/10.3847/1538-4357/ab910f)
+    * [Parsotan & Lazzati (2021)](https://doi.org/10.3847/1538-4357/ac2428)
+    * [Parsotan & Lazzati (2022)](https://doi.org/10.3847/1538-4357/ac4093)
 * [README Template from: othneildrew/Best-README-Template](https://github.com/othneildrew/Best-README-Template)
 
 

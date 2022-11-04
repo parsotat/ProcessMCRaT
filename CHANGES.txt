@@ -5,3 +5,4 @@ v0.3.1, 5/6/21 -- Fixed error with saving event file.
 v0.3.2, 5/8/21 -- Fixed error with energy unit to wavelength unit.
 v0.3.3, 5/8/21 -- Properly fixed error with energy unit to wavelength unit.
 v1.0.0, 5/10/21 -- Finalized first version of the package. Updated README.
+v2.0.0  11/4/22 -- Included hydrodynamics portion of the code to read/plot hydro files. Included bug fixes to v1.0.0.
