@@ -15,3 +15,4 @@ scipy>=1.6.2
 six>=1.15.0
 tables>=3.6.1
 gdown>=4.3.0
+joblib>=1.2.0
