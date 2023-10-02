@@ -1014,7 +1014,7 @@ def param_err_loop_comp(x,data,err, best_par,chi_sq,par,d_par):
             fudge_factor=10**-(np.str_(best_par[1])[::-1].find('.')-1)
             #if theres an e, number is too big and need larger fudge factor
             if (np.str_(best_par[1]).find('e') != -1):
-                fudge_factor=10**(np.float(np.str_(best_par[1])[np.str_(best_par[1]).find('e')+2:])-10)
+                fudge_factor=10**(float(np.str_(best_par[1])[np.str_(best_par[1]).find('e')+2:])-10)
             bound_array_l=[ -np.inf,best_par[1],-np.inf]
             bound_array_u=[np.inf,best_par[1]+(2*fudge_factor),np.inf]
             guess=[ original_best[0], best_par[1], original_best[2]]
@@ -1130,7 +1130,7 @@ def param_err_loop(x,data,err, best_par,chi_sq,par,d_par):
             fudge_factor=10**-(np.str_(best_par[1])[::-1].find('.')-1)
             #if theres an e, number is too big and need larger fudge factor
             if (np.str_(best_par[1]).find('e') != -1):
-                fudge_factor=10**(np.float(np.str_(best_par[1])[np.str_(best_par[1]).find('e')+2:])-10)
+                fudge_factor=10**(float(np.str_(best_par[1])[np.str_(best_par[1]).find('e')+2:])-10)
 
             #print(np.str_(best_par[1])[::-1].find('.'),np.str_(best_par[1])[::-1].find('.')-1)
             bound_array_l=[ -np.inf,best_par[1],-np.inf,-np.inf]
@@ -2258,9 +2258,9 @@ def get_yonetoku_rel(simid_array, t_start, t_end, dt=1, h5=False, save_plot=Fals
     for i in range(file_data.shape[0]):
         if ((np.size(np.where(np.fromstring(file_data[i,0], sep=' \xc2\xb1 ')!=-1)))!=0) and ((np.size(np.where(np.fromstring(file_data[i,1], sep=' \xc2\xb1 ')!=-1)))!=0):
             E_p[count]=np.fromstring(file_data[i,0], sep=' \xc2\xb1 ')
-            E_p_err[count]=np.float(np.fromstring(file_data[i,0][::-1], sep=' \xc2\xb1 ').astype(int).astype('U')[0][::-1])
+            E_p_err[count]=float(np.fromstring(file_data[i,0][::-1], sep=' \xc2\xb1 ').astype(int).astype('U')[0][::-1])
             L_iso[count]=np.fromstring(file_data[i,1], sep=' \xc2\xb1 ')
-            L_iso_err[count]=np.float(np.fromstring(file_data[i,1][::-1], sep=' \xc2\xb1 ').astype(float).astype('U')[0][::-1])
+            L_iso_err[count]=float(np.fromstring(file_data[i,1][::-1], sep=' \xc2\xb1 ').astype(float).astype('U')[0][::-1])
             count+=1
 
     #divide L by ten to have same normalization factor as in yonetoku paper
@@ -2291,7 +2291,7 @@ def get_yonetoku_rel(simid_array, t_start, t_end, dt=1, h5=False, save_plot=Fals
         try:
             angle=np.double(i[-2:])
         except ValueError:
-            angle=np.float(i[::-1][0])
+            angle=float(i[::-1][0])
         lc[:],lc_e[:], num_ph, dum, p, l, q, u, v, perr, p_angle, num_scatt, t=lcur(i,np.arange(0,t_end[count],dt), units='erg/s', theta=angle, h5=h5)
         L_iso_sim[count]=lc.max()/(1e52) #scale to yonetoku paper
         L_err_sim[count]=lc_e[lc.argmax()]/(1e52)
@@ -2516,9 +2516,9 @@ def get_amati_rel(simid_array, time_start, time_end, save_plot=False, h5=False):
         if ((np.size(np.where(np.fromstring(file_data[i,0], sep=' \xc2\xb1 ')!=-1)))!=0) and ((np.size(np.where(np.fromstring(file_data[i,1], sep=' \xc2\xb1 ')!=-1)))!=0):
             #print(i)
             E_p[count]=np.fromstring(file_data[i,0], sep=' \xc2\xb1 ')
-            E_p_err[count]=np.float(np.fromstring(file_data[i,0][::-1], sep=' \xc2\xb1 ').astype(int).astype('U')[0][::-1])
+            E_p_err[count]=float(np.fromstring(file_data[i,0][::-1], sep=' \xc2\xb1 ').astype(int).astype('U')[0][::-1])
             E_iso[count]=np.fromstring(file_data[i,1], sep=' \xc2\xb1 ')
-            E_iso_err[count]=np.float(np.fromstring(file_data[i,1][::-1], sep=' \xc2\xb1 ').astype(float).astype('U')[0][::-1])
+            E_iso_err[count]=float(np.fromstring(file_data[i,1][::-1], sep=' \xc2\xb1 ').astype(float).astype('U')[0][::-1])
             count+=1
 
     #Data already normalized by 10^52
@@ -2552,7 +2552,7 @@ def get_amati_rel(simid_array, time_start, time_end, save_plot=False, h5=False):
         try:
             angle=np.double(i[-2:])
         except ValueError:
-            angle=np.float(i[::-1][0])
+            angle=float(i[::-1][0])
 
         t=np.arange(time_start[count],time_end[count],1)
         lc=np.zeros([t.size])
@@ -2815,7 +2815,7 @@ def plot_golenetskii(sims, t_end, delta_t=1, detectable=False, save_plot=False, 
         #lc=np.zeros([t.size])
         #lc_e=np.zeros([t.size])
 
-        #angle=np.float(sims[i][-1])
+        #angle=float(sims[i][-1])
         lc, lcur_e, alpha,beta,e_o,err, time, model_use, P, I, Q, U, V, Perr, P_angle, num_ph, num_scatt = \
             lcur_param(i, 0, t_end[count], dt=delta_t, plotting=False, choose_best=True, hdf5=h5)
 

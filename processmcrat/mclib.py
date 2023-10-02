@@ -273,10 +273,10 @@ def get_yonetoku_data():
 		if ((np.size(np.where(np.fromstring(file_data[i, 0], sep=' \xc2\xb1 ') != -1))) != 0) and (
 				(np.size(np.where(np.fromstring(file_data[i, 1], sep=' \xc2\xb1 ') != -1))) != 0):
 			E_p[count] = np.fromstring(file_data[i, 0], sep=' \xc2\xb1 ')
-			E_p_err[count] = np.float(
+			E_p_err[count] = float(
 				np.fromstring(file_data[i, 0][::-1], sep=' \xc2\xb1 ').astype(int).astype('U')[0][::-1])
 			L_iso[count] = np.fromstring(file_data[i, 1], sep=' \xc2\xb1 ')
-			L_iso_err[count] = np.float(
+			L_iso_err[count] = float(
 				np.fromstring(file_data[i, 1][::-1], sep=' \xc2\xb1 ').astype(float).astype('U')[0][::-1])
 			count += 1
 	L_iso, L_iso_err= L_iso*1e51, L_iso_err*1e51
