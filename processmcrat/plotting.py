@@ -199,10 +199,10 @@ def plot_spectrum(spectrum_dict, photon_num_min=10, plot_polarization=False, plo
             #axarr_spex.plot(nucen_all[nucen_all <= fermi_gbm_e_min], full_band[nucen_all <= fermi_gbm_e_min], 'k--', lw=3,
             #				label='Extrapolated Band', zorder=3)
 
-            axarr_spex.annotate(r'$\alpha$' + '=' + np.str(spectrum_dict['fit']['alpha']).split('.')[0] + '.' + np.str(spectrum_dict['fit']['alpha']).split('.')[1][0] +
-                                '\n' + r'$\beta$' + '=' + np.str(spectrum_dict['fit']['beta']).split('.')[0] + '.' +
-                                np.str(spectrum_dict['fit']['beta']).split('.')[1][0] + '\n' + r'E$_{\mathrm{o}}$' + '=' +
-                                np.str(spectrum_dict['fit']['break_energy']).split('.')[0] + '.' + np.str(spectrum_dict['fit']['break_energy']).split('.')[1][0]\
+            axarr_spex.annotate(r'$\alpha$' + '=' + str(spectrum_dict['fit']['alpha']).split('.')[0] + '.' + str(spectrum_dict['fit']['alpha']).split('.')[1][0] +
+                                '\n' + r'$\beta$' + '=' + str(spectrum_dict['fit']['beta']).split('.')[0] + '.' +
+                                str(spectrum_dict['fit']['beta']).split('.')[1][0] + '\n' + r'E$_{\mathrm{o}}$' + '=' +
+                                str(spectrum_dict['fit']['break_energy']).split('.')[0] + '.' + str(spectrum_dict['fit']['break_energy']).split('.')[1][0]\
                                 + ' '+spectrum_dict['energy_bin_center'].unit.to_string('latex_inline'), xy=(0, 0),
                                 xycoords='axes fraction', fontsize=18, xytext=(10, 10),
                                 textcoords='offset points', ha='left', va='bottom')
@@ -211,9 +211,9 @@ def plot_spectrum(spectrum_dict, photon_num_min=10, plot_polarization=False, plo
             axarr_spex.plot(spectrum_dict['energy_bin_center'][idx], comptonized_function(spectrum_dict['energy_bin_center'][idx], spectrum_dict['fit']['alpha'], spectrum_dict['fit']['break_energy'], spectrum_dict['fit']['normalization']), color='k', label='Fitted COMP',
                             ls='solid', lw=3, zorder=3)
 
-            axarr_spex.annotate(r'$\alpha$' + '=' + np.str(spectrum_dict['fit']['alpha']).split('.')[0] + '.' + np.str(spectrum_dict['fit']['alpha']).split('.')[1][0] +
-                                '\n' + r'E$_{\mathrm{o}}$' + '=' + np.str(spectrum_dict['fit']['break_energy']).split('.')[0] + '.' +
-                                np.str(spectrum_dict['fit']['break_energy']).split('.')[1][0] + ' '+spectrum_dict['energy_bin_center'].unit.to_string('latex_inline'),\
+            axarr_spex.annotate(r'$\alpha$' + '=' + str(spectrum_dict['fit']['alpha']).split('.')[0] + '.' + str(spectrum_dict['fit']['alpha']).split('.')[1][0] +
+                                '\n' + r'E$_{\mathrm{o}}$' + '=' + str(spectrum_dict['fit']['break_energy']).split('.')[0] + '.' +
+                                str(spectrum_dict['fit']['break_energy']).split('.')[1][0] + ' '+spectrum_dict['energy_bin_center'].unit.to_string('latex_inline'),\
                                 xy=(0, 0), xycoords='axes fraction', fontsize=18,xytext=(10, 10),
                                 textcoords='offset points', ha='left', va='bottom')
     elif plot_fit:

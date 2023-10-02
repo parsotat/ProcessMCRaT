@@ -266,9 +266,9 @@ class MockObservation(object):
         :return: string of the created event file name
         """
         if self.hydrosim_dim == 2:
-            return np.str(id) + '_' + "%.2e" % self.r_observer + '_' + np.str(self.theta_observer)
+            return str(id) + '_' + "%.2e" % self.r_observer + '_' + str(self.theta_observer)
         else:
-            return np.str(id) + '_' + "%.2e" % self.r_observer + '_' + np.str(self.theta_observer) + '_' + np.str(
+            return str(id) + '_' + "%.2e" % self.r_observer + '_' + str(self.theta_observer) + '_' + str(
                 self.phi_observer)
 
     def load_instrument(self, instrument_object):

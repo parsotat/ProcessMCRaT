@@ -351,7 +351,7 @@ def flash_position(r_photon_avg, theta_photon_avg, rr, tt_deg):
         #Flash_r_indexes=np.logical_and(rr<r_photon_avg+(1*10**i), rr>r_photon_avg-(1*10**i))
         #    size=np.size(rr[Flash_deg_indexes*Flash_r_indexes])
         #another_method=np.logical_and(np.logical_and(Theta_photon_avg<tt_deg+0.1, Theta_photon_avg>=tt_deg-0.1), np.logical_and(rr<R_photon_avg+(1*10**i), rr>R_photon_avg-(1*10**i)) )
-    #print('Size='+np.str(size))
+    #print('Size='+str(size))
 
     #refine which rr and tt_deg is closest to desired value
     size_count=0
@@ -376,8 +376,8 @@ def flash_position(r_photon_avg, theta_photon_avg, rr, tt_deg):
         size=np.size(rr[closest_index])
 
 
-    #print('Average R='+np.str(r_photon_avg)+ ' The acquired r is: '+ np.str(rr[closest_index]))
-    #print('Average theta='+np.str(theta_photon_avg)+ ' The acquired theta is: '+ np.str(tt_deg[closest_index]))
+    #print('Average R='+str(r_photon_avg)+ ' The acquired r is: '+ str(rr[closest_index]))
+    #print('Average theta='+str(theta_photon_avg)+ ' The acquired theta is: '+ str(tt_deg[closest_index]))
 
     return closest_index
 
@@ -413,8 +413,8 @@ def flash_position_ordered(x_photon_avg, z_photon_avg, flash_x, flash_z):
 
     index=diff_magnitude.argmin()
 
-    print('Average X='+np.str(x_photon_avg)+ ' The acquired X is: '+ np.str(flash_x[index]))
-    print('Average Z='+np.str(z_photon_avg)+ ' The acquired Z is: '+ np.str(flash_z[index]))
+    print('Average X='+str(x_photon_avg)+ ' The acquired X is: '+ str(flash_x[index]))
+    print('Average Z='+str(z_photon_avg)+ ' The acquired Z is: '+ str(flash_z[index]))
     print('Difference is: ',diff_magnitude[index] )
 
     return index
@@ -882,9 +882,9 @@ def cfit(event_file,time_start, time_end, dnulog=0.1, hdf5=True, plotting=False,
             full_band = full_band*band_in_energy_range[-1]/full_band[-1]
             axarr_spex.plot(nucen_all[nucen_all<=fermi_gbm_e_min],full_band[nucen_all<=fermi_gbm_e_min],'k--', lw=3, label='Extrapolated Band', zorder=3)
 
-            axarr_spex.annotate(r'$\alpha$'+'='+np.str(best[0]).split('.')[0] + '.'+ np.str(best[0]).split('.')[1][0]+
-                '\n'+r'$\beta$'+'='+np.str(best[1]).split('.')[0] + '.'+ np.str(best[1]).split('.')[1][0]+'\n'+r'E$_{\mathrm{o}}$'+'=' +
-                    np.str(best[2]).split('.')[0] + '.'+ np.str(best[2]).split('.')[1][0] +' keV', xy=(0, 0), xycoords='axes fraction', fontsize=18, xytext=(10, 10),
+            axarr_spex.annotate(r'$\alpha$'+'='+str(best[0]).split('.')[0] + '.'+ str(best[0]).split('.')[1][0]+
+                '\n'+r'$\beta$'+'='+str(best[1]).split('.')[0] + '.'+ str(best[1]).split('.')[1][0]+'\n'+r'E$_{\mathrm{o}}$'+'=' +
+                    str(best[2]).split('.')[0] + '.'+ str(best[2]).split('.')[1][0] +' keV', xy=(0, 0), xycoords='axes fraction', fontsize=18, xytext=(10, 10),
                       textcoords='offset points', ha='left', va='bottom')
 
         if model_use=='c':
@@ -893,8 +893,8 @@ def cfit(event_file,time_start, time_end, dnulog=0.1, hdf5=True, plotting=False,
             axarr_spex.plot(nucen_all[nucen_all <= fermi_gbm_e_min], full_comp[nucen_all <= fermi_gbm_e_min], 'k--', lw=3,
                             label='Extrapolated COMP', zorder=3)
 
-            axarr_spex.annotate(r'$\alpha$'+'='+np.str(best[0]).split('.')[0] + '.'+ np.str(best[0]).split('.')[1][0]+
-                '\n'+r'E$_{\mathrm{o}}$'+'=' +np.str(best[2]).split('.')[0] + '.'+ np.str(best[2]).split('.')[1][0]+' keV', xy=(0, 0), xycoords='axes fraction', fontsize=18, xytext=(10, 10),
+            axarr_spex.annotate(r'$\alpha$'+'='+str(best[0]).split('.')[0] + '.'+ str(best[0]).split('.')[1][0]+
+                '\n'+r'E$_{\mathrm{o}}$'+'=' +str(best[2]).split('.')[0] + '.'+ str(best[2]).split('.')[1][0]+' keV', xy=(0, 0), xycoords='axes fraction', fontsize=18, xytext=(10, 10),
                       textcoords='offset points', ha='left', va='bottom')
         axarr_spex.set_ylabel('N('+r'E'+') (photons/s/keV)', fontsize=14)
         if not calc_pol:
@@ -915,10 +915,10 @@ def cfit(event_file,time_start, time_end, dnulog=0.1, hdf5=True, plotting=False,
             ang_str = event_file.split('_')[-1]
             base_name=event_file.split(ang_str)[0]
             if not calc_pol:
-                savefilename='EVENT_FILE_ANALYSIS_PLOTS/'+event_file.replace('.', '_')+'_t_s_'+np.str(time_start).replace('.','_')+'_t_e_'+np.str(time_end).replace('.','_')+'.pdf'
+                savefilename='EVENT_FILE_ANALYSIS_PLOTS/'+event_file.replace('.', '_')+'_t_s_'+str(time_start).replace('.','_')+'_t_e_'+str(time_end).replace('.','_')+'.pdf'
             else:
-                savefilename='EVENT_FILE_ANALYSIS_PLOTS/' + event_file.replace('.', '_') + '_t_s_' + np.str(
-                    time_start).replace('.', '_') + '_t_e_' + np.str(time_end).replace('.', '_') + '_w_pol_w_scatt.pdf'
+                savefilename='EVENT_FILE_ANALYSIS_PLOTS/' + event_file.replace('.', '_') + '_t_s_' + str(
+                    time_start).replace('.', '_') + '_t_e_' + str(time_end).replace('.', '_') + '_w_pol_w_scatt.pdf'
             f.savefig(savefilename, bbox_inches='tight')
         plt.show()
 
@@ -2197,12 +2197,12 @@ def lcur_param_plot(event_file,lcur, lcur_e, alpha,beta,e_o,err,t, model, P, I, 
             if dt > 0:
                 savestring=event_file.replace('.','_')+'_lc'
             else:
-                savestring= event_file.replace('.', '_') + '_lc_liso_c_%s_dt_var'%(np.str(liso_c))
+                savestring= event_file.replace('.', '_') + '_lc_liso_c_%s_dt_var'%(str(liso_c))
         else:
             if dt > 0:
-                savestring=event_file.replace('.','_')+'_dt_'+np.str(dt).replace('.','_')
+                savestring=event_file.replace('.','_')+'_dt_'+str(dt).replace('.','_')
             else:
-                savestring= event_file.replace('.', '_') + '_liso_c_%s_dt_var'%(np.str(liso_c))
+                savestring= event_file.replace('.', '_') + '_liso_c_%s_dt_var'%(str(liso_c))
 
         if plot_optical:
             savestring=savestring+'_w_optical'
@@ -2653,7 +2653,7 @@ def get_amati_rel(simid_array, time_start, time_end, save_plot=False, h5=False):
                 zoom_ax.errorbar(E_iso_sim[count],E_p_sim[count],xerr=E_err_sim[count], yerr=[np.abs(err[-1].T)], color=c, marker=symbol,ls='None',markersize=m_size, label=info)
             if i[4:14]=='.e150.g100':
                 c='darkmagenta'
-                #m_size=np.str((int(m_size)+4))
+                #m_size=str((int(m_size)+4))
                 zoom_ax.errorbar(E_iso_sim[count],E_p_sim[count],xerr=E_err_sim[count], yerr=[np.abs(err[-1].T)], color=c, marker=symbol,ls='None',markersize=m_size, label=info)
 
         elif i[0:4]=='35OB':
@@ -3164,10 +3164,10 @@ def fluidGammaVsTheta(fluid_dir, r_interest, t_interest, fps, theta_max):
     all_data_theta=[]
     all_data_gamma=[]
     for frame in frames:
-        sfrm=np.str(int(frame))
-        if frame < 1000: sfrm = '0' + np.str(int(frame))
-        if frame < 100: sfrm = '00' + np.str(int(frame))
-        if frame < 10: sfrm = '000' + np.str(int(frame))
+        sfrm=str(int(frame))
+        if frame < 1000: sfrm = '0' + str(int(frame))
+        if frame < 100: sfrm = '00' + str(int(frame))
+        if frame < 10: sfrm = '000' + str(int(frame))
 
         xx, yy, szxx, szyy, vx, vy, gg, dd, dd_lab, rr, tt, pp=read_flash(fluid_dir+sfrm)
 

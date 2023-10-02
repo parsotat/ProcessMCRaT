@@ -41,10 +41,10 @@ def get_flash_data(file_num, f, max_x, min_y, max_y, flash_l_scale):
     """
     
 
-    sfrm=np.str(file_num)
-    if file_num < 1000: sfrm = '0' + np.str(file_num)
-    if file_num < 100: sfrm = '00' + np.str(file_num)
-    if file_num < 10: sfrm = '000' + np.str(file_num)
+    sfrm=str(file_num)
+    if file_num < 1000: sfrm = '0' + str(file_num)
+    if file_num < 100: sfrm = '00' + str(file_num)
+    if file_num < 10: sfrm = '000' + str(file_num)
 
     xx, yy, szxx, szyy, vx, vy, gg, dd, dd_lab, rr, tt, pp = rp.read_flash(f + sfrm, make1D=True)
     xx=xx/flash_l_scale
@@ -114,7 +114,7 @@ def get_indexes_data(mcrat_f, num, ph_num, angle, t, dt, fps, read_comv=False, r
     full_indexes = idx #to calculate spectrum
     indexes = mcrat_indexes[idx][rnd_index]  #to plot a random set of photons on imshow plot, have to do something different here to keep photons plotted the same across frames
 
-    data = rp.read_mcrat_h5(mcrat_f+np.str(num), read_comv=read_comv, read_stokes=read_stokes, read_type=read_type)
+    data = rp.read_mcrat_h5(mcrat_f+str(num), read_comv=read_comv, read_stokes=read_stokes, read_type=read_type)
     if read_comv and read_stokes:
         if read_type:
             PW, NS, P0, P1, P2, P3, R1, R2, R3, S0, S1, S2, S3, COMV_P0, COMV_P1, COMV_P2, COMV_P3, PT = data
