@@ -10,7 +10,7 @@ with open('requirements.txt') as f:
     required = f.read().splitlines()
 #update version in init as well
 setup(
-   name='ProcessMCRaT',
+   name= 'processmcrat', #'ProcessMCRaT',
    version='2.0.1',
    description='The ProcessMCRaT library is a python package that can be used to process the output of the MCRaT code.',
    license="MIT",
