@@ -191,7 +191,7 @@ def bootstrap_parameters(x, y, yerr, function, best_fit, sample_num=1e4):
 	"""
 	#can potentially speed up with lmfit package need to require it in setup.py and install with pip install lmfit
 	#double checked that this method gives a change in reduced chi squared of 1 which is ~1 sigma
-	sample_num=np.int(sample_num)
+	sample_num=int(sample_num)
 	resampled_data=np.random.default_rng().normal(y, yerr, size=(sample_num, y.size))
 
 	parameters=np.zeros((best_fit.size, sample_num))

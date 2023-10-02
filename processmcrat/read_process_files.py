@@ -287,7 +287,7 @@ def get_times_angles(v, t, min_angle, max_angle, change_in_angle,angle_range, r 
     #stop
 
     #find number of time steps
-    time_steps=np.int(np.ceil(max_time/t))
+    time_steps=int(np.ceil(max_time/t))
 
 
     return time_steps, times, angle_indexes
@@ -2330,31 +2330,31 @@ def get_yonetoku_rel(simid_array, t_start, t_end, dt=1, h5=False, save_plot=Fals
             symbol='s'
             m_size='9'
         elif angle==7:
-            symbol=symbols[np.int(angle)-1]
+            symbol=symbols[int(angle)-1]
             m_size='12'
         elif angle==8:
-            symbol=symbols[np.int(angle)-1]
+            symbol=symbols[int(angle)-1]
             m_size='10'
         elif angle==9:
-            symbol=symbols[np.int(angle)-1]
+            symbol=symbols[int(angle)-1]
             m_size='12'
         elif angle==10:
-            symbol=symbols[np.int(angle)-1]
+            symbol=symbols[int(angle)-1]
             m_size='10'
         elif angle==11:
-            symbol=symbols[np.int(angle)-1]
+            symbol=symbols[int(angle)-1]
             m_size='10'
         elif angle==12:
-            symbol=symbols[np.int(angle)-1]
+            symbol=symbols[int(angle)-1]
             m_size='10'
         elif angle==13:
-            symbol=symbols[np.int(angle)-1]
+            symbol=symbols[int(angle)-1]
             m_size='12'
         elif angle==14:
-            symbol=symbols[np.int(angle)-1]
+            symbol=symbols[int(angle)-1]
             m_size='10'
         elif angle==15:
-            symbol=symbols[np.int(angle)-1]
+            symbol=symbols[int(angle)-1]
             m_size='12'
 
         if '1spike' in i:
@@ -2608,31 +2608,31 @@ def get_amati_rel(simid_array, time_start, time_end, save_plot=False, h5=False):
             symbol='s'
             m_size='9'
         elif angle==7:
-            symbol=symbols[np.int(angle)-1]
+            symbol=symbols[int(angle)-1]
             m_size='12'
         elif angle==8:
-            symbol=symbols[np.int(angle)-1]
+            symbol=symbols[int(angle)-1]
             m_size='10'
         elif angle==9:
-            symbol=symbols[np.int(angle)-1]
+            symbol=symbols[int(angle)-1]
             m_size='12'
         elif angle==10:
-            symbol=symbols[np.int(angle)-1]
+            symbol=symbols[int(angle)-1]
             m_size='10'
         elif angle==11:
-            symbol=symbols[np.int(angle)-1]
+            symbol=symbols[int(angle)-1]
             m_size='10'
         elif angle==12:
-            symbol=symbols[np.int(angle)-1]
+            symbol=symbols[int(angle)-1]
             m_size='10'
         elif angle==13:
-            symbol=symbols[np.int(angle)-1]
+            symbol=symbols[int(angle)-1]
             m_size='12'
         elif angle==14:
-            symbol=symbols[np.int(angle)-1]
+            symbol=symbols[int(angle)-1]
             m_size='10'
         elif angle==15:
-            symbol=symbols[np.int(angle)-1]
+            symbol=symbols[int(angle)-1]
             m_size='12'
 
 
@@ -2653,7 +2653,7 @@ def get_amati_rel(simid_array, time_start, time_end, save_plot=False, h5=False):
                 zoom_ax.errorbar(E_iso_sim[count],E_p_sim[count],xerr=E_err_sim[count], yerr=[np.abs(err[-1].T)], color=c, marker=symbol,ls='None',markersize=m_size, label=info)
             if i[4:14]=='.e150.g100':
                 c='darkmagenta'
-                #m_size=np.str((np.int(m_size)+4))
+                #m_size=np.str((int(m_size)+4))
                 zoom_ax.errorbar(E_iso_sim[count],E_p_sim[count],xerr=E_err_sim[count], yerr=[np.abs(err[-1].T)], color=c, marker=symbol,ls='None',markersize=m_size, label=info)
 
         elif i[0:4]=='35OB':
@@ -2974,9 +2974,9 @@ def polarizationVsAngle(event_files, time_start,time_end, dt=1, phi_angle=0, del
 
     for i in range(np.size(event_files)):
         if i>9:
-            angles[i] = np.int(event_files[i][-2:])
+            angles[i] = int(event_files[i][-2:])
         else:
-            angles[i] = np.int(event_files[i][-1])
+            angles[i] = int(event_files[i][-1])
 
         angles[i] = np.double(event_files[i].split('_')[-1])#*np.pi/180
         if compare_to_lund:
@@ -3164,10 +3164,10 @@ def fluidGammaVsTheta(fluid_dir, r_interest, t_interest, fps, theta_max):
     all_data_theta=[]
     all_data_gamma=[]
     for frame in frames:
-        sfrm=np.str(np.int(frame))
-        if frame < 1000: sfrm = '0' + np.str(np.int(frame))
-        if frame < 100: sfrm = '00' + np.str(np.int(frame))
-        if frame < 10: sfrm = '000' + np.str(np.int(frame))
+        sfrm=np.str(int(frame))
+        if frame < 1000: sfrm = '0' + np.str(int(frame))
+        if frame < 100: sfrm = '00' + np.str(int(frame))
+        if frame < 10: sfrm = '000' + np.str(int(frame))
 
         xx, yy, szxx, szyy, vx, vy, gg, dd, dd_lab, rr, tt, pp=read_flash(fluid_dir+sfrm)
 
