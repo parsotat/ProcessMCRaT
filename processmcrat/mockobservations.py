@@ -847,6 +847,7 @@ class MockObservation(object):
             log_energy_range = np.log10(energy_range.value)
             energy_unit = energy_range.unit
 
+        #may need to allow user to pass in custom energy bins
         delta_log_energy=np.log10(delta_energy.value)
 
         energy_min = 10 ** np.arange(log_energy_range[0], log_energy_range[1], delta_log_energy)
