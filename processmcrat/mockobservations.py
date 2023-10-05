@@ -857,10 +857,15 @@ class MockObservation(object):
             energy_bin_center = np.sqrt(energy_min * energy_max)
         else:
             #create the N-1 array of energy bin centers, and min/max energy bin values that will be filled in
-            energy_min = energy_bin_center[:-1].copy()
-            energy_max = energy_bin_center[1:].copy()
+            energy_min = energy_bins[:-1].copy()
+            energy_max = energy_bins[1:].copy()
             energy_bin_center = energy_min + 0.5*(energy_max - energy_min)
             
+            #format for entry into energy iterator
+            energy_unit = energy_bins.unit
+            energy_min = energy_min.value
+            energy_max = energy_max.value
+            energy_bin_center = energy_bin_center.value
 
         spectrum, spectrum_error, ph_num, num_scatt, pol_deg, stokes_i, stokes_q, stokes_u, stokes_v, pol_angle, pol_err = \
             self._energy_iterator(time_start, time_end, spectrum_unit, energy_min, energy_max, energy_unit=energy_unit,

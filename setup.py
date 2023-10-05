@@ -11,7 +11,7 @@ with open('requirements.txt') as f:
 #update version in init as well
 setup(
    name= 'processmcrat', #'ProcessMCRaT',
-   version='2.0.1',
+   version='2.0.2',
    description='The ProcessMCRaT library is a python package that can be used to process the output of the MCRaT code.',
    license="MIT",
    long_description=long_description,
