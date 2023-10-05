@@ -795,9 +795,9 @@ class MockObservation(object):
 
         return spectrum, spectrum_error, ph_num, num_scatt, pol_deg, stokes_i, stokes_q, stokes_u, stokes_v, pol_angle, pol_err
 
-    @unit.quantity_input(energy_range=['energy', 'length'], delta_energy=['energy', 'length'])
+    @unit.quantity_input(energy_range=['energy', 'length'], delta_energy=['energy', 'length'], energy_bins=['energy', 'length'])
     def spectrum(self, time_start, time_end, spectrum_unit=unit.erg / unit.s / unit.keV, energy_range=[10**-7, 10**5]*unit.keV, \
-                 delta_energy=10**(0.1)*unit.keV, photon_type=None, fit_spectrum=False, sample_num=1e4, calc_comv=False):
+                 delta_energy=10**(0.1)*unit.keV, energy_bins=None, photon_type=None, fit_spectrum=False, sample_num=1e4, calc_comv=False):
         """
         Calculates the spectrum and other energy-resolved parameters such as polarization for a set time interval.
 
@@ -814,6 +814,7 @@ class MockObservation(object):
             and the max energy of the spectrum. Photons with energies outside of this range will be ignored.
         :param delta_energy: Default 10**(0.1)*unit.keV or astropy quantity object. The width of the spectral energy bins for the spectra. Needs to be
             the same units as the energy_range values.
+        :param energy_bins: Default None, or a astropy quantity array of the spectral energy bins that will be used to construct the spectrum. The array should be N_bin+1 in size, where N_bin is the number of energy bins that the user wants. the default of None will indicate not to use custom energy bins and instead construct the spectral energy bins from the energy_range and delta_energy function parameters. If an astropy quantity array is passed in, then the the energy_range and delta_energy function parameters will be ignored.
         :param photon_type: Default None or a string denoting a photon type of interest. (See MCRaT documentation for each photon type)
             The spectrum will be constructed for only photons of this type.
         :param fit_spectrum: Default False. Boolean to denote if the spectra collected in each energy bin should be fit
@@ -832,7 +833,7 @@ class MockObservation(object):
 
         if energy_range.unit != delta_energy.unit:
             raise UnitsError('The units of the energy range and the energy bin sizes have to match.')
-
+            
         if (np.sum(self.detected_photons.comv_p0) == 0) and calc_comv:
             raise InputParameterError('The comoving photon data has not been loaded to produce a comoving spectrum.')
 
@@ -848,11 +849,18 @@ class MockObservation(object):
             energy_unit = energy_range.unit
 
         #may need to allow user to pass in custom energy bins
-        delta_log_energy=np.log10(delta_energy.value)
+        if energy_bins is None:
+            delta_log_energy=np.log10(delta_energy.value)
 
-        energy_min = 10 ** np.arange(log_energy_range[0], log_energy_range[1], delta_log_energy)
-        energy_max = energy_min * 10 ** delta_log_energy
-        energy_bin_center = np.sqrt(energy_min * energy_max)
+            energy_min = 10 ** np.arange(log_energy_range[0], log_energy_range[1], delta_log_energy)
+            energy_max = energy_min * 10 ** delta_log_energy
+            energy_bin_center = np.sqrt(energy_min * energy_max)
+        else:
+            #create the N-1 array of energy bin centers, and min/max energy bin values that will be filled in
+            energy_min = energy_bin_center[:-1].copy()
+            energy_max = energy_bin_center[1:].copy()
+            energy_bin_center = energy_min + 0.5*(energy_max - energy_min)
+            
 
         spectrum, spectrum_error, ph_num, num_scatt, pol_deg, stokes_i, stokes_q, stokes_u, stokes_v, pol_angle, pol_err = \
             self._energy_iterator(time_start, time_end, spectrum_unit, energy_min, energy_max, energy_unit=energy_unit,
