@@ -1094,11 +1094,22 @@ class MockObservation(object):
             data_pts = spectrum.size
 
             # test the Band function fit first and make sure that the fitted energy cant be < 0
-            band_fit, band_matrice = curve_fit(band_function, energy_bin_center, spectrum, sigma=spectrum_error, \
-                                               p0=[.3, -5, 100, normalization], maxfev=10000)
+            if normalization/spectrum.max() > 5:
+                normalization*=0.1
+                
+            try:
+                max_fev=150000
+                band_fit, band_matrice = curve_fit(band_function, energy_bin_center, spectrum, sigma=spectrum_error, \
+                                               p0=[.3, -5, 100, normalization], maxfev=max_fev)
+            except RuntimeError as e:
+                max_fev=3000000
+                band_fit, band_matrice = curve_fit(band_function, energy_bin_center, spectrum, sigma=spectrum_error, \
+                                               p0=[.3, -5, 100, normalization], maxfev=max_fev)
+            
+            
             if (band_fit[2] < 0):
                 band_fit, band_matrice = curve_fit(band_function, energy_bin_center, spectrum, sigma=spectrum_error, \
-                                                   p0=[.3, -5, 100, normalization], maxfev=10000,
+                                                   p0=[.3, -5, 100, normalization], maxfev=max_fev,
                                                    bounds=([-np.inf, -np.inf, 0, 0], [np.inf, np.inf, np.inf, np.inf]))
             # calculate chi squared
             band_chi_sq = ((band_function(energy_bin_center, band_fit[0], band_fit[1], band_fit[2],
