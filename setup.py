@@ -11,12 +11,12 @@ with open('requirements.txt') as f:
 #update version in init as well
 setup(
    name= 'processmcrat', #'ProcessMCRaT',
-   version='2.0.2',
+   version='2.0.3',
    description='The ProcessMCRaT library is a python package that can be used to process the output of the MCRaT code.',
    license="MIT",
    long_description=long_description,
    author='Tyler Parsotan',
-   author_email='parsotat@umbc.edu',
+   author_email='tyler.parsotan@nasa.gov',
    url="https://github.com/parsotat/ProcessMCRaT",
    classifiers=[
         'Development Status :: 5 - Production/Stable',
@@ -29,7 +29,7 @@ setup(
    keywords='astronomy radiation-transfer hydrodynamics',
    packages=['processmcrat','processmcrat.test'],  #same as name
    install_requires=required,
-   python_requires='>=3.3',
+   python_requires='>=3.9',
    data_files=[
         ('Data_files',['processmcrat/Data_files/Dataset_lundman_1.csv']),
         ('Data_files',['processmcrat/Data_files/Dataset_lundman_2.csv']),
